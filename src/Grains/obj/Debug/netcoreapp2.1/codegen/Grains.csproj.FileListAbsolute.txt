@@ -1,0 +1,7 @@
+/Users/agentpowers/Development/NetCore/ORLEANS/src/Grains/bin/Debug/netcoreapp2.1/Grains.deps.json
+/Users/agentpowers/Development/NetCore/ORLEANS/src/Grains/bin/Debug/netcoreapp2.1/Grains.dll
+/Users/agentpowers/Development/NetCore/ORLEANS/src/Grains/bin/Debug/netcoreapp2.1/Grains.pdb
+/Users/agentpowers/Development/NetCore/ORLEANS/src/Grains/obj/Debug/netcoreapp2.1/codegen/Grains.csproj.CoreCompileInputs.cache
+/Users/agentpowers/Development/NetCore/ORLEANS/src/Grains/obj/Debug/netcoreapp2.1/codegen/Grains.AssemblyInfoInputs.cache
+/Users/agentpowers/Development/NetCore/ORLEANS/src/Grains/bin/Debug/netcoreapp2.1/GrainInterfaces.dll
+/Users/agentpowers/Development/NetCore/ORLEANS/src/Grains/bin/Debug/netcoreapp2.1/GrainInterfaces.pdb
