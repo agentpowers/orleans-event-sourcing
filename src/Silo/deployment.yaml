@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: silo
+  labels:
+    app: silo
+spec:
+  type: NodePort
+  ports:
+    - port: 11111
+      targetPort: 11111
+      protocol: TCP
+      name: silo-port
+    - port: 30000
+      targetPort: 30000
+      protocol: TCP
+      name: gateway-port
+  selector:
+    app: silo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: silo
+  labels:
+    app: silo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: silo
+  template:
+    metadata:
+      labels:
+        app: silo
+    spec:
+      containers:
+      - name: silo
+        image: silo
+        ports:
+        - containerPort: 1111
+        - containerPort: 30000

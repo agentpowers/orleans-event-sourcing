@@ -8,10 +8,10 @@
 #pragma warning disable 693
 #pragma warning disable 1591
 #pragma warning disable 1998
-[assembly: global::Orleans.Metadata.FeaturePopulatorAttribute(typeof(OrleansGeneratedCode.OrleansCodeGenff8b28276dFeaturePopulator))]
+[assembly: global::Orleans.Metadata.FeaturePopulatorAttribute(typeof(OrleansGeneratedCode.OrleansCodeGene9f04d5930FeaturePopulator))]
 [assembly: global::System.CodeDom.Compiler.GeneratedCodeAttribute(@"Orleans-CodeGenerator", @"2.0.0.0")]
 [assembly: global::Orleans.CodeGeneration.OrleansCodeGenerationTargetAttribute(@"API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null")]
-namespace OrleansGeneratedCode16F9BF80
+namespace OrleansGeneratedCode1D24ED56
 {
     using global::Orleans;
     using global::System.Reflection;
@@ -20,7 +20,7 @@ namespace OrleansGeneratedCode16F9BF80
 namespace OrleansGeneratedCode
 {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute(@"Orleans-CodeGenerator", @"2.0.0.0")]
-    internal sealed class OrleansCodeGenff8b28276dFeaturePopulator : global::Orleans.Metadata.IFeaturePopulator<global::Orleans.Metadata.GrainInterfaceFeature>, global::Orleans.Metadata.IFeaturePopulator<global::Orleans.Metadata.GrainClassFeature>, global::Orleans.Metadata.IFeaturePopulator<global::Orleans.Serialization.SerializerFeature>
+    internal sealed class OrleansCodeGene9f04d5930FeaturePopulator : global::Orleans.Metadata.IFeaturePopulator<global::Orleans.Metadata.GrainInterfaceFeature>, global::Orleans.Metadata.IFeaturePopulator<global::Orleans.Metadata.GrainClassFeature>, global::Orleans.Metadata.IFeaturePopulator<global::Orleans.Serialization.SerializerFeature>
     {
         public void Populate(global::Orleans.Metadata.GrainInterfaceFeature feature)
         {
@@ -32,30 +32,6 @@ namespace OrleansGeneratedCode
 
         public void Populate(global::Orleans.Serialization.SerializerFeature feature)
         {
-            feature.AddKnownType(@"System.Action`9,System.Runtime", @"Action`9'9");
-            feature.AddKnownType(@"System.Action`10,System.Runtime", @"Action`10'10");
-            feature.AddKnownType(@"System.Action`11,System.Runtime", @"Action`11'11");
-            feature.AddKnownType(@"System.Action`12,System.Runtime", @"Action`12'12");
-            feature.AddKnownType(@"System.Action`13,System.Runtime", @"Action`13'13");
-            feature.AddKnownType(@"System.Action`14,System.Runtime", @"Action`14'14");
-            feature.AddKnownType(@"System.Action`15,System.Runtime", @"Action`15'15");
-            feature.AddKnownType(@"System.Action`16,System.Runtime", @"Action`16'16");
-            feature.AddKnownType(@"System.Func`10,System.Runtime", @"Func`10'10");
-            feature.AddKnownType(@"System.Func`11,System.Runtime", @"Func`11'11");
-            feature.AddKnownType(@"System.Func`12,System.Runtime", @"Func`12'12");
-            feature.AddKnownType(@"System.Func`13,System.Runtime", @"Func`13'13");
-            feature.AddKnownType(@"System.Func`14,System.Runtime", @"Func`14'14");
-            feature.AddKnownType(@"System.Func`15,System.Runtime", @"Func`15'15");
-            feature.AddKnownType(@"System.Func`16,System.Runtime", @"Func`16'16");
-            feature.AddKnownType(@"System.Func`17,System.Runtime", @"Func`17'17");
-            feature.AddKnownType(@"System.Lazy`2,System.Runtime", @"Lazy`2'2");
-            feature.AddKnownType(@"System.Threading.WaitHandleExtensions,System.Runtime", @"WaitHandleExtensions");
-            feature.AddKnownType(@"System.Runtime.AssemblyTargetedPatchBandAttribute,System.Runtime", @"AssemblyTargetedPatchBandAttribute");
-            feature.AddKnownType(@"System.Runtime.TargetedPatchingOptOutAttribute,System.Runtime", @"TargetedPatchingOptOutAttribute");
-            feature.AddKnownType(@"System.Runtime.ConstrainedExecution.PrePrepareMethodAttribute,System.Runtime", @"PrePrepareMethodAttribute");
-            feature.AddKnownType(@"System.Reflection.RuntimeReflectionExtensions,System.Runtime", @"RuntimeReflectionExtensions");
-            feature.AddKnownType(@"System.IO.FileAttributes,System.Runtime", @"FileAttributes");
-            feature.AddKnownType(@"System.IO.HandleInheritability,System.Runtime", @"HandleInheritability");
             feature.AddKnownType(@"System.IServiceProvider,System.ComponentModel", @"IServiceProvider");
             feature.AddKnownType(@"API.Program,API", @"API.Program");
             feature.AddKnownType(@"API.Startup,API", @"API.Startup");
@@ -190,6 +166,7 @@ namespace OrleansGeneratedCode
             feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.ModelBinding.DefaultPropertyFilterProvider`1,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.ModelBinding.DefaultPropertyFilterProvider`1'1");
             feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider");
             feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.ModelBinding.Metadata.DefaultModelMetadataProvider,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.ModelBinding.Metadata.DefaultModelMetadataProvider");
+            feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.ModelBinding.IModelMetadataProvider2,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.ModelBinding.IModelMetadataProvider2");
             feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.ModelBinding.FormValueProvider,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.ModelBinding.FormValueProvider");
             feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.ModelBinding.FormValueProviderFactory,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.ModelBinding.FormValueProviderFactory");
             feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.ModelBinding.ICollectionModelBinder,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.ModelBinding.ICollectionModelBinder");
@@ -330,6 +307,8 @@ namespace OrleansGeneratedCode
             feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.Internal.FilterFactoryResult,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.Internal.FilterFactoryResult");
             feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.Internal.HttpMethodActionConstraint,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.Internal.HttpMethodActionConstraint");
             feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.Internal.IMiddlewareFilterFeature,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.Internal.IMiddlewareFilterFeature");
+            feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.Internal.IParameterInfoParameterDescriptor,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.Internal.IParameterInfoParameterDescriptor");
+            feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.Internal.IPropertyInfoParameterDescriptor,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.Internal.IPropertyInfoParameterDescriptor");
             feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.Internal.IResponseCacheFilter,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.Internal.IResponseCacheFilter");
             feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.Internal.ITypeActivatorCache,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.Internal.ITypeActivatorCache");
             feature.AddKnownType(@"Microsoft.AspNetCore.Mvc.Internal.MemoryPoolHttpRequestStreamReaderFactory,Microsoft.AspNetCore.Mvc.Core", @"Microsoft.AspNetCore.Mvc.Internal.MemoryPoolHttpRequestStreamReaderFactory");

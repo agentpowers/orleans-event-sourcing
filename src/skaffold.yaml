@@ -1,0 +1,17 @@
+apiVersion: skaffold/v1alpha4
+kind: Config
+build:
+  artifacts:
+  - image: silo
+    context: .
+    docker:
+      dockerfile: Silo.Dockerfile
+  - image: api
+    context: .
+    docker:
+      dockerfile: API.Dockerfile
+deploy:
+  kubectl:
+    manifests:
+    - ./Silo/*.yaml
+    - ./API/*.yaml
