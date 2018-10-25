@@ -1,5 +1,0 @@
-/Users/agentpowers/Development/NetCore/ORLEANS/src/GrainInterfaces/bin/Debug/netstandard2.0/GrainInterfaces.deps.json
-/Users/agentpowers/Development/NetCore/ORLEANS/src/GrainInterfaces/bin/Debug/netstandard2.0/GrainInterfaces.dll
-/Users/agentpowers/Development/NetCore/ORLEANS/src/GrainInterfaces/bin/Debug/netstandard2.0/GrainInterfaces.pdb
-/Users/agentpowers/Development/NetCore/ORLEANS/src/GrainInterfaces/obj/Debug/netstandard2.0/codegen/GrainInterfaces.csproj.CoreCompileInputs.cache
-/Users/agentpowers/Development/NetCore/ORLEANS/src/GrainInterfaces/obj/Debug/netstandard2.0/codegen/GrainInterfaces.AssemblyInfoInputs.cache

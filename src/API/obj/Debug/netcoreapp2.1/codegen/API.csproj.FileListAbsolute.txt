@@ -1,9 +1,0 @@
-/Users/agentpowers/Development/NetCore/ORLEANS/src/API/obj/Debug/netcoreapp2.1/codegen/API.csproj.CoreCompileInputs.cache
-/Users/agentpowers/Development/NetCore/ORLEANS/src/API/obj/Debug/netcoreapp2.1/codegen/API.AssemblyInfoInputs.cache
-/Users/agentpowers/Development/NetCore/ORLEANS/src/API/bin/Debug/netcoreapp2.1/API.deps.json
-/Users/agentpowers/Development/NetCore/ORLEANS/src/API/bin/Debug/netcoreapp2.1/API.runtimeconfig.json
-/Users/agentpowers/Development/NetCore/ORLEANS/src/API/bin/Debug/netcoreapp2.1/API.runtimeconfig.dev.json
-/Users/agentpowers/Development/NetCore/ORLEANS/src/API/bin/Debug/netcoreapp2.1/API.dll
-/Users/agentpowers/Development/NetCore/ORLEANS/src/API/bin/Debug/netcoreapp2.1/API.pdb
-/Users/agentpowers/Development/NetCore/ORLEANS/src/API/bin/Debug/netcoreapp2.1/GrainInterfaces.dll
-/Users/agentpowers/Development/NetCore/ORLEANS/src/API/bin/Debug/netcoreapp2.1/GrainInterfaces.pdb
