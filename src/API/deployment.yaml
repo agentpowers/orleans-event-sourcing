@@ -7,8 +7,8 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 11111
-      targetPort: 11111
+    - port: 80
+      targetPort: 80
       protocol: TCP
       name: api-port
   selector:
@@ -34,4 +34,4 @@ spec:
       - name: api
         image: api
         ports:
-        - containerPort: 1111
+        - containerPort: 80

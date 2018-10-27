@@ -8,53 +8,66 @@ using Orleans.Hosting;
 using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
+using Orleans.Clustering.Kubernetes;
 
 namespace Silo
 {
-    class Program
+    public class Program
     {
-        private static ISiloHost silo;
-        private static readonly ManualResetEvent siloStopped = new ManualResetEvent(false);
+        private static readonly AutoResetEvent Closing = new AutoResetEvent(false);
 
-        static void Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
-            // TODO replace with your connection string
-            silo = new SiloHostBuilder()
-                .UseLocalhostClustering()
-                .Configure<ClusterOptions>(options =>
-                {
-                    options.ClusterId = "orleans-docker";
-                    options.ServiceId = "AspNetSampleApp";
-                })
-                //.UseAzureStorageClustering(options => options.ConnectionString = connectionString)
-                //.ConfigureEndpoints(siloPort: 11111, gatewayPort: 30000)
-                .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
-                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ValueGrain).Assembly).WithReferences())
-                .ConfigureLogging(builder => builder.SetMinimumLevel(LogLevel.Warning).AddConsole())
-                .Build();
-
-            Task.Run(StartSilo);
-
-            AssemblyLoadContext.Default.Unloading += context =>
+            try
             {
-                Task.Run(StopSilo);
-                siloStopped.WaitOne();
-            };
+                var host = await StartSilo();
+                Console.WriteLine("Silo is ready!");
 
-            siloStopped.WaitOne();
+                Console.CancelKeyPress += OnExit;
+                Closing.WaitOne();
+
+                Console.WriteLine("Shutting down...");
+
+                await host.StopAsync();
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return 1;
+            }
         }
 
-        private static async Task StartSilo()
+        private static async Task<ISiloHost> StartSilo()
         {
-            await silo.StartAsync();
-            Console.WriteLine("Silo started");
+            var builder = new SiloHostBuilder()
+                .Configure<ClusterOptions>(options => 
+                {
+                    options.ClusterId = "testcluster";
+                    options.ServiceId = "SampleApp";
+                })
+                .ConfigureEndpoints(new Random(1).Next(10001, 10100), new Random(1).Next(20001, 20100))
+                .UseKubeMembership(opt =>
+                {
+                    //opt.APIEndpoint = "http://localhost:8001";
+                    //opt.CertificateData = "test";
+                    //opt.APIToken = "test";
+                    opt.CanCreateResources = true;
+                    opt.DropResourcesOnInit = true;
+                })
+                .AddMemoryGrainStorageAsDefault()
+                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ValueGrain).Assembly).WithReferences())
+                .ConfigureLogging(logging => logging.AddConsole());
+
+            var host = builder.Build();
+            await host.StartAsync();
+            return host;
         }
 
-        private static async Task StopSilo()
+        private static void OnExit(object sender, ConsoleCancelEventArgs args)
         {
-            await silo.StopAsync();
-            Console.WriteLine("Silo stopped");
-            siloStopped.Set();
+            Closing.Set();
         }
     }
 }
