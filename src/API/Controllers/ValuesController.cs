@@ -20,9 +20,10 @@ namespace API.Controllers
 
         // GET api/values
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<IDictionary<string, string>> Get()
         {
-            return new string[] { "value1", "value2" };
+            var collectionGrain = this.client.GetGrain<IValueCollectionGrain>("collection");
+            return await collectionGrain.GetValues();
         }
 
         // GET api/values/5

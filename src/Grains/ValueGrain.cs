@@ -15,10 +15,11 @@ namespace Grains
             return Task.FromResult(this.value);
         }
 
-        public Task SetValue(string value)
+        public async Task SetValue(string value)
         {
             this.value = value;
-            return Task.CompletedTask;
+            var collectionGrain = GrainFactory.GetGrain<IValueCollectionGrain>("collection");
+            await collectionGrain.Add(this.GetPrimaryKey().ToString(), this.value);
         }
     }
 }

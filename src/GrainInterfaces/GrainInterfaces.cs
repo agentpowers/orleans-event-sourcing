@@ -12,4 +12,12 @@ namespace GrainInterfaces
 
         Task SetValue(string value);
     }
+
+    public interface IValueCollectionGrain: IGrainWithStringKey 
+    {
+        Task<IDictionary<string, string>> GetValues();
+
+        Task Add(string key, string value);
+
+    }
 }

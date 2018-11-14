@@ -1,4 +1,4 @@
-apiVersion: skaffold/v1alpha4
+apiVersion: skaffold/v1alpha5
 kind: Config
 build:
   artifacts:
@@ -13,7 +13,7 @@ build:
 deploy:
   kubectl:
     manifests:
-    - ClusterVersionCRD.yaml
-    - SiloEntryCRD.yaml
+    #- ClusterVersionCRD.yaml
+    #- SiloEntryCRD.yaml
     - ./Silo/*.yaml
     - ./API/*.yaml
