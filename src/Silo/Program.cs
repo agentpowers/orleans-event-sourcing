@@ -47,6 +47,8 @@ namespace Silo
                     options.ClusterId = "testcluster";
                     options.ServiceId = "SampleApp";
                 })
+                //.UseLocalhostClustering()
+                .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
                 .ConfigureEndpoints(new Random(1).Next(10001, 10100), new Random(1).Next(20001, 20100))
                 .UseKubeMembership(opt =>
                 {

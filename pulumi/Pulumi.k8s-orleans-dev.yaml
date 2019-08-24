@@ -1,0 +1,2 @@
+config:
+  k8s-orleans:image-tag: 829a33d

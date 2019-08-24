@@ -30,7 +30,7 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddSingleton<IClusterClient>(a => StartClientWithRetries().Result);
         }
 
@@ -64,6 +64,7 @@ namespace API
                             options.ClusterId = "testcluster";
                             options.ServiceId = "SampleApp";
                         })
+                        //.UseLocalhostClustering()
                         .UseKubeGatewayListProvider()
                         .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IValueGrain).Assembly).WithReferences())
                         .ConfigureLogging(logging => logging.AddConsole())

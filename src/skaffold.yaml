@@ -1,4 +1,4 @@
-apiVersion: skaffold/v1alpha5
+apiVersion: skaffold/v1beta2
 kind: Config
 build:
   artifacts:
@@ -13,6 +13,7 @@ build:
 deploy:
   kubectl:
     manifests:
+    - ./ingress.yaml
     #- ClusterVersionCRD.yaml
     #- SiloEntryCRD.yaml
     - ./Silo/*.yaml

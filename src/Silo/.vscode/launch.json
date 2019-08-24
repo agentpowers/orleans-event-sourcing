@@ -5,28 +5,14 @@
    "version": "0.2.0",
    "configurations": [
         {
-            "name": "Launch Silo",
+            "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/Silo/bin/Debug/netcoreapp2.2/Silo.dll",
+            "program": "${workspaceFolder}/bin/Debug/netcoreapp2.2/Silo.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/Silo",
-            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
-            "console": "internalConsole",
-            "stopAtEntry": false,
-            "internalConsoleOptions": "openOnSessionStart"
-        },
-        {
-            "name": "Launch API",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/API/bin/Debug/netcoreapp2.2/API.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/src/API",
+            "cwd": "${workspaceFolder}",
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
             "console": "internalConsole",
             "stopAtEntry": false,

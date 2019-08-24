@@ -1,0 +1,5 @@
+name: k8s-orleans
+runtime: nodejs
+description: A minimal Kubernetes JavaScript Pulumi program
+template:
+  description: A minimal Kubernetes JavaScript Pulumi program
