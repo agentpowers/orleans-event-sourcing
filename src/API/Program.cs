@@ -20,7 +20,6 @@ namespace API
         public static void Main(string[] args)
         {
             var podIPAddress = Environment.GetEnvironmentVariable("MY_POD_IP");
-            Console.WriteLine($"MY_POD_IP: {podIPAddress}");
             var host = new HostBuilder()
                 .ConfigureWebHostDefaults(builder =>
                 {
