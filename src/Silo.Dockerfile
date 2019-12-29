@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.2-sdk AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0-alpine AS build
 WORKDIR /src
 
 # Copy csproj and dependencies
@@ -15,7 +15,7 @@ RUN dotnet restore
 RUN dotnet publish -c Release -o out
 
 
-FROM microsoft/dotnet:2.2-runtime AS runtime
+FROM mcr.microsoft.com/dotnet/core/runtime:3.0-alpine AS runtime
 WORKDIR /src/Silo
 COPY --from=build /src/Silo/out ./
 ENTRYPOINT ["dotnet", "Silo.dll"]

@@ -9,7 +9,7 @@ using Orleans;
 namespace API.Controllers
 {
     [Route("[controller]")]
-    public class ValuesController : Controller
+    public class ValuesController : ControllerBase
     {
         private IClusterClient client;
         
@@ -35,11 +35,11 @@ namespace API.Controllers
         }
 
         // POST api/values/5
-        [HttpGet("set")]
-        public async Task Post(int id, string value)
+        [HttpPost("set")]
+        public async Task Post([FromQuery]int id, [FromQuery]string value)
         {
             var grain = this.client.GetGrain<IValueGrain>(id);
-            await grain.SetValue(value ?? id.ToString());
+            await grain.SetValue(value);
         }
     }
 }

@@ -2,10 +2,10 @@ apiVersion: skaffold/v1beta2
 kind: Config
 build:
   artifacts:
-  - image: silo
-    context: .
-    docker:
-      dockerfile: Silo.Dockerfile
+  # - image: silo
+  #   context: .
+  #   docker:
+  #     dockerfile: Silo.Dockerfile
   - image: api
     context: .
     docker:
@@ -16,5 +16,5 @@ deploy:
     - ./ingress.yaml
     #- ClusterVersionCRD.yaml
     #- SiloEntryCRD.yaml
-    - ./Silo/*.yaml
+    #- ./Silo/*.yaml
     - ./API/*.yaml
