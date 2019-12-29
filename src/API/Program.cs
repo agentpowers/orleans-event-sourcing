@@ -19,6 +19,8 @@ namespace API
         const int gatewayPort = 30000;
         public static void Main(string[] args)
         {
+            var podIPAddress = Environment.GetEnvironmentVariable("MY_POD_IP");
+            Console.WriteLine($"MY_POD_IP: {podIPAddress}");
             var host = new HostBuilder()
                 .ConfigureWebHostDefaults(builder =>
                 {
@@ -34,7 +36,7 @@ namespace API
                         options.ServiceId = "SampleApp";
                     })
                     //.UseLocalhostClustering()
-                    .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
+                    .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Parse(podIPAddress))
                     //.ConfigureEndpoints(new Random(1).Next(10001, 10100), new Random(1).Next(20001, 20100))
                     .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
                     .UseKubeMembership(opt =>

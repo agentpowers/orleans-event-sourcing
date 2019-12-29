@@ -29,7 +29,9 @@ metadata:
   labels:
     app: api
 spec:
-  replicas: 2
+  replicas: 4
+  strategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app: api
@@ -45,3 +47,8 @@ spec:
         - containerPort: 80
         - containerPort: 1111
         - containerPort: 30000
+        env:
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
