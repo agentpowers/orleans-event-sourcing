@@ -5,14 +5,14 @@ namespace GrainInterfaces
 {
     public class Result<T>
     {
-        public T Success { get; set; }
+        public T Value { get; set; }
         public string Error { get; set; }
     }
     public interface IAccountGrain : IGrainWithIntegerKey
     {
-        Task<int> GetBalance();
-        Task<Result<int>> Withdraw(int amount);
-        Task<int> Deposit(int amount);
-        Task<Result<int>> Transfer(int accountId, int amount);
+        Task<decimal> GetBalance();
+        Task<Result<decimal>> Withdraw(decimal amount);
+        Task<decimal> Deposit(decimal amount);
+        Task<Result<decimal>> Transfer(int accountId, decimal amount);
     }
 }

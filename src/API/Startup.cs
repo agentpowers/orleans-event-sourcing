@@ -16,6 +16,7 @@ using Orleans.Clustering.Kubernetes;
 using Orleans.Configuration;
 using Orleans.Runtime;
 using Microsoft.Extensions.Hosting;
+using Persistance;
 
 namespace API
 {
@@ -30,6 +31,7 @@ namespace API
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient<IRepository, Repository>();
             // add controllers
             services.AddControllers();
             // add services for dashboard

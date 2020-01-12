@@ -34,22 +34,22 @@ namespace API
                         options.ClusterId = "testcluster";
                         options.ServiceId = "SampleApp";
                     })
-                    //.UseLocalhostClustering()
-                    .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Parse(podIPAddress))
-                    //.ConfigureEndpoints(new Random(1).Next(10001, 10100), new Random(1).Next(20001, 20100))
+                    .UseLocalhostClustering()
+                    //.Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Parse(podIPAddress))
+                    .ConfigureEndpoints(new Random(1).Next(10001, 10100), new Random(1).Next(20001, 20100))
                     .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
-                    .UseKubeMembership(opt =>
-                    {
-                        //opt.APIEndpoint = "http://localhost:8001";
-                        //opt.CertificateData = "test";
-                        //opt.APIToken = "test";
-                        //opt.CanCreateResources = true;
-                        opt.DropResourcesOnInit = true;
-                    })
+                    // .UseKubeMembership(opt =>
+                    // {
+                    //     //opt.APIEndpoint = "http://localhost:8001";
+                    //     //opt.CertificateData = "test";
+                    //     //opt.APIToken = "test";
+                    //     //opt.CanCreateResources = true;
+                    //     opt.DropResourcesOnInit = true;
+                    // })
                     .AddMemoryGrainStorageAsDefault()
                     .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ValueGrain).Assembly).WithReferences())
                     .ConfigureLogging(logging => logging.AddConsole())
-                    .UseLinuxEnvironmentStatistics()
+                    //.UseLinuxEnvironmentStatistics()
                     .UseDashboard(x =>
                     {
                         x.HostSelf = false;
