@@ -31,24 +31,24 @@ namespace Events
     #region Events
     public interface IAccountEvents
     {
-        string Type { get; }
+        string Type { get; set; }
     }
 
     public class Deposited: IAccountEvents
     {
-        public string Type { get; } = nameof(Deposited);
+        public string Type { get; set;} = nameof(Deposited);
         public decimal Amount { get; set; }
     }
 
     public class Withdrawn: IAccountEvents
     {
-        public string Type { get; } = nameof(Withdrawn);
+        public string Type { get; set; } = nameof(Withdrawn);
         public decimal Amount { get; set; }
     }
 
     public class BalanceRetrieved: IAccountEvents
     {
-        public string Type { get; } = nameof(BalanceRetrieved);
+        public string Type { get; set; } = nameof(BalanceRetrieved);
     }
 
     #endregion

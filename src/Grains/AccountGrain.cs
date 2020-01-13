@@ -20,20 +20,25 @@ namespace Grains
         private Account _account = new Account();
         private int _eventCount = 0;
         private long _lastEventSequence = 0;
+        private static JsonSerializerSettings serializerSettings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Auto
+        };
 
         public AccountGrain(IRepository repository)
         {
             _repository = repository;
         }
 
-        public static string Serialize<T>(T obj)
+        public static string SerializeEvent<T>(T obj)
         {
-            return JsonConvert.SerializeObject(obj);
+            return JsonConvert.SerializeObject(new Events.Event<T>(obj), Formatting.Indented, serializerSettings);
         }
 
-        public static T DeSerialize<T>(string json)
+        public static T DeserializeEvent<T>(string json)
         {
-            return JsonConvert.DeserializeObject<T>(json);
+            var deserialized = JsonConvert.DeserializeObject<Events.Event<T>>(json, serializerSettings);
+            return deserialized.Data; 
         }
 
         public override async Task OnActivateAsync()
@@ -59,23 +64,13 @@ namespace Grains
             // apply snapshot if any
             if(snapshot != null)
             {
-                _account = DeSerialize<Account>(snapshot.Data);
+                _account = JsonConvert.DeserializeObject<Account>(snapshot.Data);
             }
             // apply events
             foreach (var dbEvent in events)
             {
-                switch (dbEvent.Type)
-                {
-                    case nameof(Deposited):
-                        _account = _accountAggregate.Apply(DeSerialize<Deposited>(dbEvent.Data), _account);
-                        break;
-                    case nameof(Withdrawn):
-                        _account = _accountAggregate.Apply(DeSerialize<Withdrawn>(dbEvent.Data), _account);
-                        break;
-                    default:
-                        break;
-                }
-                
+                var @event = DeserializeEvent<IAccountEvents>(dbEvent.Data);
+                _account = _accountAggregate.Apply(@event, _account);
             }
             // call base OnActivateAsync
             await base.OnActivateAsync();
@@ -92,15 +87,15 @@ namespace Grains
             return Task.FromResult(_account.Amount);
         }
 
-        public Task<Result<decimal>> Transfer(int accountId, decimal amount)
+        public Task<decimal> Transfer(int accountId, decimal amount)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<Result<decimal>> Withdraw(decimal amount)
+        public async Task<decimal> Withdraw(decimal amount)
         {
             await ApplyCommand(new Withdraw{ Amount = amount });
-            return new Result<decimal>{ Value = _account.Amount };
+            return _account.Amount;
         }
 
         private async Task ApplyCommand(IAccountCommands command)
@@ -108,7 +103,7 @@ namespace Grains
             // get updatedState and event
             var (updatedState, @event) = _accountAggregate.Exec(command, _account);
             // serialize event for db
-            var serialized = Serialize(@event);
+            var serialized = SerializeEvent<IAccountEvents>(@event);
             // save event to db
             _lastEventSequence = await _repository.SaveEvent(new Event { AggregateId = _aggregateId, Type = @event.Type, Data = serialized });
             // increment event count
@@ -116,7 +111,7 @@ namespace Grains
             // save snapshot when needed(every 10 events)
             if (_eventCount % 10 == 0)
             {
-                await _repository.SaveSnapshot(new Snapshot{ AggregateId = _aggregateId, LastEventSequence = _lastEventSequence, Data = Serialize(_account) });
+                await _repository.SaveSnapshot(new Snapshot{ AggregateId = _aggregateId, LastEventSequence = _lastEventSequence, Data = JsonConvert.SerializeObject(_account) });
             }
             // update state
             _account = updatedState;

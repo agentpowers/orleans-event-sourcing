@@ -9,11 +9,9 @@ namespace Events
             switch (@event)
             {
                 case Deposited deposited: 
-                    state.Amount += deposited.Amount;
-                    break;
+                    return new Account { Amount = state.Amount + deposited.Amount};
                 case Withdrawn withdrawn:
-                    state.Amount -= withdrawn.Amount;
-                    break;
+                    return new Account { Amount = state.Amount - withdrawn.Amount};
                 case BalanceRetrieved balanceRetrieved:
                 default:
                     break;

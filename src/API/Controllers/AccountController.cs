@@ -37,8 +37,7 @@ namespace API.Controllers
         public async Task<decimal> Withdraw(int id, decimal amount)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
-            var result =  await grain.Withdraw(amount);
-            return result.Value;
+            return await grain.Withdraw(amount);
         }
     }
 }
