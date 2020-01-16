@@ -10,14 +10,13 @@ using System.Linq;
 
 namespace Grains
 {
-    public class AccountGrain : Grain, IAccountGrain
+    public class AccountGrain : Grain, IAccountGrain, IAccountCommand
     {
-        private AccountAggregate _accountAggregate = new AccountAggregate();
+        private AccountAggregate _accountAggregate = null;
         private long _accountId;
         private string _aggregateType;
         private long _aggregateId;
         private readonly IRepository _repository;
-        private Account _account = new Account();
         private int _eventCount = 0;
         private long _lastEventSequence = 0;
         private static JsonSerializerSettings serializerSettings = new JsonSerializerSettings
@@ -32,13 +31,12 @@ namespace Grains
 
         public static string SerializeEvent<T>(T obj)
         {
-            return JsonConvert.SerializeObject(new Events.Event<T>(obj), Formatting.Indented, serializerSettings);
+            return JsonConvert.SerializeObject(obj, Formatting.Indented, serializerSettings);
         }
 
         public static T DeserializeEvent<T>(string json)
         {
-            var deserialized = JsonConvert.DeserializeObject<Events.Event<T>>(json, serializerSettings);
-            return deserialized.Data; 
+            return JsonConvert.DeserializeObject<T>(json, serializerSettings);
         }
 
         public override async Task OnActivateAsync()
@@ -64,13 +62,17 @@ namespace Grains
             // apply snapshot if any
             if(snapshot != null)
             {
-                _account = JsonConvert.DeserializeObject<Account>(snapshot.Data);
+                _accountAggregate = new AccountAggregate(JsonConvert.DeserializeObject<Account>(snapshot.Data));
+            }
+            else
+            {
+                _accountAggregate = new AccountAggregate(new Account());
             }
             // apply events
             foreach (var dbEvent in events)
             {
-                var @event = DeserializeEvent<IAccountEvents>(dbEvent.Data);
-                _account = _accountAggregate.Apply(@event, _account);
+                var @event = DeserializeEvent<Events.AccountEvent>(dbEvent.Data);
+                _accountAggregate.Apply(@event);
             }
             // call base OnActivateAsync
             await base.OnActivateAsync();
@@ -78,13 +80,14 @@ namespace Grains
 
         public async Task<decimal> Deposit(decimal amount)
         {
-            await ApplyCommand(new Deposit{ Amount = amount });
-            return _account.Amount;
+            await ApplyEvent(new Deposited{ Amount = amount });
+            return _accountAggregate.State.Amount;
         }
 
-        public Task<decimal> GetBalance()
+        public async Task<decimal> GetBalance()
         {
-            return Task.FromResult(_account.Amount);
+            await ApplyEvent(new BalanceRetrieved());
+            return _accountAggregate.State.Amount;
         }
 
         public Task<decimal> Transfer(int accountId, decimal amount)
@@ -94,27 +97,25 @@ namespace Grains
 
         public async Task<decimal> Withdraw(decimal amount)
         {
-            await ApplyCommand(new Withdraw{ Amount = amount });
-            return _account.Amount;
+            await ApplyEvent(new Withdrawn{ Amount = amount });
+            return _accountAggregate.State.Amount;
         }
 
-        private async Task ApplyCommand(IAccountCommands command)
+        private async Task ApplyEvent(AccountEvent @event)
         {
-            // get updatedState and event
-            var (updatedState, @event) = _accountAggregate.Exec(command, _account);
             // serialize event for db
-            var serialized = SerializeEvent<IAccountEvents>(@event);
+            var serialized = SerializeEvent(@event);
             // save event to db
-            _lastEventSequence = await _repository.SaveEvent(new Event { AggregateId = _aggregateId, Type = @event.Type, Data = serialized });
+            _lastEventSequence = await _repository.SaveEvent(new Persistance.Event { AggregateId = _aggregateId, Type = @event.Type, Data = serialized });
             // increment event count
             _eventCount++;
             // save snapshot when needed(every 10 events)
             if (_eventCount % 10 == 0)
             {
-                await _repository.SaveSnapshot(new Snapshot{ AggregateId = _aggregateId, LastEventSequence = _lastEventSequence, Data = JsonConvert.SerializeObject(_account) });
+                await _repository.SaveSnapshot(new Snapshot{ AggregateId = _aggregateId, LastEventSequence = _lastEventSequence, Data = JsonConvert.SerializeObject(_accountAggregate.State) });
             }
             // update state
-            _account = updatedState;
+            _accountAggregate.Apply(@event);
         }
     }
 }

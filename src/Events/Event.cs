@@ -2,15 +2,8 @@ using System;
 
 namespace Events
 {
-    public class Event<T>
+    public abstract class Event
     {
-        public T Data { get; set; }
-
-        public Event(T data)
-        {
-            Data = data;
-        }
-
-        public Event(){}
+        public abstract string Type { get; set; }
     }
 }

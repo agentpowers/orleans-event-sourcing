@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace GrainInterfaces
 {
-    public interface IAccountGrain : IGrainWithIntegerKey
+    public interface IAccountGrain: IGrainWithIntegerKey
     {
         Task<decimal> GetBalance();
         Task<decimal> Withdraw(decimal amount);
