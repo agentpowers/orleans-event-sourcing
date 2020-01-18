@@ -4,11 +4,7 @@ namespace Events
 {
     public class AccountAggregate : IAggregate<Account, AccountEvent>
     {
-        public Account State { get;}
-        public AccountAggregate(Account account) 
-        {
-            State = account;
-        }
+        public Account State { get; set; }
         public void Apply(AccountEvent @event)
         {
             switch (@event)

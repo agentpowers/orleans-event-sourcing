@@ -2,9 +2,9 @@
 
 namespace Events
 {
-    interface IAggregate<TState, TEvent>
+    public interface IAggregate<TState, TEvent>
     {       
-        TState State {get;}
+        TState State {get; set;}
         /// <summary>
         /// Applies an event to a state
         /// </summary>

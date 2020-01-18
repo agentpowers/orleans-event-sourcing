@@ -13,10 +13,6 @@
             "args": [],
             "cwd": "${workspaceFolder}/API",
             "stopAtEntry": false,
-            "serverReadyAction": {
-                "action": "openExternally",
-                "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)"
-            },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },
