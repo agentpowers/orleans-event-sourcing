@@ -5,7 +5,6 @@ namespace EventSourcing.Persistance
     internal class Aggregate
     {
         public long AggregateId {get; set; }
-        public int Version {get; set; }
         public string Type { get; set; }
         public DateTime Created {get; set;}
     }
@@ -14,7 +13,7 @@ namespace EventSourcing.Persistance
     {
         public long Sequence { get; set; }
         public long AggregateId { get; set; }
-        public int Version { get; set; }
+        public long Version { get; set; }
         public string Type { get; set; }
         public string Data { get; set; }
         public DateTime Created { get; set; }
@@ -24,7 +23,6 @@ namespace EventSourcing.Persistance
     {
         public long Sequence { get; set; }
         public long AggregateId { get; set; }
-        public int Version { get; set; }
         public long LastEventSequence { get; set; }
         public string Data { get; set; }
         public DateTime Created { get; set; }
