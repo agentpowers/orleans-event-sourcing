@@ -1,6 +1,6 @@
 using System;
 
-namespace Events
+namespace Grains.Account
 {
     #region Events
     public class Deposited: AccountEvent

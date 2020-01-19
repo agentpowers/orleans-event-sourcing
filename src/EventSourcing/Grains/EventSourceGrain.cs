@@ -1,19 +1,19 @@
 using Orleans;
 using System.Threading.Tasks;
-using Events;
-using Persistance;
+using EventSourcing.Persistance;
 using Newtonsoft.Json;
 
-namespace Grains
+namespace EventSourcing.Grains
 {
     internal class EventWrapper
     {
-        public Events.Event Event { get; set; }
+        [JsonProperty(TypeNameHandling = TypeNameHandling.Auto)]
+        public Event Event { get; set; }
         
     }
     public abstract class EventSourceGrain<TState, TEvent> : Grain 
         where TState :  new()
-        where TEvent : Events.Event
+        where TEvent : Event
     {
         // aggregate name
         private readonly string _aggregateName;
@@ -33,12 +33,8 @@ namespace Grains
         /// </summary>
         /// <value></value>
         protected TState State { get { return _aggregate.State ;} }
-        private static JsonSerializerSettings serializerSettings = new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.Auto
-        };
 
-        protected EventSourcingGrain(string aggregateName, IAggregate<TState, TEvent> aggregate)
+        protected EventSourceGrain(string aggregateName, IAggregate<TState, TEvent> aggregate)
         {
             _aggregateName = aggregateName;
             _aggregate = aggregate;
@@ -47,13 +43,13 @@ namespace Grains
         // serialize an event by wrapping that using EventWrapper and then uses JSON.NET typenamehandling
         static string SerializeEvent(TEvent obj)
         {
-            return JsonConvert.SerializeObject(new EventWrapper{ Event = obj }, Formatting.Indented, serializerSettings);
+            return JsonConvert.SerializeObject(new EventWrapper{ Event = obj });
         }
 
         // deserialize json to event
         static TEvent DeserializeEvent(string json)
         {
-            var eventWrapper =  JsonConvert.DeserializeObject<EventWrapper>(json, serializerSettings);
+            var eventWrapper =  JsonConvert.DeserializeObject<EventWrapper>(json);
             return eventWrapper.Event as TEvent;
         }
 
@@ -90,7 +86,7 @@ namespace Grains
             }
             else
             {
-                // set set as new instance of TState
+                // set state as new instance of TState
                 _aggregate.State = new TState();
             }
             // apply events
@@ -125,6 +121,7 @@ namespace Grains
             // increment event count
             _eventCount++;
             // save snapshot when needed(every 10 events)
+            // TODO: make it configurable when to save snapshot
             if (_eventCount % 10 == 0)
             {
                 await SaveSnapshot();

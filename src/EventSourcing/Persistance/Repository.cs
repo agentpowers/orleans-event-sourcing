@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Npgsql;
 using System.Linq;
 
-namespace Persistance
+namespace EventSourcing.Persistance
 {
-    public class Repository : IRepository
+    internal class Repository : IRepository
     {
         private IDbConnection Connection
         {

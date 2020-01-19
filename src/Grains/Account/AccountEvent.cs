@@ -1,6 +1,7 @@
 using System;
+using EventSourcing;
 
-namespace Events
+namespace Grains.Account
 {
     public abstract class AccountEvent: Event
     {

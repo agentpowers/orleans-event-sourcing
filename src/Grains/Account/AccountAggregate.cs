@@ -1,6 +1,7 @@
 using System;
+using EventSourcing;
 
-namespace Events
+namespace Grains.Account
 {
     public class AccountAggregate : IAggregate<Account, AccountEvent>
     {

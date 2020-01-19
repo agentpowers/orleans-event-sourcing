@@ -17,8 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GrainInterfaces\GrainInterfaces.csproj" />
-    <ProjectReference Include="..\Events\Events.csproj" />
-    <ProjectReference Include="..\Persistance\Persistance.csproj" />
+    <ProjectReference Include="..\EventSourcing\EventSourcing.csproj" />
   </ItemGroup>
 
 </Project>

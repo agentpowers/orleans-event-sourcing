@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Persistance
+namespace EventSourcing.Persistance
 {
-    public class Aggregate
+    internal class Aggregate
     {
         public long AggregateId {get; set; }
         public int Version {get; set; }
@@ -10,7 +10,7 @@ namespace Persistance
         public DateTime Created {get; set;}
     }
 
-    public class Event
+    internal class Event
     {
         public long Sequence { get; set; }
         public long AggregateId { get; set; }

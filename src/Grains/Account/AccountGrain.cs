@@ -2,9 +2,9 @@
 using GrainInterfaces;
 using System;
 using System.Threading.Tasks;
-using Events;
+using EventSourcing.Grains;
 
-namespace Grains
+namespace Grains.Account
 {
     public class AccountGrain : EventSourceGrain<Account, AccountEvent>, IAccountGrain, IAccountCommand
     {

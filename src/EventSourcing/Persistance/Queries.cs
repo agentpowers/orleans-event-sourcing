@@ -1,6 +1,6 @@
-namespace Persistance
+namespace EventSourcing.Persistance
 {
-    public static class Queries
+    internal static class Queries
     {
 
         public const string NewAggregateTableSql= 

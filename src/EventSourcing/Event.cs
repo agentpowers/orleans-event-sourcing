@@ -1,6 +1,6 @@
 using System;
 
-namespace Events
+namespace EventSourcing
 {
     public abstract class Event
     {

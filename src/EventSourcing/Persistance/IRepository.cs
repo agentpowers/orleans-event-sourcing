@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Persistance
+namespace EventSourcing.Persistance
 {
-    public interface IRepository
+    internal interface IRepository
     {
         Task<Event[]> GetEvents(long aggregateId, long lastEventSequence);
         Task<(Snapshot, Event[])> GetSnapshotAndEvents(long aggregateId);
