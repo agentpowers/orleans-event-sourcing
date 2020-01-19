@@ -2,6 +2,7 @@ using Orleans;
 using System.Threading.Tasks;
 using EventSourcing.Persistance;
 using Newtonsoft.Json;
+using System;
 
 namespace EventSourcing.Grains
 {
@@ -12,7 +13,7 @@ namespace EventSourcing.Grains
         
     }
     public abstract class EventSourceGrain<TState, TEvent> : Grain 
-        where TState :  new()
+        where TState : new()
         where TEvent : Event
     {
         // aggregate name
@@ -53,6 +54,24 @@ namespace EventSourcing.Grains
             return eventWrapper.Event as TEvent;
         }
 
+        private string GetGrainKey()
+        {
+            if (this.GetPrimaryKeyLong() > 0)
+            {
+                return this.GetPrimaryKeyLong().ToString();
+            }
+            if (this.GetPrimaryKeyString() != null)
+            {
+                return this.GetPrimaryKeyString();
+            }
+            var guidKey = this.GetPrimaryKey().ToString();
+            if (guidKey != "00000000-0000-0000-0100-000000000000")
+            {
+                return guidKey;
+            }
+            throw new ArgumentException("unable to get primary key");
+        }
+
         /// <summary>
         /// Retrieves current state using snapshot and events
         /// </summary>
@@ -61,7 +80,7 @@ namespace EventSourcing.Grains
         {
             _repository = ServiceProvider.GetService(typeof(IRepository)) as IRepository;
             // generate aggregateType
-            var aggregateType = $"{_aggregateName}:{IdentityString}";
+            var aggregateType = $"{_aggregateName}:{GetGrainKey()}";
             // get aggregate from db
             var aggregate = await _repository.GetAggregateByTypeName(aggregateType);
             if (aggregate == null)
