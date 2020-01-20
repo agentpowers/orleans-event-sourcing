@@ -54,6 +54,11 @@ namespace EventSourcing.Grains
             return eventWrapper.Event as TEvent;
         }
 
+        private const string defaultGuidString = "00000000-0000-0000-0100-000000000000";
+        /// <summary>
+        /// Get grain id string
+        /// </summary>
+        /// <returns></returns>
         private string GetGrainKey()
         {
             if (this.GetPrimaryKeyLong() > 0)
@@ -65,7 +70,7 @@ namespace EventSourcing.Grains
                 return this.GetPrimaryKeyString();
             }
             var guidKey = this.GetPrimaryKey().ToString();
-            if (guidKey != "00000000-0000-0000-0100-000000000000")
+            if (guidKey != defaultGuidString)
             {
                 return guidKey;
             }

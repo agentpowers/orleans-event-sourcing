@@ -28,13 +28,13 @@ namespace EventSourcing.Persistance
                 Created timestamp default current_timestamp
             );";
         public const string InsertAggregateSql=
-            "insert into Aggregate(Version,Type) values (@Version,@Type) returning AggregateId";
+            "insert into Aggregate(Type) values (@Type) returning AggregateId";
 
         public const string InsertEventSql=
             "insert into Events(AggregateId,Version,Type,Data) values (@AggregateId,@Version,@Type,@Data) returning Sequence";
 
         public const string InsertSnapShotSql=
-            "insert into Snapshots(AggregateId,Version,LastEventSequence,Data) values (@AggregateId,@Version,@LastEventSequence,@Data) returning Sequence";
+            "insert into Snapshots(AggregateId,LastEventSequence,Data) values (@AggregateId,@LastEventSequence,@Data) returning Sequence";
 
         public const string GetAggregateSql =
             "select * from Aggregate where AggregateId=@id and Type=@type limit 1";
