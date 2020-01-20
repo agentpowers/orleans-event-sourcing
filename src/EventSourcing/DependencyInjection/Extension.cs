@@ -5,9 +5,9 @@ namespace EventSourcing.Extensions
 {
     public static class Extensions
     {
-        public static void AddEventSourcing(this IServiceCollection services)
+        public static void AddEventSourcing(this IServiceCollection services, string connectionString)
         {
-            services.AddTransient<IRepository, Repository>();
+            services.AddTransient<IRepository>(g => new Repository(connectionString));
         }
     }
 }

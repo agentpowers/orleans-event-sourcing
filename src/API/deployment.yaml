@@ -48,7 +48,7 @@ spec:
         - containerPort: 1111
         - containerPort: 30000
         env:
-          - name: MY_POD_IP
+          - name: POD_IP
             valueFrom:
               fieldRef:
                 fieldPath: status.podIP

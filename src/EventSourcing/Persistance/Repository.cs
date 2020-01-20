@@ -9,12 +9,18 @@ namespace EventSourcing.Persistance
 {
     internal class Repository : IRepository
     {
+        private string _connectionString;
         private IDbConnection Connection
         {
             get
             {
-                return new NpgsqlConnection("host=localhost;database=EventSourcing;username=orleans;password=orleans");
+                return new NpgsqlConnection(_connectionString);
             }
+        }
+
+        public Repository(string connectionString)
+        {
+            _connectionString = connectionString;
         }
 
         public async Task<Aggregate> GetAggregate(long id, string type)
@@ -90,7 +96,6 @@ namespace EventSourcing.Persistance
             {
                 return await conn.ExecuteScalarAsync<long>(Queries.InsertAggregateSql, aggregate);
             }
-
         }
 
         public async Task<long> SaveEvent(Event @event)
