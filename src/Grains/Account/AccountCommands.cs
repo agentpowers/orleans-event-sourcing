@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace Grains
+namespace Grains.Account
 {
     public interface IAccountCommand
     {
