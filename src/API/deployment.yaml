@@ -11,6 +11,14 @@ spec:
       targetPort: 80
       protocol: TCP
       name: api-port
+    - port: 11111
+      targetPort: 11111
+      protocol: TCP
+      name: silo-port
+    - port: 30000
+      targetPort: 30000
+      protocol: TCP
+      name: gateway-port
   selector:
     app: api
 ---
@@ -21,7 +29,9 @@ metadata:
   labels:
     app: api
 spec:
-  replicas: 1
+  replicas: 4
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: api
@@ -35,3 +45,10 @@ spec:
         image: api
         ports:
         - containerPort: 80
+        - containerPort: 1111
+        - containerPort: 30000
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP

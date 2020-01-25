@@ -1,20 +1,19 @@
-FROM microsoft/dotnet:2.2-sdk AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS build
 WORKDIR /src
 
 # Copy csproj and dependencies
 COPY ./API/ API/
+COPY ./Grains Grains/
 COPY ./GrainInterfaces/ GrainInterfaces/
+COPY ./EventSourcing EventSourcing/
 
 WORKDIR /src/API
-
-# Restore
-RUN dotnet restore
 
 # Release
 RUN dotnet publish -c Release -o out
 
 
-FROM microsoft/dotnet:2.2-aspnetcore-runtime AS runtime
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine AS runtime
 WORKDIR /src/API
 COPY --from=build /src/API/out ./
 ENTRYPOINT ["dotnet", "API.dll"]
