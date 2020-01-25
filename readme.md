@@ -39,5 +39,7 @@ CREATE TABLE IF NOT EXISTS Snapshots (
 
 # TESTING ENDPOINTS
 http://localhost/api/account/1
+
 http://localhost/api/account/1/deposit?amount=100
+
 http://localhost/api/account/1/withdraw?amount=100
