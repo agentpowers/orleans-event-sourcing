@@ -24,10 +24,16 @@ namespace Grains.Account
             return State.Amount;
         }
 
-        public async Task<decimal> GetBalance()
+        // public async Task<decimal> GetBalance()
+        // {
+        //     await ApplyEvent(new BalanceRetrieved());
+        //     return State.Amount;
+        // }
+
+
+        public Task<decimal> GetBalance()
         {
-            await ApplyEvent(new BalanceRetrieved());
-            return State.Amount;
+            return Task.FromResult(State.Amount);
         }
 
         public Task<decimal> Transfer(int accountId, decimal amount)
