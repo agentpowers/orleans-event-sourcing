@@ -1,8 +1,13 @@
+# RUNNING CLUSTER
+```
+skaffold run
+```
+
 # INIT POSTGRES DB
-## Access psl by exec into postgredb POD in kubernetes.  Then run the following to connect psql
-`
+## Access psql by exec into postgredb POD in kubernetes.  Then run the following to connect psql
+```
 psql -h localhost -U postgresadmin -p 5432 postgresdb -W
-`
+```
 
 ## Then run the following 3 scripts to add tables
 ```
@@ -32,3 +37,8 @@ CREATE TABLE IF NOT EXISTS Snapshots (
     Created timestamp default current_timestamp
 );
 ```
+
+# TESTING ENDPOINTS
+http://localhost/api/account/1
+http://localhost/api/account/1/deposit?amount=100
+http://localhost/api/account/1/withdraw?amount=100
