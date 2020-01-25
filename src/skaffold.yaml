@@ -9,5 +9,8 @@ build:
 deploy:
   kubectl:
     manifests:
-    - ./ingress.yaml
-    - ./API/*.yaml
+    - ClusterVersionCRD.yaml
+    - SiloEntryCRD.yaml
+    - postgres.yaml
+    - ingress.yaml
+    - API/*.yaml

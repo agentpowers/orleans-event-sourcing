@@ -5,6 +5,7 @@ WORKDIR /src
 COPY ./API/ API/
 COPY ./Grains Grains/
 COPY ./GrainInterfaces/ GrainInterfaces/
+COPY ./EventSourcing EventSourcing/
 
 WORKDIR /src/API
 

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Orleans;
 using Microsoft.Extensions.Hosting;
 using EventSourcing.Extensions;
+using System;
 
 namespace API
 {
@@ -19,8 +20,11 @@ namespace API
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var dbHost = Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST");
+            // var postgresConnectionString = "host=localhost;database=EventSourcing;username=orleans;password=orleans";
+            var postgresConnectionString = $"host={dbHost};database=postgresdb;username=postgresadmin;password=postgrespwd";
             // add evensourcing related services
-            services.AddEventSourcing("host=localhost;database=EventSourcing;username=orleans;password=orleans");
+            services.AddEventSourcing(postgresConnectionString);
             // add controllers
             services.AddControllers();
             // add services for dashboard
