@@ -5,7 +5,6 @@ using Orleans;
 using Orleans.Configuration;
 using Microsoft.Extensions.Hosting;
 using Orleans.Clustering.Kubernetes;
-using Grains;
 using Orleans.Statistics;
 using System;
 using System.Net;
