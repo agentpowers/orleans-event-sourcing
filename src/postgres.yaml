@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: postgres:latest
+        image: postgres
         envFrom:
           - configMapRef:
               name: postgres-config-demo
