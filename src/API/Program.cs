@@ -9,6 +9,7 @@ using Grains;
 using Orleans.Statistics;
 using System;
 using System.Net;
+using Grains.Account;
 
 namespace API
 {
@@ -34,7 +35,7 @@ namespace API
                 opt.DropResourcesOnInit = true;
             })
             .AddMemoryGrainStorageAsDefault()
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ValueGrain).Assembly).WithReferences())
+            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
             .ConfigureLogging(logging => logging.AddConsole())
             .UseLinuxEnvironmentStatistics()
             .UseDashboard(x =>
@@ -57,7 +58,7 @@ namespace API
             .ConfigureEndpoints(new Random(1).Next(10001, 10100), new Random(1).Next(20001, 20100))
             .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
             .AddMemoryGrainStorageAsDefault()
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ValueGrain).Assembly).WithReferences())
+            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
             .ConfigureLogging(logging => logging.AddConsole())
             .UseDashboard(x =>
              {
