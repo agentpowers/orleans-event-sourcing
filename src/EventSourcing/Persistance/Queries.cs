@@ -14,7 +14,7 @@ namespace EventSourcing.Persistance
             @"CREATE TABLE IF NOT EXISTS Events (
                 Sequence bigint primary key not null generated always as identity,
                 AggregateId bigint not null,
-                Version bigint not null DEFAULT 0,
+                RowVersion bigint not null,
                 Type varchar(255) not null,
                 Data text,
                 Created timestamp default current_timestamp
@@ -31,7 +31,7 @@ namespace EventSourcing.Persistance
             "insert into Aggregate(Type) values (@Type) returning AggregateId";
 
         public const string InsertEventSql=
-            "insert into Events(AggregateId,Version,Type,Data) values (@AggregateId,@Version,@Type,@Data) returning Sequence";
+            "insert into Events(AggregateId,RowVersion, Type,Data) values (@AggregateId,@RowVersion,@Type,@Data) returning Sequence";
 
         public const string InsertSnapShotSql=
             "insert into Snapshots(AggregateId,LastEventSequence,Data) values (@AggregateId,@LastEventSequence,@Data) returning Sequence";
