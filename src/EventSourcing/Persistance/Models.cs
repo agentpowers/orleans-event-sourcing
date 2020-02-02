@@ -13,7 +13,7 @@ namespace EventSourcing.Persistance
     {
         public long Sequence { get; set; }
         public long AggregateId { get; set; }
-        public long Version { get; set; }
+        public long AggregateVersion { get; set; }
         public string Type { get; set; }
         public string Data { get; set; }
         public DateTime Created { get; set; }
@@ -23,7 +23,7 @@ namespace EventSourcing.Persistance
     {
         public long Sequence { get; set; }
         public long AggregateId { get; set; }
-        public long LastEventSequence { get; set; }
+        public long AggregateVersion { get; set; }
         public string Data { get; set; }
         public DateTime Created { get; set; }
     }

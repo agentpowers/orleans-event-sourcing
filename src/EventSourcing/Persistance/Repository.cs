@@ -47,70 +47,60 @@ namespace EventSourcing.Persistance
             }
         }
 
-        public async Task<Event[]> GetEvents(long aggregateId, long lastEventSequence)
+        public async Task<Event[]> GetEvents(string aggregateName, long aggregateId, long aggregateVersion)
         {
             using (IDbConnection conn = Connection)
             {
-                return (await conn.QueryAsync<Event>(Queries.GetEventsSql, new { id = aggregateId, lastEventSequence = lastEventSequence })).ToArray();
+                return (await conn.QueryAsync<Event>(Queries.GetEventsSql(aggregateName), new { id = aggregateId, aggregateVersion })).ToArray();
             }
         }
 
-        public async Task<Event> GetLastEvent(long aggregateId)
+        public async Task<Event> GetLastEvent(string aggregateName, long aggregateId)
         {
             using (IDbConnection conn = Connection)
             {
-                return await conn.QueryFirstAsync<Event>(Queries.GetLastEventsSql, new { id = aggregateId });
+                return await conn.QueryFirstAsync<Event>(Queries.GetLastEventsSql(aggregateName), new { id = aggregateId });
             }
         }
 
-        public async Task<(Snapshot, Event[])> GetSnapshotAndEvents(long aggregateId)
+        public async Task<(Snapshot, Event[])> GetSnapshotAndEvents(string aggregateName, long aggregateId)
         {
             using (IDbConnection conn = Connection)
             {
-                var snapshot  = await conn.QueryFirstOrDefaultAsync<Snapshot>(Queries.GetSnapshotSql, new { id = aggregateId });
-                return (snapshot, (await conn.QueryAsync<Event>(Queries.GetEventsSql, new { id = aggregateId, lastEventSequence = (snapshot?.LastEventSequence).GetValueOrDefault() })).ToArray());
+                var snapshot  = await conn.QueryFirstOrDefaultAsync<Snapshot>(Queries.GetSnapshotSql(aggregateName), new { id = aggregateId });
+                return (snapshot, (await conn.QueryAsync<Event>(Queries.GetEventsSql(aggregateName), new { id = aggregateId, aggregateVersion = (snapshot?.AggregateVersion).GetValueOrDefault() })).ToArray());
             }
         }
 
-        public async Task<long> GetSnapshotLastEventSequence(long aggregateId)
+        public async Task<long> GetSnapshotAggregateVersionSql(string aggregateName, long aggregateId)
         {
             using (IDbConnection conn = Connection)
             {
-                return await conn.QueryFirstAsync<long>(Queries.GetSnapshotLastEventSequenceSql, new { id = aggregateId });
+                return await conn.QueryFirstAsync<long>(Queries.GetSnapshotAggregateVersionSql(aggregateName), new { id = aggregateId });
             }
         }
 
-        public async Task InitTables()
+        public async Task<long> SaveAggregate(string aggregateName, Aggregate aggregate)
         {
             using (IDbConnection conn = Connection)
             {
-                await conn.ExecuteAsync(Queries.NewAggregateTableSql);
-                await conn.ExecuteAsync(Queries.NewEventsTableSql);
-                await conn.ExecuteAsync(Queries.NewSnapshotsTabelSql);
+                return await conn.ExecuteScalarAsync<long>(Queries.NewAggregate(aggregateName), aggregate);
             }
         }
 
-        public async Task<long> SaveAggregate(Aggregate aggregate)
+        public async Task SaveEvent(string aggregateName, Event @event)
         {
             using (IDbConnection conn = Connection)
             {
-                return await conn.ExecuteScalarAsync<long>(Queries.InsertAggregateSql, aggregate);
+                await conn.ExecuteScalarAsync<long>(Queries.InsertEventSql(aggregateName), @event);
             }
         }
 
-        public async Task<long> SaveEvent(Event @event)
+        public async Task SaveSnapshot(string aggregateName, Snapshot snapshot)
         {
             using (IDbConnection conn = Connection)
             {
-                return await conn.ExecuteScalarAsync<long>(Queries.InsertEventSql, @event);
-            }
-        }
-
-        public async Task<long> SaveSnapshot(Snapshot snapshot)
-        {
-            using (IDbConnection conn = Connection)
-            {
-                return await conn.ExecuteScalarAsync<long>(Queries.InsertSnapShotSql, snapshot);
+                await conn.ExecuteAsync(Queries.InsertSnapShotSql(aggregateName), snapshot);
             }
         }
     }

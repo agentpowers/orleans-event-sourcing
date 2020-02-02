@@ -24,10 +24,8 @@ namespace EventSourcing.Grains
         private long _aggregateId;
         // repository
         private IRepository _repository;
-        // event counter
-        private int _eventCount = 0;
-        // last event sequence that was written to db
-        private long _lastEventSequence = 0;
+        // version number for this instance of aggregate(incremented for each event)
+        private long _aggregateVersion = 0;
 
         /// <summary>
         /// Get current state
@@ -91,34 +89,39 @@ namespace EventSourcing.Grains
             if (aggregate == null)
             {
                 // add new aggregate if it doesn't exist
-                _aggregateId = await _repository.SaveAggregate(new Aggregate{ Type = aggregateType });
+                _aggregateId = await _repository.SaveAggregate(_aggregateName, new Aggregate{ Type = aggregateType });
+                // set state as new instance of TState
+                _aggregate.State = new TState();
             }
             else
             {
                 // use aggregate id from db
                 _aggregateId = aggregate.AggregateId;
+                // get snapshot and events
+                var (snapshot, events) = await _repository.GetSnapshotAndEvents(_aggregateName, _aggregateId);
+                // apply snapshot if any
+                if(snapshot != null)
+                {
+                    // store aggregate version number
+                    _aggregateVersion = snapshot.AggregateVersion;
+                    // set snapshot as state
+                    _aggregate.State = JsonConvert.DeserializeObject<TState>(snapshot.Data);
+                }
+                else
+                {
+                    // set state as new instance of TState
+                    _aggregate.State = new TState();
+                }
+                // apply events
+                foreach (var dbEvent in events)
+                {
+                    var @event = DeserializeEvent(dbEvent.Data);
+                    _aggregate.Apply(@event);
+                    // store aggregate version number
+                    _aggregateVersion = dbEvent.AggregateVersion;
+                }
             }
-            // get snapshot and events
-            var (snapshot, events) = await _repository.GetSnapshotAndEvents(_aggregateId);
-            // apply snapshot if any
-            if(snapshot != null)
-            {
-                // set last sequence id
-                _lastEventSequence = snapshot.LastEventSequence;
-                // set snapshot as state
-                _aggregate.State = JsonConvert.DeserializeObject<TState>(snapshot.Data);
-            }
-            else
-            {
-                // set state as new instance of TState
-                _aggregate.State = new TState();
-            }
-            // apply events
-            foreach (var dbEvent in events)
-            {
-                var @event = DeserializeEvent(dbEvent.Data);
-                _aggregate.Apply(@event);
-            }
+            
             // call base OnActivateAsync
             await base.OnActivateAsync();
         }
@@ -129,7 +132,7 @@ namespace EventSourcing.Grains
         /// <returns></returns>
         private async Task SaveSnapshot()
         {
-            await _repository.SaveSnapshot(new Snapshot{ AggregateId = _aggregateId, LastEventSequence = _lastEventSequence, Data = JsonConvert.SerializeObject(_aggregate.State) });
+            await _repository.SaveSnapshot(_aggregateName, new Snapshot{ AggregateId = _aggregateId, AggregateVersion = _aggregateVersion, Data = JsonConvert.SerializeObject(_aggregate.State) });
         }
 
         /// <summary>
@@ -140,18 +143,18 @@ namespace EventSourcing.Grains
         {
             // serialize event for db
             var serialized = SerializeEvent(@event);
+            // increment aggregate version 
+            _aggregateVersion++;
             // save event to db
-            _lastEventSequence = await _repository.SaveEvent(new Persistance.Event { AggregateId = _aggregateId, Type = @event.Type, Data = serialized });
-            // increment event count
-            _eventCount++;
+            await _repository.SaveEvent(_aggregateName, new Persistance.Event { AggregateId = _aggregateId, AggregateVersion = _aggregateVersion, Type = @event.Type, Data = serialized });
+            // update state
+            _aggregate.Apply(@event);
             // save snapshot when needed(every 10 events)
             // TODO: make it configurable when to save snapshot
-            if (_eventCount % 10 == 0)
+            if (_aggregateVersion % 10 == 0)
             {
                 await SaveSnapshot();
             }
-            // update state
-            _aggregate.Apply(@event);
         }
     }
 }
