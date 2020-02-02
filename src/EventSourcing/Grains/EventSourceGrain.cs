@@ -26,7 +26,6 @@ namespace EventSourcing.Grains
         private IRepository _repository;
         // event counter
         private int _eventCount = 0;
-        private long _eventSequenceNumber = 0;
         // last event sequence that was written to db
         private long _lastEventSequence = 0;
 
@@ -92,7 +91,7 @@ namespace EventSourcing.Grains
             if (aggregate == null)
             {
                 // add new aggregate if it doesn't exist
-                await _repository.SaveAggregate(new Aggregate{ Type = aggregateType });
+                _aggregateId = await _repository.SaveAggregate(new Aggregate{ Type = aggregateType });
             }
             else
             {
@@ -100,7 +99,7 @@ namespace EventSourcing.Grains
                 _aggregateId = aggregate.AggregateId;
             }
             // get snapshot and events
-            var (snapshot, events) = await _repository.GetSnapshotAndEvents(_aggregateName);
+            var (snapshot, events) = await _repository.GetSnapshotAndEvents(_aggregateId);
             // apply snapshot if any
             if(snapshot != null)
             {
@@ -119,7 +118,6 @@ namespace EventSourcing.Grains
             {
                 var @event = DeserializeEvent(dbEvent.Data);
                 _aggregate.Apply(@event);
-                _eventSequenceNumber++;
             }
             // call base OnActivateAsync
             await base.OnActivateAsync();
@@ -131,7 +129,7 @@ namespace EventSourcing.Grains
         /// <returns></returns>
         private async Task SaveSnapshot()
         {
-            await _repository.SaveSnapshot(_aggregateName, new Snapshot{ AggregateId = _aggregateId, LastEventSequence = _lastEventSequence, Data = JsonConvert.SerializeObject(_aggregate.State) });
+            await _repository.SaveSnapshot(new Snapshot{ AggregateId = _aggregateId, LastEventSequence = _lastEventSequence, Data = JsonConvert.SerializeObject(_aggregate.State) });
         }
 
         /// <summary>
@@ -143,7 +141,7 @@ namespace EventSourcing.Grains
             // serialize event for db
             var serialized = SerializeEvent(@event);
             // save event to db
-            await _repository.SaveEvent(_aggregateName, new Persistance.Event { Sequence = _eventSequenceNumber++, Type = @event.Type, Data = serialized });
+            _lastEventSequence = await _repository.SaveEvent(new Persistance.Event { AggregateId = _aggregateId, Type = @event.Type, Data = serialized });
             // increment event count
             _eventCount++;
             // save snapshot when needed(every 10 events)
