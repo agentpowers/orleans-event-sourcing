@@ -21,8 +21,8 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
             var dbHost = Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST");
-            var postgresConnectionString = "host=localhost;database=EventSourcing;username=orleans;password=orleans";
-            // var postgresConnectionString = $"host={dbHost};database=postgresdb;username=postgresadmin;password=postgrespwd";
+            //var postgresConnectionString = "host=localhost;database=EventSourcing;username=orleans;password=orleans";
+            var postgresConnectionString = $"host={dbHost};database=postgresdb;username=postgresadmin;password=postgrespwd";
             // add evensourcing related services
             services.AddEventSourcing(postgresConnectionString);
             // add controllers
