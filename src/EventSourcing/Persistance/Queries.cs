@@ -29,7 +29,6 @@ namespace EventSourcing.Persistance
                         insert into Aggregate(Type) values (@Type) returning AggregateId;
                     COMMIT;";
         }
-
         public static string InsertEventSql(string aggregateType)
         {
             return $"insert into {aggregateType}_events(AggregateId, AggregateVersion, Type, Data) values (@AggregateId, @AggregateVersion, @Type, @Data)";
@@ -38,12 +37,10 @@ namespace EventSourcing.Persistance
         {
             return $"insert into {aggregateType}_snapshots(AggregateId,AggregateVersion,Data) values (@AggregateId, @AggregateVersion, @Data)";
         }
-
         public const string GetAggregateSql =
             "select * from Aggregate where AggregateId=@id and Type=@type limit 1";
         public const string GetAggregateByTypeSql =
             "select * from Aggregate where Type=@type limit 1";
-
         public const string GetAggregatesByTypeSql =
             "select * from Aggregate where Type=@type";
         public static string GetSnapshotSql(string aggregateType)
