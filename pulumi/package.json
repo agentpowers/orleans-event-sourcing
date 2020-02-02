@@ -1,8 +1,0 @@
-{
-    "name": "kubernetes-javascript",
-    "main": "index.js",
-    "dependencies": {
-        "@pulumi/pulumi": "latest",
-        "@pulumi/kubernetes": "latest"
-    }
-}

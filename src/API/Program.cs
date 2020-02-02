@@ -75,7 +75,7 @@ namespace API
                 {
                     builder.UseStartup<Startup>();
                 })
-                .UseOrleans(ConfigureOrleans)
+                .UseOrleans(ConfigureLocalOrleans)
                 .Build();
             host.Run();
         }
