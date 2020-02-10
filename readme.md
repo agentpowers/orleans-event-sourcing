@@ -3,12 +3,14 @@
 skaffold run or skaffold dev
 
 # INIT POSTGRES DB
-## Access psql by exec into postgredb POD in kubernetes.  Then run the following to connect psql
+## In k8s access psql by port forwarding postgres port 5432 to local 5432 port.  Then use gui like azure data studio to access the db.
 ```
-psql -h localhost -U postgresadmin -p 5432 postgresdb -W
+kubectl port-forward pods/postgres-demo-0 5432:5432 -n default
 ```
+### local db credentials -> host=localhost;database=EventSourcing;username=orleans;password=orleans
+### k8s db credentials -> host=localhot;database=postgresdb;username=postgresadmin;password=postgrespwd
 
-## In local database run the following script to add Aggregate table.  In K8s this is initialized using sql-scripts
+## In local database run the following script to add Aggregate table.  In K8s this is initialized using src/sql-scripts
 ```
 CREATE TABLE IF NOT EXISTS Aggregate (
     AggregateId bigint primary key not null generated always as identity,

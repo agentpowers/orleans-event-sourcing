@@ -16,6 +16,8 @@ namespace API
     {
         const int siloPort = 11111;
         const int gatewayPort = 30000;
+
+        public static bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
         
         //https://stackoverflow.com/questions/54841844/orleans-direct-client-in-asp-net-core-project/54842916#54842916
         private static void ConfigureOrleans(ISiloBuilder builder)
@@ -70,14 +72,21 @@ namespace API
         
         public static void Main(string[] args)
         {
-            var host = new HostBuilder()
+            var hostBuilder = new HostBuilder()
                 .ConfigureWebHostDefaults(builder =>
                 {
                     builder.UseStartup<Startup>();
-                })
-                .UseOrleans(ConfigureOrleans)
-                .Build();
-            host.Run();
+                });
+            if(isLocal)
+            {
+                hostBuilder.UseOrleans(ConfigureLocalOrleans);
+            }
+            else
+            {
+                hostBuilder.UseOrleans(ConfigureOrleans);
+            }
+
+            hostBuilder.Build().Run();
         }
     }
 }

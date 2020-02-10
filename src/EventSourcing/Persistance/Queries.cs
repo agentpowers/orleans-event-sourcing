@@ -12,15 +12,19 @@ namespace EventSourcing.Persistance
         {
             return @"BEGIN TRANSACTION;
                         CREATE TABLE IF NOT EXISTS " + aggregateType + @"_events (
-                            Sequence bigint primary key not null generated always as identity,
+                            Id bigint primary key not null generated always as identity,
                             AggregateId bigint not null,
                             AggregateVersion bigint not null,
+                            EventVersion int not null,
+                            ParentEventId bigint null,
+                            RootEventId bigint null,
                             Type varchar(255) not null,
                             Data text,
-                            Created timestamp default current_timestamp
+                            Created timestamp default current_timestamp,
+                            UNIQUE (AggregateId, AggregateVersion)
                         );
                         CREATE TABLE IF NOT EXISTS " + aggregateType + @"_snapshots (
-                            Sequence bigint primary key not null generated always as identity,
+                            Id bigint primary key not null generated always as identity,
                             AggregateId bigint not null,
                             AggregateVersion bigint not null,
                             Data text,
@@ -31,7 +35,7 @@ namespace EventSourcing.Persistance
         }
         public static string InsertEventSql(string aggregateType)
         {
-            return $"insert into {aggregateType}_events(AggregateId, AggregateVersion, Type, Data) values (@AggregateId, @AggregateVersion, @Type, @Data)";
+            return $"insert into {aggregateType}_events(AggregateId, AggregateVersion, EventVersion, ParentEventId, RootEventId, Type, Data) values (@AggregateId, @AggregateVersion, @EventVersion, @ParentEventId, @RootEventId, @Type, @Data)";
         }
         public static string InsertSnapShotSql(string aggregateType)
         {
@@ -45,19 +49,19 @@ namespace EventSourcing.Persistance
             "select * from Aggregate where Type=@type";
         public static string GetSnapshotSql(string aggregateType)
         {
-            return $"select * from {aggregateType}_snapshots where AggregateId=@id order by Sequence desc limit 1";
+            return $"select * from {aggregateType}_snapshots where AggregateId=@id order by Id desc limit 1";
         }
         public static string GetSnapshotAggregateVersionSql(string aggregateType)
         {
-            return $"select AggregateVersion from {aggregateType}_snapshots where AggregateId=@id order by Sequence desc limit 1";
+            return $"select AggregateVersion from {aggregateType}_snapshots where AggregateId=@id order by Id desc limit 1";
         }
         public static string GetEventsSql(string aggregateType)
         {
-            return $"select * from {aggregateType}_events where AggregateId=@id and AggregateVersion > @AggregateVersion order by Sequence asc";
+            return $"select * from {aggregateType}_events where AggregateId=@id and AggregateVersion > @AggregateVersion order by Id asc";
         }
         public static string GetLastEventsSql(string aggregateType)
         {
-            return $"select * from {aggregateType}_events order AggregateId=@id by Sequence desc limit 1";
+            return $"select * from {aggregateType}_events order AggregateId=@id by Id desc limit 1";
         }       
     }
 }
