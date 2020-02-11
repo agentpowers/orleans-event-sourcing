@@ -5,15 +5,15 @@ run  ```skaffold run``` or ```skaffold dev``` from src folder
 ```
 kubectl port-forward pods/postgres-demo-0 5432:5432 -n default
 ```
-## ORLEANS DASHBOARD - http://localhost:5000/dashboard
+## ORLEANS DASHBOARD - http://localhost/api/dashboard
 
 ## Account Endpoints
 
-http://localhost:5000/account/1
+http://localhost/api/account/1
 
-http://localhost:5000/account/1/deposit?amount=100
+http://localhost/api/account/1/deposit?amount=100
 
-http://localhost:5000/account/1/withdraw?amount=100
+http://localhost/api/account/1/withdraw?amount=100
 
 
 
@@ -35,13 +35,12 @@ cd src/API && dotnet run
 OR 
 Debug via VSCODE
 
-
-## ORLEANS DASHBOARD - http://localhost/api/dashboard
+## ORLEANS DASHBOARD - http://localhost:5000/dashboard
 
 ## Account Endpoints
 
-http://localhost/api/account/1
+http://localhost:5000/account/1
 
-http://localhost/api/account/1/deposit?amount=100
+http://localhost:5000/account/1/deposit?amount=100
 
-http://localhost/api/account/1/withdraw?amount=100
+http://localhost:5000/account/1/withdraw?amount=100
