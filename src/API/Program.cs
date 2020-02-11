@@ -26,8 +26,8 @@ namespace API
             var podIPAddress = Environment.GetEnvironmentVariable("POD_IP");
             builder.Configure<ClusterOptions>(options => 
             {
-                options.ClusterId = "testcluster";
-                options.ServiceId = "SampleApp";
+                options.ClusterId = "api-cluster";
+                options.ServiceId = "API";
             })
             .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Parse(podIPAddress))
             .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
@@ -52,8 +52,8 @@ namespace API
         {
             builder.Configure<ClusterOptions>(options => 
             {
-                options.ClusterId = "testcluster";
-                options.ServiceId = "SampleApp";
+                options.ClusterId = "api-cluster";
+                options.ServiceId = "API";
             })
             .UseLocalhostClustering()
             .ConfigureEndpoints(new Random(1).Next(10001, 10100), new Random(1).Next(20001, 20100))
@@ -65,7 +65,6 @@ namespace API
              {
                 x.HostSelf = false;
                 x.BasePath = "/dashboard";
-                x.ScriptPath = "/api/dashboard";
                 x.CounterUpdateIntervalMs = 10000;
              });
         }
