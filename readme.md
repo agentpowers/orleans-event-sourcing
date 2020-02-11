@@ -1,7 +1,7 @@
 # k8s (using skaffold)
 run  ```skaffold run``` or ```skaffold dev``` from src folder
 
-## In k8s access psql by port forwarding postgres port 5432 to local 5432 port.  Then use gui like azure data studio to access the db.
+## In k8s access psql by port forwarding postgres port 5432 to local 5432 port.  Then use any postgres database GUI like azure data studio to access the db.
 ```
 kubectl port-forward pods/postgres-demo-0 5432:5432 -n default
 ```
