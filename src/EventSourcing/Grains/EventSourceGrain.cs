@@ -149,12 +149,16 @@ namespace EventSourcing.Grains
             await _repository.SaveEvent(_aggregateName, new Persistance.Event { AggregateId = _aggregateId, AggregateVersion = _aggregateVersion, Type = @event.Type, Data = serialized });
             // update state
             _aggregate.Apply(@event);
-            // save snapshot when needed(every 10 events)
-            // TODO: make it configurable when to save snapshot
-            if (_aggregateVersion % 10 == 0)
+            // save snapshot if ShouldSaveSnapshot returns true
+            if (ShouldSaveSnapshot(@event, _aggregateVersion))
             {
                 await SaveSnapshot();
             }
+        }
+
+        public virtual bool ShouldSaveSnapshot(TEvent @event, long aggregateVersion)
+        {
+            return aggregateVersion % 20 == 0;
         }
     }
 }
