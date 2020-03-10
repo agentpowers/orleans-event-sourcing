@@ -88,19 +88,19 @@ namespace EventSourcing.Persistance
             }
         }
 
-        public async Task SaveEvent(string aggregateName, Event @event)
+        public async Task<long> SaveEvent(string aggregateName, Event @event)
         {
             using (IDbConnection conn = Connection)
             {
-                await conn.ExecuteScalarAsync<long>(Queries.InsertEventSql(aggregateName), @event);
+                return await conn.ExecuteScalarAsync<long>(Queries.InsertEventSql(aggregateName), @event);
             }
         }
 
-        public async Task SaveSnapshot(string aggregateName, Snapshot snapshot)
+        public async Task<long> SaveSnapshot(string aggregateName, Snapshot snapshot)
         {
             using (IDbConnection conn = Connection)
             {
-                await conn.ExecuteAsync(Queries.InsertSnapShotSql(aggregateName), snapshot);
+                return await conn.ExecuteAsync(Queries.InsertSnapShotSql(aggregateName), snapshot);
             }
         }
     }

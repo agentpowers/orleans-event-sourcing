@@ -6,7 +6,7 @@ namespace EventSourcing.Persistance
             @"CREATE TABLE IF NOT EXISTS Aggregate (
                 AggregateId bigint primary key not null generated always as identity,
                 Type varchar(255) not null UNIQUE,
-                Created timestamp default current_timestamp
+                Created timestamp not null
             );";
         public static string NewAggregate(string aggregateType)
         {
@@ -20,7 +20,7 @@ namespace EventSourcing.Persistance
                             RootEventId bigint null,
                             Type varchar(255) not null,
                             Data text,
-                            Created timestamp default current_timestamp,
+                            Created timestamp not null,
                             UNIQUE (AggregateId, AggregateVersion)
                         );
                         CREATE TABLE IF NOT EXISTS " + aggregateType + @"_snapshots (
@@ -28,18 +28,18 @@ namespace EventSourcing.Persistance
                             AggregateId bigint not null,
                             AggregateVersion bigint not null,
                             Data text,
-                            Created timestamp default current_timestamp
+                            Created timestamp not null,
                         );
                         insert into Aggregate(Type) values (@Type) returning AggregateId;
                     COMMIT;";
         }
         public static string InsertEventSql(string aggregateType)
         {
-            return $"insert into {aggregateType}_events(AggregateId, AggregateVersion, EventVersion, ParentEventId, RootEventId, Type, Data) values (@AggregateId, @AggregateVersion, @EventVersion, @ParentEventId, @RootEventId, @Type, @Data)";
+            return $"insert into {aggregateType}_events(AggregateId, AggregateVersion, EventVersion, ParentEventId, RootEventId, Type, Data) values (@AggregateId, @AggregateVersion, @EventVersion, @ParentEventId, @RootEventId, @Type, @Data) returning Id";
         }
         public static string InsertSnapShotSql(string aggregateType)
         {
-            return $"insert into {aggregateType}_snapshots(AggregateId,AggregateVersion,Data) values (@AggregateId, @AggregateVersion, @Data)";
+            return $"insert into {aggregateType}_snapshots(AggregateId,AggregateVersion,Data) values (@AggregateId, @AggregateVersion, @Data) returning Id";
         }
         public const string GetAggregateSql =
             "select * from Aggregate where AggregateId=@id and Type=@type limit 1";

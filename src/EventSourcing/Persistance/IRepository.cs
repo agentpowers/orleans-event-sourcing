@@ -13,7 +13,7 @@ namespace EventSourcing.Persistance
         Task<Aggregate[]> GetAggregatesByTypeName(string type);
         Task<Event> GetLastEvent(string aggregateName, long aggregateId);
         Task <long> SaveAggregate(string aggregateName, Aggregate aggregate);
-        Task SaveSnapshot(string aggregateName, Snapshot snapshot);
-        Task SaveEvent(string aggregateName, Event @event);
+        Task<long> SaveSnapshot(string aggregateName, Snapshot snapshot);
+        Task<long> SaveEvent(string aggregateName, Event @event);
     }
 }
