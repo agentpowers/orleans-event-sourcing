@@ -35,11 +35,11 @@ namespace EventSourcing.Persistance
         }
         public static string InsertEventSql(string aggregateType)
         {
-            return $"insert into {aggregateType}_events(AggregateId, AggregateVersion, EventVersion, ParentEventId, RootEventId, Type, Data) values (@AggregateId, @AggregateVersion, @EventVersion, @ParentEventId, @RootEventId, @Type, @Data) returning Id";
+            return $"insert into {aggregateType}_events(AggregateId, AggregateVersion, EventVersion, ParentEventId, RootEventId, Type, Data, Created) values (@AggregateId, @AggregateVersion, @EventVersion, @ParentEventId, @RootEventId, @Type, @Data, @Created) returning Id";
         }
         public static string InsertSnapShotSql(string aggregateType)
         {
-            return $"insert into {aggregateType}_snapshots(AggregateId,AggregateVersion,Data) values (@AggregateId, @AggregateVersion, @Data) returning Id";
+            return $"insert into {aggregateType}_snapshots(AggregateId,AggregateVersion,Data, Created) values (@AggregateId, @AggregateVersion, @Data, @Created) returning Id";
         }
         public const string GetAggregateSql =
             "select * from Aggregate where AggregateId=@id and Type=@type limit 1";
@@ -59,9 +59,17 @@ namespace EventSourcing.Persistance
         {
             return $"select * from {aggregateType}_events where AggregateId=@id and AggregateVersion > @AggregateVersion order by Id asc";
         }
+        public static string GetAggregateEventsSql(string aggregateType)
+        {
+            return $"select ev.id ,ev.aggregateid ,ev.aggregateversion ,ev.eventversion ,ev.parenteventid ,ev.rooteventid ,ev.type ,ev.data ,ev.created ,ag.type as aggregateType from {aggregateType}_events ev join aggregate ag on ag.aggregateid = ev.aggregateid where ev.Id > @id order by ev.Id asc";
+        }
+        public static string GetLastAggregateEventsSql(string aggregateType)
+        {
+            return $"select ev.id ,ev.aggregateid ,ev.aggregateversion ,ev.eventversion ,ev.parenteventid ,ev.rooteventid ,ev.type ,ev.data ,ev.created ,ag.type as aggregateType from {aggregateType}_events ev join aggregate ag on ag.aggregateid = ev.aggregateid order by ev.Id desc limit 1;";
+        }
         public static string GetLastEventsSql(string aggregateType)
         {
-            return $"select * from {aggregateType}_events order AggregateId=@id by Id desc limit 1";
+            return $"select * from {aggregateType}_events where AggregateId=@id order by Id desc limit 1";
         }       
     }
 }

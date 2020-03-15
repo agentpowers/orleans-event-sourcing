@@ -9,7 +9,7 @@ namespace EventSourcing.Persistance
         public DateTime Created {get; set;}
     }
 
-    public sealed class Event
+    public class Event
     {
         public long Id { get; set; }
         public long AggregateId { get; set; }
@@ -20,6 +20,11 @@ namespace EventSourcing.Persistance
         public string Type { get; set; }
         public string Data { get; set; }
         public DateTime Created { get; set; }
+    }
+
+    public sealed class AggregateEvent: Event
+    {
+        public string AggregateType { get; set; }
     }
 
     public sealed class Snapshot

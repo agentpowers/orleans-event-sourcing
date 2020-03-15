@@ -6,6 +6,8 @@ using Orleans.Core;
 using Microsoft.Extensions.Logging;
 using Orleans.Services;
 using EventSourcing.Stream;
+using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 namespace EventSourcing.Services
 {
@@ -13,6 +15,8 @@ namespace EventSourcing.Services
     public class AggregateStreamKeepAliveService : GrainService, IAggregateStreamKeepAliveService
     {
         private readonly IGrainFactory _grainFactory;
+
+        private string[] _aggregateNames;
         
         public AggregateStreamKeepAliveService(IGrainIdentity grainId, Silo silo, ILoggerFactory loggerFactory, IGrainFactory grainFactory) : base(grainId, silo, loggerFactory)
         {
@@ -23,14 +27,16 @@ namespace EventSourcing.Services
         {
             this.RegisterTimer(AggregateStreamGrainPingHandler, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(30));
 
+            _aggregateNames = serviceProvider.GetServices<IAggregateStreamSettings>().Select(g => g.AggregateName).ToArray();
+
             await base.Init(serviceProvider);
         }
 
         public async Task AggregateStreamGrainPingHandler(object args)
         {
-            foreach (var streamType in AggregateStreamConfig.StreamTypes)
+            foreach (var aggregateName in _aggregateNames)
             {
-                var aggregateStreamGrain = _grainFactory.GetGrain<IAggregateStream>(streamType);
+                var aggregateStreamGrain = _grainFactory.GetGrain<IAggregateStream>(aggregateName);
                 await aggregateStreamGrain.Ping();
             }
         }

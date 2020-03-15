@@ -7,6 +7,7 @@ using EventSourcing.Grains;
 using Orleans.Concurrency;
 using Orleans.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 namespace EventSourcing.Stream
 {
@@ -31,7 +32,7 @@ namespace EventSourcing.Stream
     public class UpdatedLastNotifiedEventId: StreamEvent
     {
         public override string Type { get; set;} = nameof(UpdatedLastNotifiedEventId);
-        public long LastNotifiedEventVersion { get; set; }
+        public long LastNotifiedEventId { get; set; }
     }
 
     #endregion
@@ -39,8 +40,7 @@ namespace EventSourcing.Stream
     #region  State
     public class AggregateStreamState
     { 
-        public HashSet<long> SubscribedGrainIntKeys { get; } = new HashSet<long>();
-        public long? LastNotifiedEventVersion { get; set; }
+        public long? LastNotifiedEventId { get; set; }
     }
     #endregion
 
@@ -53,14 +53,8 @@ namespace EventSourcing.Stream
         {
             switch (@event)
             {
-                case Subscribed subscribed: 
-                    State.SubscribedGrainIntKeys.Add(subscribed.IntKey);
-                    break;
-                case UnSubscribed unSubscribed:
-                    State.SubscribedGrainIntKeys.Remove(unSubscribed.IntKey);
-                    break;
                 case UpdatedLastNotifiedEventId updatedLastSentEventId:
-                    State.LastNotifiedEventVersion = updatedLastSentEventId.LastNotifiedEventVersion;
+                    State.LastNotifiedEventId = updatedLastSentEventId.LastNotifiedEventId;
                     break;
                 default:
                     break;
@@ -70,14 +64,9 @@ namespace EventSourcing.Stream
 
     #endregion
 
-    public interface IAggregateStreamReceiverWithIntegerKey : IGrainWithIntegerKey
-    {
-        Task Receive(EventSourcing.Persistance.Event @event);
-    }
-
     public interface IAggregateStreamReceiver : IGrain
     {
-        Task Receive(EventSourcing.Persistance.Event @event);
+        Task Receive(EventSourcing.Persistance.AggregateEvent @event);
     }
 
     public interface IAggregateStream: IGrainWithStringKey
@@ -90,57 +79,80 @@ namespace EventSourcing.Stream
     public interface IAggregateStreamSettings
     {
         string AggregateName {get;}
-        Dictionary<string, Func<EventSourcing.Persistance.Event, IGrainFactory, IAggregateStreamReceiver>> EventReceiverResolverMap { get; }
+        Dictionary<string, Func<EventSourcing.Persistance.AggregateEvent, IGrainFactory, IAggregateStreamReceiver>> EventReceiverGrainResolverMap { get; }
     }
 
     public class AggregateStreamSettings : IAggregateStreamSettings
     {
         public string AggregateName { get; private set;}
 
-        public Dictionary<string, Func<Persistance.Event, IGrainFactory, IAggregateStreamReceiver>> EventReceiverResolverMap { get; private set; }
+        public Dictionary<string, Func<Persistance.AggregateEvent, IGrainFactory, IAggregateStreamReceiver>> EventReceiverGrainResolverMap { get; private set; }
 
         public AggregateStreamSettings(string aggregateName)
         {
             AggregateName = aggregateName;
-            EventReceiverResolverMap = new Dictionary<string, Func<Persistance.Event, IGrainFactory, IAggregateStreamReceiver>>();
+            EventReceiverGrainResolverMap = new Dictionary<string, Func<Persistance.AggregateEvent, IGrainFactory, IAggregateStreamReceiver>>();
         }
     }
 
     public static class ConfigureAggregateStreamExtensions
     {
-        
-        public static ISiloHostBuilder ConfigureAggregateStream(this ISiloHostBuilder siloHostBuilder, string aggregateName, Action<IAggregateStreamSettings> configureAggregateStream)
+        public static ISiloBuilder ConfigureAggregateStream(this ISiloBuilder builder, string aggregateName, Action<IAggregateStreamSettings> configureAggregateStream)
         {
             var aggregateStreamSettings = new AggregateStreamSettings(aggregateName);
 
             configureAggregateStream.Invoke(aggregateStreamSettings);
 
-            siloHostBuilder.ConfigureServices((hostBuilder, serviceCollection) => 
+            builder.ConfigureServices((hostBuilder, serviceCollection) => 
             {
                 serviceCollection.AddSingleton<IAggregateStreamSettings>(aggregateStreamSettings);
             });
             
-            return siloHostBuilder;
+            return builder;
         }
     }
 
     [Reentrant]
     public class AggregateStreamGrain : EventSourceGrain<AggregateStreamState, StreamEvent>, IAggregateStream
     {
-        private Queue<EventSourcing.Persistance.Event> _eventQueue = new Queue<EventSourcing.Persistance.Event>();
-        const string aggregateName = "stream";
+        private Queue<EventSourcing.Persistance.AggregateEvent> _eventQueue = new Queue<EventSourcing.Persistance.AggregateEvent>();
+        private IAggregateStreamSettings _aggregateStreamSettings;
+        
+        private string _aggregateName;
 
-        public AggregateStreamGrain(): base(aggregateName, new AggregateStream())
+        public AggregateStreamGrain(): base("stream", new AggregateStream())
         {
         }
         
         public override async Task OnActivateAsync()
         {
-            // register pollForEvents method
-            this.RegisterTimer(PollForEvents, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+            // set current grian key as aggregateName
+            _aggregateName = GrainReference.GetPrimaryKeyString();
+
+            // get IAggregateStreamSettings instance from service collection filtered by grainKey
+            _aggregateStreamSettings = ServiceProvider.GetServices<IAggregateStreamSettings>().FirstOrDefault(g => g.AggregateName == _aggregateName);
+            
+            // throw if not able to get StreamSettings
+            if(_aggregateStreamSettings == null)
+            {
+                throw new InvalidOperationException($"unable to retrieve IAggregateStreamSettings for aggregateName {_aggregateName}");
+            }
 
             // call base OnActivateAsync
             await base.OnActivateAsync();
+
+            // set LastNotifiedEventVersion if needed
+            if(!State.LastNotifiedEventId.HasValue)
+            {
+                // get last event from db
+                var lastEvent = await Repository.GetLastAggregateEvent(_aggregateName);
+
+                // get LastNotifiedEventVersion as latest aggregate version from db or 0
+                await ApplyEvent(new UpdatedLastNotifiedEventId{ LastNotifiedEventId = lastEvent?.Id ?? 0 });
+            }
+
+            // register pollForEvents method
+            this.RegisterTimer(PollForEvents, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         }
 
         public Task Ping()
@@ -150,10 +162,16 @@ namespace EventSourcing.Stream
 
         private async Task PollForEvents(object args)
         {
-            if (State.LastNotifiedEventVersion.HasValue)
+            if (State.LastNotifiedEventId.HasValue)
             {
                 // get new events
-                var unprocessedEvents = await Repository.GetEvents(aggregateName, AggregateId, State.LastNotifiedEventVersion.Value);
+                var unprocessedEvents = await Repository.GetAggregateEvents(_aggregateName, State.LastNotifiedEventId.Value);
+
+                // short circuit if no events to process
+                if (unprocessedEvents.Length == 0)
+                {
+                    return;
+                }
                 
                 // add new events to queue
                 foreach (var ev in unprocessedEvents)
@@ -171,17 +189,18 @@ namespace EventSourcing.Stream
             // dequeue each event and sent to subscribers
             while(_eventQueue.Count > 0)
             {
-                // iterate thru each IntegerKey grain and notify subscribers
-                foreach (var grainKey in State.SubscribedGrainIntKeys)
+                var @event = _eventQueue.Peek();
+                // iterate thru each eventReceiver resolvers and notify grain
+                foreach (var eventReceiverGrainResolver in _aggregateStreamSettings.EventReceiverGrainResolverMap)
                 {
                     // get subscriber grain
-                    var subscriberGrain = GrainFactory.GetGrain<IAggregateStreamReceiverWithIntegerKey>(grainKey);
+                    var subscriberGrain = eventReceiverGrainResolver.Value.Invoke(@event, GrainFactory);
                     // send event
-                    await subscriberGrain.Receive(_eventQueue.Peek());
+                    await subscriberGrain.Receive(@event);
                 }
 
                 // update state with LastNotifiedEventVersion
-                await ApplyEvent(new UpdatedLastNotifiedEventId{ LastNotifiedEventVersion = _eventQueue.Peek().EventVersion });
+                await ApplyEvent(new UpdatedLastNotifiedEventId{ LastNotifiedEventId = @event.Id });
 
                 // remove from queue
                 _eventQueue.Dequeue();
@@ -199,16 +218,16 @@ namespace EventSourcing.Stream
         }
     }
 
-    public static class AggregateStreamConfig
-    {
-        private static HashSet<string> _streamTypes = new HashSet<string>();
-        public static void AddType(string type) => _streamTypes.Add(type);
-        public static IEnumerable<string> StreamTypes = _streamTypes;
+    // public static class AggregateStreamConfig
+    // {
+    //     private static HashSet<string> _streamTypes = new HashSet<string>();
+    //     public static void AddType(string type) => _streamTypes.Add(type);
+    //     public static IEnumerable<string> StreamTypes = _streamTypes;
 
-        // public static ISiloBuilder ConfigureAggregateStream(this ISiloBuilder siloBuilder, Action<AggregateStreamConfig> configure)
-        // {
-        //     configure.Invoke(AggregateStreamConfig.AddType);
-        //     return siloBuilder;
-        // }
-    }
+    //     // public static ISiloBuilder ConfigureAggregateStream(this ISiloBuilder siloBuilder, Action<AggregateStreamConfig> configure)
+    //     // {
+    //     //     configure.Invoke(AggregateStreamConfig.AddType);
+    //     //     return siloBuilder;
+    //     // }
+    // }
 }

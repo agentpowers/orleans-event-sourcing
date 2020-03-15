@@ -5,7 +5,8 @@ namespace EventSourcing.Persistance
 {
     public interface IRepository
     {
-        Task<Event[]> GetEvents(string aggregateName, long aggregateId, long AggregateVersion);
+        Task<AggregateEvent[]> GetAggregateEvents(string aggregateName, long eventId);
+        Task<AggregateEvent> GetLastAggregateEvent(string aggregateName);
         Task<(Snapshot, Event[])> GetSnapshotAndEvents(string aggregateName, long aggregateId);
         Task<long> GetSnapshotAggregateVersionSql(string aggregateName, long aggregateId);
         Task<Aggregate> GetAggregate(long id, string type);
