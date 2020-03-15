@@ -18,6 +18,11 @@ namespace API
         const int gatewayPort = 30000;
 
         public static bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
+
+        private static void ConfigureAggregateStream()
+        {
+            EventSourcing.Stream.AggregateStreamConfig.AddType(AccountGrain.AggregateName);
+        }
         
         //https://stackoverflow.com/questions/54841844/orleans-direct-client-in-asp-net-core-project/54842916#54842916
         private static void ConfigureOrleans(ISiloBuilder builder)
@@ -37,6 +42,7 @@ namespace API
             })
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
+            .AddGrainService<EventSourcing.Services.AggregateStreamKeepAliveService>()
             .ConfigureLogging(logging => logging.AddConsole())
             .UseLinuxEnvironmentStatistics()
             .UseDashboard(x =>
@@ -60,6 +66,7 @@ namespace API
             .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
+            .AddGrainService<EventSourcing.Services.AggregateStreamKeepAliveService>()
             .ConfigureLogging(logging => logging.AddConsole())
             .UseDashboard(x =>
              {
@@ -76,6 +83,7 @@ namespace API
                 {
                     builder.UseStartup<Startup>();
                 });
+            ConfigureAggregateStream();
             if(isLocal)
             {
                 hostBuilder.UseOrleans(ConfigureLocalOrleans);

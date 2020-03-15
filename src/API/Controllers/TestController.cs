@@ -22,8 +22,8 @@ namespace API.Controllers
         [HttpGet()]
         public Task Get()
         {
-            var grain = this.client.GetGrain<Grains.Test.IStream>("test");
-            grain.Ping();
+            // var grain = this.client.GetGrain<Grains.Test.ITestStream>("test");
+            // grain.Ping();
             return Task.CompletedTask;
         }
     }

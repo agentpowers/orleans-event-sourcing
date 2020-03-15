@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace EventSourcing.Persistance
 {
-    internal interface IRepository
+    public interface IRepository
     {
         Task<Event[]> GetEvents(string aggregateName, long aggregateId, long AggregateVersion);
         Task<(Snapshot, Event[])> GetSnapshotAndEvents(string aggregateName, long aggregateId);

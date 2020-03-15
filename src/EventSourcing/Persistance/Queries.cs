@@ -28,7 +28,7 @@ namespace EventSourcing.Persistance
                             AggregateId bigint not null,
                             AggregateVersion bigint not null,
                             Data text,
-                            Created timestamp not null,
+                            Created timestamp not null
                         );
                         insert into Aggregate(Type) values (@Type) returning AggregateId;
                     COMMIT;";

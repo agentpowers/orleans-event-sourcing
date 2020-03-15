@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using EventSourcing.Persistance;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 
 namespace EventSourcing.Grains
 {
@@ -20,12 +21,13 @@ namespace EventSourcing.Grains
         private readonly string _aggregateName;
         // aggregate
         private IAggregate<TState, TEvent> _aggregate;
-        // db aggregateid
-        private long _aggregateId;
-        // repository
-        private IRepository _repository;
         // version number for this instance of aggregate(incremented for each event)
         private long _aggregateVersion = 0;
+        
+        // db aggregateid
+        protected long AggregateId;
+        // repository
+        protected IRepository Repository {get; private set;}
 
         /// <summary>
         /// Get current state
@@ -52,27 +54,26 @@ namespace EventSourcing.Grains
             return eventWrapper.Event as TEvent;
         }
 
-        private const string defaultGuidString = "00000000-0000-0000-0100-000000000000";
         /// <summary>
         /// Get grain id string
         /// </summary>
         /// <returns></returns>
-        private string GetGrainKey()
+        public virtual string GetGrainKey()
         {
-            if (this.GetPrimaryKeyLong() > 0)
+            var interfaces = this.GetType().GetInterfaces().ToList();
+            if (interfaces.Any(x => x.Equals(typeof(IGrainWithIntegerKey))))
             {
                 return this.GetPrimaryKeyLong().ToString();
             }
-            if (this.GetPrimaryKeyString() != null)
+            if (interfaces.Any(x => x.Equals(typeof(IGrainWithStringKey))))
             {
                 return this.GetPrimaryKeyString();
             }
-            var guidKey = this.GetPrimaryKey().ToString();
-            if (guidKey != defaultGuidString)
+            if (interfaces.Any(x => x.Equals(typeof(IGrainWithGuidKey))))
             {
-                return guidKey;
+                return this.GetPrimaryKey().ToString();
             }
-            throw new ArgumentException("unable to get primary key");
+            throw new InvalidOperationException("unable to retrieve GrainKey");
         }
 
         /// <summary>
@@ -81,24 +82,24 @@ namespace EventSourcing.Grains
         /// <returns></returns>
         public override async Task OnActivateAsync()
         {
-            _repository = ServiceProvider.GetService(typeof(IRepository)) as IRepository;
+            Repository = ServiceProvider.GetService(typeof(IRepository)) as IRepository;
             // generate aggregateType
             var aggregateType = $"{_aggregateName}:{GetGrainKey()}";
             // get aggregate from db
-            var aggregate = await _repository.GetAggregateByTypeName(aggregateType);
+            var aggregate = await Repository.GetAggregateByTypeName(aggregateType);
             if (aggregate == null)
             {
                 // add new aggregate if it doesn't exist
-                _aggregateId = await _repository.SaveAggregate(_aggregateName, new Aggregate{ Type = aggregateType, Created = DateTime.UtcNow });
+                AggregateId = await Repository.SaveAggregate(_aggregateName, new Aggregate{ Type = aggregateType, Created = DateTime.UtcNow });
                 // set state as new instance of TState
                 _aggregate.State = new TState();
             }
             else
             {
                 // use aggregate id from db
-                _aggregateId = aggregate.AggregateId;
+                AggregateId = aggregate.AggregateId;
                 // get snapshot and events
-                var (snapshot, events) = await _repository.GetSnapshotAndEvents(_aggregateName, _aggregateId);
+                var (snapshot, events) = await Repository.GetSnapshotAndEvents(_aggregateName, AggregateId);
                 // apply snapshot if any
                 if(snapshot != null)
                 {
@@ -132,7 +133,7 @@ namespace EventSourcing.Grains
         /// <returns></returns>
         private async Task SaveSnapshot()
         {
-            await _repository.SaveSnapshot(_aggregateName, new Snapshot{ AggregateId = _aggregateId, AggregateVersion = _aggregateVersion, Data = JsonConvert.SerializeObject(_aggregate.State), Created = DateTime.UtcNow });
+            await Repository.SaveSnapshot(_aggregateName, new Snapshot{ AggregateId = AggregateId, AggregateVersion = _aggregateVersion, Data = JsonConvert.SerializeObject(_aggregate.State), Created = DateTime.UtcNow });
         }
 
         /// <summary>
@@ -146,7 +147,7 @@ namespace EventSourcing.Grains
             // increment aggregate version 
             _aggregateVersion++;
             // save event to db
-            await _repository.SaveEvent(_aggregateName, new Persistance.Event { AggregateId = _aggregateId, AggregateVersion = _aggregateVersion, Type = @event.Type, Data = serialized, Created = DateTime.UtcNow });
+            await Repository.SaveEvent(_aggregateName, new Persistance.Event { AggregateId = AggregateId, AggregateVersion = _aggregateVersion, Type = @event.Type, Data = serialized, Created = DateTime.UtcNow });
             // update state
             _aggregate.Apply(@event);
             // save snapshot if ShouldSaveSnapshot returns true

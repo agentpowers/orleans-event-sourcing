@@ -8,7 +8,8 @@ namespace Grains.Account
 {
     public class AccountGrain : EventSourceGrain<Account, AccountEvent>, IAccountGrain, IAccountCommand
     {
-        public AccountGrain(): base("account", new AccountAggregate())
+        public const string AggregateName = "account";
+        public AccountGrain(): base(AggregateName, new AccountAggregate())
         {
 
         }
