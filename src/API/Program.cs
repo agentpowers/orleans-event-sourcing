@@ -26,9 +26,12 @@ namespace API
             {
                 aggregateStreamSettings.EventReceiverGrainResolverMap.Add("test", (aggregateEvent, grainFactory) =>
                 {
-                    var grain = (IAggregateStreamReceiver)grainFactory.GetGrain(typeof(IAggregateStreamReceiver), aggregateEvent.AggregateType);
+                    return (IAggregateStreamReceiver)grainFactory.GetGrain(typeof(IAggregateStreamReceiver), aggregateEvent.AggregateType);
+                });
 
-                    return grain;
+                aggregateStreamSettings.EventReceiverGrainResolverMap.Add("test2", (aggregateEvent, grainFactory) =>
+                {
+                    return (IAggregateStreamReceiver)grainFactory.GetGrain(typeof(IAggregateStreamReceiver), "test2:" + aggregateEvent.AggregateType);
                 });
             });
         }

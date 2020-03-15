@@ -8,6 +8,7 @@ using Orleans.Concurrency;
 using Orleans.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace EventSourcing.Stream
 {
@@ -117,11 +118,13 @@ namespace EventSourcing.Stream
     {
         private Queue<EventSourcing.Persistance.AggregateEvent> _eventQueue = new Queue<EventSourcing.Persistance.AggregateEvent>();
         private IAggregateStreamSettings _aggregateStreamSettings;
+        private readonly ILogger<AggregateStreamGrain> _logger;
         
         private string _aggregateName;
 
-        public AggregateStreamGrain(): base("stream", new AggregateStream())
+        public AggregateStreamGrain(ILogger<AggregateStreamGrain> logger): base("stream", new AggregateStream())
         {
+            _logger = logger;
         }
         
         public override async Task OnActivateAsync()
@@ -193,10 +196,17 @@ namespace EventSourcing.Stream
                 // iterate thru each eventReceiver resolvers and notify grain
                 foreach (var eventReceiverGrainResolver in _aggregateStreamSettings.EventReceiverGrainResolverMap)
                 {
-                    // get subscriber grain
-                    var subscriberGrain = eventReceiverGrainResolver.Value.Invoke(@event, GrainFactory);
-                    // send event
-                    await subscriberGrain.Receive(@event);
+                    try
+                    {
+                        // get subscriber grain
+                        var subscriberGrain = eventReceiverGrainResolver.Value.Invoke(@event, GrainFactory);
+                        // send event
+                        await subscriberGrain.Receive(@event);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error NotifySubscriber {eventReceiverGrainResolver.Key}");
+                    }
                 }
 
                 // update state with LastNotifiedEventVersion

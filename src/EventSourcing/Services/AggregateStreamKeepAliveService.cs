@@ -25,7 +25,7 @@ namespace EventSourcing.Services
 
         public override async Task Init(IServiceProvider serviceProvider)
         {
-            this.RegisterTimer(AggregateStreamGrainPingHandler, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(30));
+            this.RegisterTimer(AggregateStreamGrainPingHandler, null, TimeSpan.Zero, TimeSpan.FromMinutes(60));
 
             _aggregateNames = serviceProvider.GetServices<IAggregateStreamSettings>().Select(g => g.AggregateName).ToArray();
 
