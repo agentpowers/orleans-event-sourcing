@@ -18,18 +18,6 @@ namespace EventSourcing.Stream
     {
     }
 
-    public class Subscribed: StreamEvent
-    {
-        public override string Type { get; set;} = nameof(Subscribed);
-        public long IntKey { get; set; }
-    }
-
-    public class UnSubscribed: StreamEvent
-    {
-        public override string Type { get; set;} = nameof(UnSubscribed);
-        public long IntKey { get; set; }
-    }
-
     public class UpdatedLastNotifiedEventId: StreamEvent
     {
         public override string Type { get; set;} = nameof(UpdatedLastNotifiedEventId);
@@ -39,9 +27,15 @@ namespace EventSourcing.Stream
     #endregion
 
     #region  State
-    public class AggregateStreamState
+    public class AggregateStreamState: State
     { 
         public long? LastNotifiedEventId { get; set; }
+        public string Id { get; set; }
+
+        public override void Init(string id)
+        {
+            Id = id;
+        }
     }
     #endregion
 
@@ -72,8 +66,6 @@ namespace EventSourcing.Stream
 
     public interface IAggregateStream: IGrainWithStringKey
     {
-        Task Subscribe(IGrainIdentity grainIdentity);
-        Task UnSubscribe(IGrainIdentity grainIdentity);
         Task Ping();
     }
 
@@ -198,10 +190,13 @@ namespace EventSourcing.Stream
                 {
                     try
                     {
-                        // get subscriber grain
+                        // get subscriber grain via resolver (resolver can return null if there is no need to notify)
                         var subscriberGrain = eventReceiverGrainResolver.Value.Invoke(@event, GrainFactory);
-                        // send event
-                        await subscriberGrain.Receive(@event);
+                        if (subscriberGrain != null)
+                        {
+                            // send event
+                            await subscriberGrain.Receive(@event);
+                        }
                     }
                     catch (System.Exception ex)
                     {
@@ -216,28 +211,5 @@ namespace EventSourcing.Stream
                 _eventQueue.Dequeue();
             }
         }
-
-        public async Task Subscribe(IGrainIdentity grainIdentity)
-        {
-            await this.ApplyEvent(new Subscribed{ IntKey = grainIdentity.PrimaryKeyLong });
-        }
-
-        public async Task UnSubscribe(IGrainIdentity grainIdentity)
-        {
-            await this.ApplyEvent(new UnSubscribed{ IntKey = grainIdentity.PrimaryKeyLong });
-        }
     }
-
-    // public static class AggregateStreamConfig
-    // {
-    //     private static HashSet<string> _streamTypes = new HashSet<string>();
-    //     public static void AddType(string type) => _streamTypes.Add(type);
-    //     public static IEnumerable<string> StreamTypes = _streamTypes;
-
-    //     // public static ISiloBuilder ConfigureAggregateStream(this ISiloBuilder siloBuilder, Action<AggregateStreamConfig> configure)
-    //     // {
-    //     //     configure.Invoke(AggregateStreamConfig.AddType);
-    //     //     return siloBuilder;
-    //     // }
-    // }
 }

@@ -11,10 +11,11 @@ namespace EventSourcing.Grains
     {
         [JsonProperty(TypeNameHandling = TypeNameHandling.Auto)]
         public Event Event { get; set; }
-        
     }
+
+
     public abstract class EventSourceGrain<TState, TEvent> : Grain 
-        where TState : new()
+        where TState : State, new()
         where TEvent : Event
     {
         // aggregate name
@@ -83,8 +84,10 @@ namespace EventSourcing.Grains
         public override async Task OnActivateAsync()
         {
             Repository = ServiceProvider.GetService(typeof(IRepository)) as IRepository;
+            // get grain key
+            var grainKey = GetGrainKey();
             // generate aggregateType
-            var aggregateType = $"{_aggregateName}:{GetGrainKey()}";
+            var aggregateType = $"{_aggregateName}:{grainKey}";
             // get aggregate from db
             var aggregate = await Repository.GetAggregateByTypeName(aggregateType);
             if (aggregate == null)
@@ -93,6 +96,8 @@ namespace EventSourcing.Grains
                 AggregateId = await Repository.SaveAggregate(_aggregateName, new Aggregate{ Type = aggregateType, Created = DateTime.UtcNow });
                 // set state as new instance of TState
                 _aggregate.State = new TState();
+                // init state with grain id
+                _aggregate.State.Init(grainKey);
             }
             else
             {

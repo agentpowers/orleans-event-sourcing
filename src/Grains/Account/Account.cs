@@ -1,4 +1,5 @@
 using System;
+using EventSourcing;
 
 namespace Grains.Account
 {
@@ -22,8 +23,14 @@ namespace Grains.Account
 
     #endregion
 
-    public class Account 
+    public class Account : State
     {
         public decimal Amount { get; set; }
+        public int AccountId { get; set; }
+
+        public override void Init(string id)
+        {
+            AccountId = int.Parse(id);
+        }
     }
 }

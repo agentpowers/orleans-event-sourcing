@@ -21,7 +21,7 @@ namespace Grains.Account
 
         public async Task<decimal> Deposit(decimal amount)
         {
-            await ApplyEvent(new Deposited{ Amount = amount });
+            await ApplyEvent(new Deposited{ Amount = amount, AccountId = State.AccountId });
             return State.Amount;
         }
 
@@ -44,7 +44,7 @@ namespace Grains.Account
 
         public async Task<decimal> Withdraw(decimal amount)
         {
-            await ApplyEvent(new Withdrawn{ Amount = amount });
+            await ApplyEvent(new Withdrawn{ Amount = amount, AccountId = State.AccountId});
             return State.Amount;
         }
     }
