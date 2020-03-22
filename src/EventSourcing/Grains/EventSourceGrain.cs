@@ -42,19 +42,6 @@ namespace EventSourcing.Grains
             _aggregate = aggregate;
         }
 
-        // serialize an event by wrapping that using EventWrapper and then uses JSON.NET typenamehandling
-        static string SerializeEvent(TEvent obj)
-        {
-            return JsonConvert.SerializeObject(new EventWrapper{ Event = obj });
-        }
-
-        // deserialize json to event
-        static TEvent DeserializeEvent(string json)
-        {
-            var eventWrapper =  JsonConvert.DeserializeObject<EventWrapper>(json);
-            return eventWrapper.Event as TEvent;
-        }
-
         /// <summary>
         /// Get grain id string
         /// </summary>
@@ -121,7 +108,7 @@ namespace EventSourcing.Grains
                 // apply events
                 foreach (var dbEvent in events)
                 {
-                    var @event = DeserializeEvent(dbEvent.Data);
+                    var @event = JsonSerializer.DeserializeEvent<TEvent>(dbEvent.Data);
                     _aggregate.Apply(@event);
                     // store aggregate version number
                     _aggregateVersion = dbEvent.AggregateVersion;
@@ -148,7 +135,7 @@ namespace EventSourcing.Grains
         protected async Task ApplyEvent(TEvent @event)
         {
             // serialize event for db
-            var serialized = SerializeEvent(@event);
+            var serialized = JsonSerializer.SerializeEvent(@event);
             // increment aggregate version 
             _aggregateVersion++;
             // save event to db

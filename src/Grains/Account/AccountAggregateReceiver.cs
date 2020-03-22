@@ -5,10 +5,11 @@ using System;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Grains.Test
+namespace Grains.Account
 {
 
-    public class AccountAggregateReceiver : Grain, IAggregateStreamReceiver//, IGrainWithStringKey
+    public interface IAccountAggregateReceiver: IAggregateStreamReceiver{}
+    public class AccountAggregateReceiver : Grain, IAccountAggregateReceiver
     {
         public override async Task OnActivateAsync()
         {

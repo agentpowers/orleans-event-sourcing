@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 
 namespace EventSourcing.Persistance
@@ -8,7 +7,7 @@ namespace EventSourcing.Persistance
         Task<AggregateEvent[]> GetAggregateEvents(string aggregateName, long eventId);
         Task<AggregateEvent> GetLastAggregateEvent(string aggregateName);
         Task<(Snapshot, Event[])> GetSnapshotAndEvents(string aggregateName, long aggregateId);
-        Task<long> GetSnapshotAggregateVersionSql(string aggregateName, long aggregateId);
+        Task<long> GetSnapshotAggregateVersion(string aggregateName, long aggregateId);
         Task<Aggregate> GetAggregate(long id, string type);
         Task<Aggregate> GetAggregateByTypeName(string type);
         Task<Aggregate[]> GetAggregatesByTypeName(string type);
@@ -16,5 +15,7 @@ namespace EventSourcing.Persistance
         Task <long> SaveAggregate(string aggregateName, Aggregate aggregate);
         Task<long> SaveSnapshot(string aggregateName, Snapshot snapshot);
         Task<long> SaveEvent(string aggregateName, Event @event);
+        Task<AggregateEvent[]> GetAggregateEventsByAggregateTypeName(string aggregateName, string aggregateTypName, long aggregateVersion);
+        Task CreateEventsAndSnapshotsTables(string aggregateName);
     }
 }

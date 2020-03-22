@@ -22,7 +22,7 @@ namespace EventSourcing.Persistance
         public DateTime Created { get; set; }
     }
 
-    public sealed class AggregateEvent: Event
+    public class AggregateEvent: Event
     {
         public string AggregateType { get; set; }
     }

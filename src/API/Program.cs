@@ -9,7 +9,7 @@ using Orleans.Statistics;
 using System;
 using System.Net;
 using Grains.Account;
-using EventSourcing.Stream;
+using Grains;
 
 namespace API
 {
@@ -20,21 +20,6 @@ namespace API
 
         public static bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
 
-        private static void ConfigureAggregateStream(ISiloBuilder builder)
-        {
-            builder.ConfigureAggregateStream(AccountGrain.AggregateName, (aggregateStreamSettings) => 
-            {
-                aggregateStreamSettings.EventReceiverGrainResolverMap.Add("test", (aggregateEvent, grainFactory) =>
-                {
-                    return (IAggregateStreamReceiver)grainFactory.GetGrain(typeof(IAggregateStreamReceiver), aggregateEvent.AggregateType);
-                });
-
-                aggregateStreamSettings.EventReceiverGrainResolverMap.Add("test2", (aggregateEvent, grainFactory) =>
-                {
-                    return (IAggregateStreamReceiver)grainFactory.GetGrain(typeof(IAggregateStreamReceiver), "test2:" + aggregateEvent.AggregateType);
-                });
-            });
-        }
         
         //https://stackoverflow.com/questions/54841844/orleans-direct-client-in-asp-net-core-project/54842916#54842916
         private static void ConfigureOrleans(ISiloBuilder builder)
@@ -65,7 +50,7 @@ namespace API
                 x.CounterUpdateIntervalMs = 10000;
             });
 
-            ConfigureAggregateStream(builder);
+            builder.ConfigureAggregateStream();
         }
         
         private static void ConfigureLocalOrleans(ISiloBuilder builder)
@@ -89,7 +74,7 @@ namespace API
                 x.CounterUpdateIntervalMs = 10000;
              });
 
-            ConfigureAggregateStream(builder);
+            builder.ConfigureAggregateStream();
         }
         
         public static void Main(string[] args)

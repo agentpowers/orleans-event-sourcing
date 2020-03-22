@@ -6,6 +6,7 @@ using Orleans;
 using Microsoft.Extensions.Hosting;
 using EventSourcing.Extensions;
 using System;
+using Grains;
 
 namespace API
 {
@@ -27,6 +28,8 @@ namespace API
                 : $"host={dbHost};database=postgresdb;username=postgresadmin;password=postgrespwd";
             // add evensourcing related services
             services.AddEventSourcing(postgresConnectionString);
+            // add grain service
+            services.AddGrainServices(postgresConnectionString);
             // add controllers
             services.AddControllers();
             // add services for dashboard

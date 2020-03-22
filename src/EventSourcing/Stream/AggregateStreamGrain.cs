@@ -111,6 +111,8 @@ namespace EventSourcing.Stream
         private Queue<EventSourcing.Persistance.AggregateEvent> _eventQueue = new Queue<EventSourcing.Persistance.AggregateEvent>();
         private IAggregateStreamSettings _aggregateStreamSettings;
         private readonly ILogger<AggregateStreamGrain> _logger;
+        private bool _isNotifyingSubscribers = false;
+        private long _lastQueuedEventId;
         
         private string _aggregateName;
 
@@ -139,6 +141,9 @@ namespace EventSourcing.Stream
             // set LastNotifiedEventVersion if needed
             if(!State.LastNotifiedEventId.HasValue)
             {
+                // init aggregate tables
+                await Repository.CreateEventsAndSnapshotsTables(_aggregateName);
+                
                 // get last event from db
                 var lastEvent = await Repository.GetLastAggregateEvent(_aggregateName);
 
@@ -171,7 +176,12 @@ namespace EventSourcing.Stream
                 // add new events to queue
                 foreach (var ev in unprocessedEvents)
                 {
-                    _eventQueue.Enqueue(ev);
+                    // only add to queue if new
+                    if (ev.Id > _lastQueuedEventId)
+                    {
+                        _eventQueue.Enqueue(ev);
+                        _lastQueuedEventId = ev.Id;
+                    }
                 }
 
                 // trigger notification
@@ -181,34 +191,49 @@ namespace EventSourcing.Stream
 
         public async Task NotifySubscribers()
         {
-            // dequeue each event and sent to subscribers
-            while(_eventQueue.Count > 0)
+            // if already notifying then return
+            if (_isNotifyingSubscribers)
             {
-                var @event = _eventQueue.Peek();
-                // iterate thru each eventReceiver resolvers and notify grain
-                foreach (var eventReceiverGrainResolver in _aggregateStreamSettings.EventReceiverGrainResolverMap)
+                return;
+            }
+            // set flag to true
+            _isNotifyingSubscribers = true;
+            try
+            {
+                // dequeue each event and sent to subscribers
+                while(_eventQueue.Count > 0)
                 {
-                    try
+                    var @event = _eventQueue.Peek();
+                    // iterate thru each eventReceiver resolvers and notify grain
+                    foreach (var eventReceiverGrainResolver in _aggregateStreamSettings.EventReceiverGrainResolverMap)
                     {
-                        // get subscriber grain via resolver (resolver can return null if there is no need to notify)
-                        var subscriberGrain = eventReceiverGrainResolver.Value.Invoke(@event, GrainFactory);
-                        if (subscriberGrain != null)
+                        try
                         {
-                            // send event
-                            await subscriberGrain.Receive(@event);
+                            // get subscriber grain via resolver (resolver can return null if there is no need to notify)
+                            var subscriberGrain = eventReceiverGrainResolver.Value.Invoke(@event, GrainFactory);
+                            if (subscriberGrain != null)
+                            {
+                                // send event
+                                await subscriberGrain.Receive(@event);
+                            }
+                        }
+                        catch (System.Exception ex)
+                        {
+                            _logger.LogError(ex, $"Error NotifySubscriber {eventReceiverGrainResolver.Key}");
                         }
                     }
-                    catch (System.Exception ex)
-                    {
-                        _logger.LogError(ex, $"Error NotifySubscriber {eventReceiverGrainResolver.Key}");
-                    }
+
+                    // update state with LastNotifiedEventVersion
+                    await ApplyEvent(new UpdatedLastNotifiedEventId{ LastNotifiedEventId = @event.Id });
+
+                    // remove from queue
+                    _eventQueue.Dequeue();
                 }
-
-                // update state with LastNotifiedEventVersion
-                await ApplyEvent(new UpdatedLastNotifiedEventId{ LastNotifiedEventId = @event.Id });
-
-                // remove from queue
-                _eventQueue.Dequeue();
+            }
+            finally
+            {
+                // set flag to false
+                _isNotifyingSubscribers = false;
             }
         }
     }

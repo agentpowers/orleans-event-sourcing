@@ -68,11 +68,11 @@ namespace EventSourcing.Persistance
             using (IDbConnection conn = Connection)
             {
                 var snapshot  = await conn.QueryFirstOrDefaultAsync<Snapshot>(Queries.GetSnapshotSql(aggregateName), new { id = aggregateId });
-                return (snapshot, (await conn.QueryAsync<Event>(Queries.GetEventsSql(aggregateName), new { id = aggregateId, aggregateVersion = (snapshot?.AggregateVersion).GetValueOrDefault() })).ToArray());
+                return (snapshot, (await conn.QueryAsync<Event>(Queries.GetEventsByAggregateIdSql(aggregateName), new { id = aggregateId, aggregateVersion = (snapshot?.AggregateVersion).GetValueOrDefault() })).ToArray());
             }
         }
 
-        public async Task<long> GetSnapshotAggregateVersionSql(string aggregateName, long aggregateId)
+        public async Task<long> GetSnapshotAggregateVersion(string aggregateName, long aggregateId)
         {
             using (IDbConnection conn = Connection)
             {
@@ -109,6 +109,22 @@ namespace EventSourcing.Persistance
             using (IDbConnection conn = Connection)
             {
                 return await conn.QueryFirstOrDefaultAsync<AggregateEvent>(Queries.GetLastAggregateEventsSql(aggregateName));
+            }
+        }
+
+        public async Task<AggregateEvent[]> GetAggregateEventsByAggregateTypeName(string aggregateName, string aggregateTypeName, long aggregateVersion)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                return (await conn.QueryAsync<AggregateEvent>(Queries.GetAggregateEventsByAggregateTypeNameSql(aggregateName), new { aggregateTypeName, aggregateVersion })).ToArray();
+            }
+        }
+
+        public async Task CreateEventsAndSnapshotsTables(string aggregateName)
+        {
+            using (IDbConnection conn = Connection)
+            {
+                await conn.ExecuteAsync(Queries.CreateEventsAndSnapshotsTableSql(aggregateName));
             }
         }
     }
