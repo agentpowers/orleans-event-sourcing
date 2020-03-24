@@ -2,111 +2,16 @@ using Orleans;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Orleans.Core;
 using EventSourcing.Grains;
 using Orleans.Concurrency;
-using Orleans.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 
 namespace EventSourcing.Stream
 {
-    #region events
-
-    public abstract class StreamEvent: Event
-    {
-    }
-
-    public class UpdatedLastNotifiedEventId: StreamEvent
-    {
-        public override string Type { get; set;} = nameof(UpdatedLastNotifiedEventId);
-        public long LastNotifiedEventId { get; set; }
-    }
-
-    #endregion
-
-    #region  State
-    public class AggregateStreamState: State
-    { 
-        public long? LastNotifiedEventId { get; set; }
-        public string Id { get; set; }
-
-        public override void Init(string id)
-        {
-            Id = id;
-        }
-    }
-    #endregion
-
-    #region Aggregate
-
-    public class AggregateStream : IAggregate<AggregateStreamState, StreamEvent>
-    {
-        public AggregateStreamState State { get; set; }
-        public void Apply(StreamEvent @event)
-        {
-            switch (@event)
-            {
-                case UpdatedLastNotifiedEventId updatedLastSentEventId:
-                    State.LastNotifiedEventId = updatedLastSentEventId.LastNotifiedEventId;
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    #endregion
-
-    public interface IAggregateStreamReceiver : IGrain
-    {
-        Task Receive(EventSourcing.Persistance.AggregateEvent @event);
-    }
-
-    public interface IAggregateStream: IGrainWithStringKey
-    {
-        Task Ping();
-    }
-
-    public interface IAggregateStreamSettings
-    {
-        string AggregateName {get;}
-        Dictionary<string, Func<EventSourcing.Persistance.AggregateEvent, IGrainFactory, IAggregateStreamReceiver>> EventReceiverGrainResolverMap { get; }
-    }
-
-    public class AggregateStreamSettings : IAggregateStreamSettings
-    {
-        public string AggregateName { get; private set;}
-
-        public Dictionary<string, Func<Persistance.AggregateEvent, IGrainFactory, IAggregateStreamReceiver>> EventReceiverGrainResolverMap { get; private set; }
-
-        public AggregateStreamSettings(string aggregateName)
-        {
-            AggregateName = aggregateName;
-            EventReceiverGrainResolverMap = new Dictionary<string, Func<Persistance.AggregateEvent, IGrainFactory, IAggregateStreamReceiver>>();
-        }
-    }
-
-    public static class ConfigureAggregateStreamExtensions
-    {
-        public static ISiloBuilder ConfigureAggregateStream(this ISiloBuilder builder, string aggregateName, Action<IAggregateStreamSettings> configureAggregateStream)
-        {
-            var aggregateStreamSettings = new AggregateStreamSettings(aggregateName);
-
-            configureAggregateStream.Invoke(aggregateStreamSettings);
-
-            builder.ConfigureServices((hostBuilder, serviceCollection) => 
-            {
-                serviceCollection.AddSingleton<IAggregateStreamSettings>(aggregateStreamSettings);
-            });
-            
-            return builder;
-        }
-    }
-
     [Reentrant]
-    public class AggregateStreamGrain : EventSourceGrain<AggregateStreamState, StreamEvent>, IAggregateStream
+    public class AggregateStreamGrain : EventSourceGrain<AggregateStreamState, IStreamEvent>, IAggregateStream
     {
         private Queue<EventSourcing.Persistance.AggregateEvent> _eventQueue = new Queue<EventSourcing.Persistance.AggregateEvent>();
         private IAggregateStreamSettings _aggregateStreamSettings;
@@ -139,7 +44,7 @@ namespace EventSourcing.Stream
             await base.OnActivateAsync();
 
             // set LastNotifiedEventVersion if needed
-            if(!State.LastNotifiedEventId.HasValue)
+            if(State.LastNotifiedEventId == 0)
             {
                 // init aggregate tables
                 await Repository.CreateEventsAndSnapshotsTables(_aggregateName);
@@ -151,42 +56,51 @@ namespace EventSourcing.Stream
                 await ApplyEvent(new UpdatedLastNotifiedEventId{ LastNotifiedEventId = lastEvent?.Id ?? 0 });
             }
 
+            // sync up lastQueuedEventId and LastNotifiedEventId
+            _lastQueuedEventId = State.LastNotifiedEventId;
+
             // register pollForEvents method
             this.RegisterTimer(PollForEvents, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         }
 
+        /// <summary>
+        /// Ping method(to keep grain alive)
+        /// </summary>
+        /// <returns></returns>
         public Task Ping()
         {
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// This method will get events that are greater than last notified eventId from database and 
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         private async Task PollForEvents(object args)
         {
-            if (State.LastNotifiedEventId.HasValue)
+            // get new events after last Queued Event Id
+            var newEvents = await Repository.GetAggregateEvents(_aggregateName, _lastQueuedEventId);
+
+            // short circuit if no events to process
+            if (newEvents.Length == 0)
             {
-                // get new events
-                var unprocessedEvents = await Repository.GetAggregateEvents(_aggregateName, State.LastNotifiedEventId.Value);
-
-                // short circuit if no events to process
-                if (unprocessedEvents.Length == 0)
-                {
-                    return;
-                }
-                
-                // add new events to queue
-                foreach (var ev in unprocessedEvents)
-                {
-                    // only add to queue if new
-                    if (ev.Id > _lastQueuedEventId)
-                    {
-                        _eventQueue.Enqueue(ev);
-                        _lastQueuedEventId = ev.Id;
-                    }
-                }
-
-                // trigger notification
-                NotifySubscribers().Ignore();
+                return;
             }
+            
+            // add new events to queue
+            foreach (var ev in newEvents)
+            {
+                // only add to queue if new(just in case)
+                if (ev.Id > _lastQueuedEventId)
+                {
+                    _eventQueue.Enqueue(ev);
+                    _lastQueuedEventId = ev.Id;
+                }
+            }
+
+            // trigger notification
+            NotifySubscribers().Ignore();
         }
 
         public async Task NotifySubscribers()
@@ -207,6 +121,7 @@ namespace EventSourcing.Stream
                     // iterate thru each eventReceiver resolvers and notify grain
                     foreach (var eventReceiverGrainResolver in _aggregateStreamSettings.EventReceiverGrainResolverMap)
                     {
+                        // TODO: set up auto retry
                         try
                         {
                             // get subscriber grain via resolver (resolver can return null if there is no need to notify)

@@ -3,8 +3,8 @@ using EventSourcing;
 
 namespace Grains.Account
 {
-    public abstract class AccountEvent: Event
+    public interface IAccountEvent: IEvent
     {
-        public int AccountId { get; set; }
+        int AccountId { get; set; }
     }
 }

@@ -4,31 +4,34 @@ using EventSourcing;
 namespace Grains.Account
 {
     #region Events
-    public class Deposited: AccountEvent
+    public class Deposited: IAccountEvent
     {
-        public override string Type { get; set;} = nameof(Deposited);
+        public string Type { get; set;} = nameof(Deposited);
         public decimal Amount { get; set; }
+        public int AccountId { get; set; }
     }
 
-    public class Withdrawn: AccountEvent
+    public class Withdrawn: IAccountEvent
     {
-        public override string Type { get; set; } = nameof(Withdrawn);
+        public string Type { get; set; } = nameof(Withdrawn);
         public decimal Amount { get; set; }
+        public int AccountId { get; set; }
     }
 
-    public class BalanceRetrieved: AccountEvent
+    public class BalanceRetrieved: IAccountEvent
     {
-        public override string Type { get; set; } = nameof(BalanceRetrieved);
+        public string Type { get; set; } = nameof(BalanceRetrieved);
+        public int AccountId { get; set; }
     }
 
     #endregion
 
-    public class Account : State
+    public class Account : IState
     {
         public decimal Amount { get; set; }
         public int AccountId { get; set; }
 
-        public override void Init(string id)
+        public void Init(string id)
         {
             AccountId = int.Parse(id);
         }

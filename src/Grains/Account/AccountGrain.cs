@@ -6,7 +6,7 @@ using EventSourcing.Grains;
 
 namespace Grains.Account
 {
-    public class AccountGrain : EventSourceGrain<Account, AccountEvent>, IAccountGrain, IAccountCommand
+    public class AccountGrain : EventSourceGrain<Account, IAccountEvent>, IAccountGrain, IAccountCommand
     {
         public const string AggregateName = "account";
         public AccountGrain(): base(AggregateName, new AccountAggregate())

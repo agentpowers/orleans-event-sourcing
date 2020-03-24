@@ -10,13 +10,13 @@ namespace EventSourcing.Grains
     internal class EventWrapper
     {
         [JsonProperty(TypeNameHandling = TypeNameHandling.Auto)]
-        public Event Event { get; set; }
+        public IEvent Event { get; set; }
     }
 
 
     public abstract class EventSourceGrain<TState, TEvent> : Grain 
-        where TState : State, new()
-        where TEvent : Event
+        where TState : IState, new()
+        where TEvent : IEvent
     {
         // aggregate name
         private readonly string _aggregateName;

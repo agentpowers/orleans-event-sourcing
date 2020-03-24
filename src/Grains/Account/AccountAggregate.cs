@@ -3,10 +3,10 @@ using EventSourcing;
 
 namespace Grains.Account
 {
-    public class AccountAggregate : IAggregate<Account, AccountEvent>
+    public class AccountAggregate : IAggregate<Account, IAccountEvent>
     {
         public Account State { get; set; }
-        public void Apply(AccountEvent @event)
+        public void Apply(IAccountEvent @event)
         {
             switch (@event)
             {

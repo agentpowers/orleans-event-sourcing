@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace Grains.Account
 {
-
     public class AccountModel
     {
         public long Version { get; set; }
@@ -25,7 +24,7 @@ namespace Grains.Account
         {
             State.Version = aggregateEvent.AggregateVersion;
             State.Modified = aggregateEvent.Created;
-            var accountEvent = JsonSerializer.DeserializeEvent<AccountEvent>(aggregateEvent.Data);
+            var accountEvent = JsonSerializer.DeserializeEvent<IAccountEvent>(aggregateEvent.Data);
             switch (accountEvent)
             {
                 case Deposited deposited: 
