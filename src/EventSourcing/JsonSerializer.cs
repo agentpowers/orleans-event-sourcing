@@ -1,5 +1,4 @@
-﻿using System;
-using EventSourcing.Grains;
+﻿using EventSourcing.Grains;
 using Newtonsoft.Json;
 
 namespace EventSourcing
@@ -12,7 +11,7 @@ namespace EventSourcing
             return JsonConvert.SerializeObject(new EventWrapper{ Event = obj });
         }
 
-        // deserialize json to event
+        // deserialize json to event(json is wrapped using EventWrapper)
         public static TEvent DeserializeEvent<TEvent>(string json) where TEvent : IEvent
         {
             var eventWrapper =  JsonConvert.DeserializeObject<EventWrapper>(json);

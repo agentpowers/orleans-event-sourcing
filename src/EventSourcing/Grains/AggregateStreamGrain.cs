@@ -2,13 +2,13 @@ using Orleans;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using EventSourcing.Grains;
 using Orleans.Concurrency;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using EventSourcing.Stream;
 
-namespace EventSourcing.Stream
+namespace EventSourcing.Grains
 {
     [Reentrant]
     public class AggregateStreamGrain : EventSourceGrain<AggregateStreamState, IStreamEvent>, IAggregateStream
