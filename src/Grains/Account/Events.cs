@@ -3,6 +3,10 @@ using EventSourcing;
 
 namespace Grains.Account
 {
+    public interface IAccountEvent: IEvent
+    {
+        int AccountId { get; set; }
+    }
     #region Events
     public class Deposited: IAccountEvent
     {
@@ -25,15 +29,4 @@ namespace Grains.Account
     }
 
     #endregion
-
-    public class Account : IState
-    {
-        public decimal Amount { get; set; }
-        public int AccountId { get; set; }
-
-        public void Init(string id)
-        {
-            AccountId = int.Parse(id);
-        }
-    }
 }

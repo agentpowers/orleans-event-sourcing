@@ -1,4 +1,3 @@
-using EventSourcing;
 using EventSourcing.Grains;
 using EventSourcing.Persistance;
 using EventSourcing.Stream;
@@ -7,47 +6,16 @@ using Orleans;
 using System;
 using System.Threading.Tasks;
 
-namespace Grains.Account
+namespace Grains.Account.ReadModelWriter
 {
-    public class AccountModel
-    {
-        public long Version { get; set; }
-        public long Id { get; set; }
-        public decimal Balance { get; set; }
-        public DateTime Modified { get; set; }
-    }
-    
-    public class AccountModelAggregate : IAggregate<AccountModel, AggregateEvent>
-    {
-        public AccountModel State { get; set; }
-        public void Apply(AggregateEvent aggregateEvent)
-        {
-            State.Version = aggregateEvent.AggregateVersion;
-            State.Modified = aggregateEvent.Created;
-            var accountEvent = JsonSerializer.DeserializeEvent<IAccountEvent>(aggregateEvent.Data);
-            switch (accountEvent)
-            {
-                case Deposited deposited: 
-                    State.Balance += deposited.Amount;
-                    break;
-                case Withdrawn withdrawn:
-                    State.Balance -= withdrawn.Amount;
-                    break;
-                case BalanceRetrieved balanceRetrieved:
-                default:
-                    break;
-            }
-        }
-    }
+    public interface IAccountModelWriterAggregateStreamReceiver: IAggregateStreamReceiver{}
 
-    public interface IAccountModelAggregateStreamReceiver: IAggregateStreamReceiver{}
-
-    public class AccountModelWriter : ModelWriter<AccountModel, AggregateEvent>, IAccountModelAggregateStreamReceiver, IGrainWithStringKey
+    public class AccountModelWriterGrain : ModelWriter<AccountModel, AggregateEvent>, IAccountModelWriterAggregateStreamReceiver, IGrainWithStringKey
     {
         private readonly EventSourcing.Persistance.IRepository _eventSourcingRepository;
         private readonly IAccountRepository _accountRepository;
         private long _accountId;
-        public AccountModelWriter(
+        public AccountModelWriterGrain(
             EventSourcing.Persistance.IRepository eventSourcingRepository,
             IAccountRepository accountRepository)
             : base(new AccountModelAggregate())

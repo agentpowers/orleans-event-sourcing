@@ -1,6 +1,7 @@
 using Orleans.Hosting;
 using EventSourcing.Stream;
 using Grains.Account;
+using Grains.Account.ReadModelWriter;
 
 namespace Grains.Extensions
 {
@@ -10,15 +11,14 @@ namespace Grains.Extensions
         {
             builder.ConfigureAggregateStream(AccountGrain.AggregateName, (aggregateStreamSettings) => 
             {
-                //var accountAggregateReceiverPrefix = typeof(AccountAggregateReceiver).FullName;
                 aggregateStreamSettings.EventReceiverGrainResolverMap.Add(nameof(AccountAggregateReceiver), (aggregateEvent, grainFactory) =>
                 {
                     return (IAccountAggregateReceiver)grainFactory.GetGrain(typeof(IAccountAggregateReceiver), aggregateEvent.AggregateType);
                 });
 
-                aggregateStreamSettings.EventReceiverGrainResolverMap.Add(nameof(AccountModelWriter), (aggregateEvent, grainFactory) =>
+                aggregateStreamSettings.EventReceiverGrainResolverMap.Add(nameof(AccountModelWriterGrain), (aggregateEvent, grainFactory) =>
                 {
-                    return (IAccountModelAggregateStreamReceiver)grainFactory.GetGrain(typeof(IAccountModelAggregateStreamReceiver), aggregateEvent.AggregateType);
+                    return (IAccountModelWriterAggregateStreamReceiver)grainFactory.GetGrain(typeof(IAccountModelWriterAggregateStreamReceiver), aggregateEvent.AggregateType);
                 });
             });
         }

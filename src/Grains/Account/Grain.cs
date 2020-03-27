@@ -10,9 +10,7 @@ namespace Grains.Account
     {
         public const string AggregateName = "account";
         public AccountGrain(): base(AggregateName, new AccountAggregate())
-        {
-
-        }
+        {}
 
         public override async Task OnActivateAsync()
         {
@@ -30,7 +28,6 @@ namespace Grains.Account
         //     await ApplyEvent(new BalanceRetrieved());
         //     return State.Amount;
         // }
-
 
         public Task<decimal> GetBalance()
         {

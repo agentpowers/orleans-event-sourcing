@@ -1,8 +1,8 @@
 using System.Data;
 using System.Threading.Tasks;
-using Grains.Account;
 using Npgsql;
 using Dapper;
+using Grains.Account.ReadModelWriter;
 
 namespace Grains.Repositories
 {
