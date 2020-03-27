@@ -1,4 +1,3 @@
-using System;
 using EventSourcing;
 
 namespace Grains.Account
