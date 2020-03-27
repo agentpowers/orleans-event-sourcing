@@ -4,9 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans;
 using Microsoft.Extensions.Hosting;
-using EventSourcing.Extensions;
 using System;
-using Grains;
+using Grains.Extensions;
+using EventSourcing.Extensions;
 
 namespace API
 {

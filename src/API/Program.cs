@@ -9,7 +9,7 @@ using Orleans.Statistics;
 using System;
 using System.Net;
 using Grains.Account;
-using Grains;
+using Grains.Extensions;
 
 namespace API
 {

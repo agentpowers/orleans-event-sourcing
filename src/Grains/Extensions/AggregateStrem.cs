@@ -1,19 +1,11 @@
-using Microsoft.Extensions.DependencyInjection;
-using EventSourcing.Persistance;
-using Grains.Repositories;
 using Orleans.Hosting;
 using EventSourcing.Stream;
 using Grains.Account;
 
-namespace Grains
+namespace Grains.Extensions
 {
-    public static class Extensions
+    public static class AggregateStream
     {
-        public static void AddGrainServices(this IServiceCollection services, string connectionString)
-        {
-            services.AddTransient<IAccountRepository>(g => new AccountRepository(connectionString));
-        }
-
         public static void ConfigureAggregateStream(this ISiloBuilder builder)
         {
             builder.ConfigureAggregateStream(AccountGrain.AggregateName, (aggregateStreamSettings) => 
