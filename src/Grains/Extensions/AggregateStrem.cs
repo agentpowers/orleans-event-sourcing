@@ -18,7 +18,7 @@ namespace Grains.Extensions
 
                 aggregateStreamSettings.EventReceiverGrainResolverMap.Add(nameof(AccountModelWriterGrain), (aggregateEvent, grainFactory) =>
                 {
-                    return (IAccountModelWriterAggregateStreamReceiver)grainFactory.GetGrain(typeof(IAccountModelWriterAggregateStreamReceiver), aggregateEvent.AggregateType);
+                    return (IAccountModelWriterAggregateStreamReceiver)grainFactory.GetGrain(typeof(IAccountModelWriterAggregateStreamReceiver), $"{AccountModelWriterGrain.GrainPrefix}{aggregateEvent.AggregateType}");
                 });
             });
         }

@@ -12,6 +12,8 @@ namespace Grains.Account.ReadModelWriter
 
     public class AccountModelWriterGrain : ModelWriter<AccountModel, AggregateEvent>, IAccountModelWriterAggregateStreamReceiver, IGrainWithStringKey
     {
+        // grain key example => {writer:account:123}
+        public static readonly int keyStringAccountIdStartIndex = GrainPrefix.Length + AccountGrain.AggregateName.Length + 1;
         private readonly EventSourcing.Persistance.IRepository _eventSourcingRepository;
         private readonly IAccountRepository _accountRepository;
         private long _accountId;
@@ -26,7 +28,7 @@ namespace Grains.Account.ReadModelWriter
 
         public override async Task OnActivateAsync()
         {
-            _accountId = long.Parse(this.GetPrimaryKeyString().Substring(AccountGrain.AggregateName.Length + 1));
+            _accountId = long.Parse(this.GetPrimaryKeyString().Substring(keyStringAccountIdStartIndex));
             await Init();
             // call base OnActivateAsync
             await base.OnActivateAsync();
