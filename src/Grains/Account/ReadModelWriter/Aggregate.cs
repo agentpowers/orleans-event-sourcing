@@ -19,7 +19,20 @@ namespace Grains.Account.ReadModelWriter
                 case Withdrawn withdrawn:
                     State.Balance -= withdrawn.Amount;
                     break;
-                case BalanceRetrieved balanceRetrieved:
+                case TransferCreditPending transferCreditPending:
+                    State.Balance -= transferCreditPending.Amount;
+                    State.PendingCredit += transferCreditPending.Amount;
+                    break;
+                case TransferDebitPending transferDebitPending:
+                    State.PendingDebit += transferDebitPending.Amount;
+                    break;
+                case TransferCreditConfirmed transferCreditConfirmed:
+                    State.PendingCredit -= transferCreditConfirmed.AccountId;
+                    break;
+                case TransferDebitConfirmed transferDebitConfirmed:
+                    State.Balance += transferDebitConfirmed.Amount;
+                    State.PendingDebit -= transferDebitConfirmed.Amount;
+                    break;
                 default:
                     break;
             }
