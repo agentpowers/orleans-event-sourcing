@@ -1,3 +1,4 @@
+using System;
 using EventSourcing;
 
 namespace Grains.Account
@@ -6,6 +7,7 @@ namespace Grains.Account
     {
         int AccountId { get; set; }
     }
+
     #region Events
     public class Deposited: IAccountEvent
     {
@@ -22,40 +24,40 @@ namespace Grains.Account
         public int AccountId { get; set; }
     }
 
-    public class TransferCreditPending: IAccountEvent
+    public class TransferCredited: IAccountEvent
     {
-        public string Type { get; set; } = nameof(TransferCreditPending);
+        public string Type { get; set; } = nameof(TransferCredited);
         public int AccountId { get; set; }
-        public int ToAccount { get; set; }
+        public int ToAccountId { get; set; }
         public decimal Amount { get; set; }
-        public long TransactionId { get; set; }
+        public Guid TransactionId { get; set; }
     }
 
-    public class TransferDebitPending: IAccountEvent
+    public class TransferDebited: IAccountEvent
     {
-        public string Type { get; set; } = nameof(TransferDebitPending);
+        public string Type { get; set; } = nameof(TransferDebited);
         public int AccountId { get; set; }
-        public int FromAccount { get; set; }
+        public int FromAccountId { get; set; }
         public decimal Amount { get; set; }
-        public long TransactionId { get; set; }
+        public Guid TransactionId { get; set; }
+    }
+    
+    public class TransferCreditReversed: IAccountEvent
+    {
+        public string Type { get; set; } = nameof(TransferCreditReversed);
+        public int AccountId { get; set; }
+        public int ToAccountId { get; set; }
+        public decimal Amount { get; set; }
+        public Guid TransactionId { get; set; }
     }
 
-    public class TransferCreditConfirmed: IAccountEvent
+    public class TransferDebitReversed: IAccountEvent
     {
-        public string Type { get; set; } = nameof(TransferCreditConfirmed);
+        public string Type { get; set; } = nameof(TransferDebitReversed);
         public int AccountId { get; set; }
-        public int ToAccount { get; set; }
+        public int FromAccountId { get; set; }
         public decimal Amount { get; set; }
-        public long TransactionId { get; set; }
-    }
-
-    public class TransferDebitConfirmed: IAccountEvent
-    {
-        public string Type { get; set; } = nameof(TransferDebitConfirmed);
-        public int AccountId { get; set; }
-        public int FromAccount { get; set; }
-        public decimal Amount { get; set; }
-        public long TransactionId { get; set; }
+        public Guid TransactionId { get; set; }
     }
 
     #endregion

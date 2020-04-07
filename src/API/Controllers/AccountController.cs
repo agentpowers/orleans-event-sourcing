@@ -17,24 +17,39 @@ namespace API.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<decimal> Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
-            return await grain.GetBalance();
+            var response = await grain.GetBalance();
+            if (response.ErrorCode != GrainInterfaces.ErrorCode.None)
+            {
+                return BadRequest(response.ErrorMessage);
+            }
+            return Ok(response.Value);
         }
 
         [HttpPost("{id}/deposit")]
-        public async Task<decimal> Deposit(int id, decimal amount)
+        public async Task<IActionResult> Deposit(int id, decimal amount)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
-            return await grain.Deposit(amount);
+            var response = await grain.Deposit(amount);
+            if (response.ErrorCode != GrainInterfaces.ErrorCode.None)
+            {
+                return BadRequest(response.ErrorMessage);
+            }
+            return Ok(response.Value);
         }
 
         [HttpPost("{id}/withdraw")]
-        public async Task<decimal> Withdraw(int id, decimal amount)
+        public async Task<IActionResult> Withdraw(int id, decimal amount)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
-            return await grain.Withdraw(amount);
+            var response = await grain.Withdraw(amount);
+            if (response.ErrorCode != GrainInterfaces.ErrorCode.None)
+            {
+                return BadRequest(response.ErrorMessage);
+            }
+            return Ok(response.Value);
         }
     }
 }
