@@ -2,14 +2,18 @@ using GrainInterfaces;
 using System;
 using System.Threading.Tasks;
 using EventSourcing.Grains;
+using Microsoft.Extensions.Logging;
 
 namespace Grains.Account
 {
     public class AccountGrain : EventSourceGrain<Account, IAccountEvent>, IAccountGrain
     {
         public const string AggregateName = "account";
-        public AccountGrain(): base(AggregateName, new AccountAggregate())
-        {}
+        private readonly ILogger<AccountGrain> _logger;
+        public AccountGrain(ILogger<AccountGrain> logger): base(AggregateName, new AccountAggregate())
+        {
+            _logger = logger;
+        }
 
         public override async Task OnActivateAsync()
         {
@@ -39,7 +43,7 @@ namespace Grains.Account
             return new AccountResponse<decimal>(State.Amount);
         }
 
-        public async Task<AccountResponse<decimal>> TransferTo(int toAccountId, decimal amount)
+        public async Task<AccountResponse<decimal>> Transfer(int toAccountId, decimal amount)
         {
             // validate
             if (State.Amount - amount < 0)
@@ -48,24 +52,35 @@ namespace Grains.Account
             }
             // create transactionId
             var transactionId = Guid.NewGuid();
-            // save event
-            await ApplyEvent(new TransferCredited{ AccountId = State.AccountId, ToAccountId = toAccountId, Amount = amount, TransactionId = transactionId });
-            // get to grain
+            // get to Account grain
             var toGrain = GrainFactory.GetGrain<IAccountGrain>(toAccountId);
             // get response
-            var response = await toGrain.TransferFrom(State.AccountId, transactionId, amount);
-            // compensate previous event if not success
-            if (!response.Value)
+            var response = await toGrain.TransferDebit(State.AccountId, transactionId, amount);
+            // save event if response was successful
+            if (response.ErrorCode == ErrorCode.None)
             {
-                await ApplyEvent(new TransferCreditReversed{ AccountId = State.AccountId, ToAccountId = toAccountId, Amount = amount, TransactionId = transactionId });
+                // save event with response value(eventId) as Root and ParentId
+                await ApplyEvent(
+                    new TransferCredited{ AccountId = State.AccountId, ToAccountId = toAccountId, Amount = amount, TransactionId = transactionId },
+                    response.Value,
+                    response.Value
+                );
+                // return new balance
+                return new AccountResponse<decimal>(State.Amount);
             }
-            return new AccountResponse<decimal>(State.Amount);
+            else 
+            {
+                // log info
+                _logger.LogInformation($"Unable to complete transfer, Reason={response.ErrorMessage}, From={State.AccountId}, To={toAccountId}");   
+                // return error 
+                return new AccountResponse<decimal>(response.ErrorMessage, response.ErrorCode);
+            }
         }
 
-        public async Task<AccountResponse<bool>> TransferFrom(int fromAccountId, Guid transactionId, decimal amount)
+        public async Task<AccountResponse<long>> TransferDebit(int fromAccountId, Guid transactionId, decimal amount)
         {
-            await ApplyEvent(new TransferDebited{ AccountId = State.AccountId, FromAccountId = fromAccountId, Amount = amount, TransactionId = transactionId });
-            return new AccountResponse<bool>(true);
+            var eventId = await ApplyEvent(new TransferDebited{ AccountId = State.AccountId, FromAccountId = fromAccountId, Amount = amount, TransactionId = transactionId });
+            return new AccountResponse<long>(eventId);
         }
     }
 }

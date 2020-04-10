@@ -51,5 +51,17 @@ namespace API.Controllers
             }
             return Ok(response.Value);
         }
+
+        [HttpPost("{id}/transfer/{toId}")]
+        public async Task<IActionResult> Transfer(int id, int toId, decimal amount)
+        {
+            var grain = this.client.GetGrain<IAccountGrain>(id);
+            var response = await grain.Transfer(toId, amount);
+            if (response.ErrorCode != GrainInterfaces.ErrorCode.None)
+            {
+                return BadRequest(response.ErrorMessage);
+            }
+            return Ok(response.Value);
+        }
     }
 }

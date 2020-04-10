@@ -80,7 +80,14 @@ namespace EventSourcing.Grains
             if (aggregate == null)
             {
                 // add new aggregate if it doesn't exist
-                AggregateId = await Repository.SaveAggregate(_aggregateName, new Aggregate{ Type = aggregateType, Created = DateTime.UtcNow });
+                AggregateId = await Repository.SaveAggregate(
+                    _aggregateName,
+                    new Aggregate
+                    { 
+                        Type = aggregateType,
+                        Created = DateTime.UtcNow
+                    }
+                );
                 // set state as new instance of TState
                 _aggregate.State = new TState();
                 // init state with grain id
@@ -91,7 +98,10 @@ namespace EventSourcing.Grains
                 // use aggregate id from db
                 AggregateId = aggregate.AggregateId;
                 // get snapshot and events
-                var (snapshot, events) = await Repository.GetSnapshotAndEvents(_aggregateName, AggregateId);
+                var (snapshot, events) = await Repository.GetSnapshotAndEvents(
+                    _aggregateName,
+                    AggregateId
+                );
                 // apply snapshot if any
                 if(snapshot != null)
                 {
@@ -125,21 +135,43 @@ namespace EventSourcing.Grains
         /// <returns></returns>
         private async Task SaveSnapshot()
         {
-            await Repository.SaveSnapshot(_aggregateName, new Snapshot{ AggregateId = AggregateId, AggregateVersion = _aggregateVersion, Data = JsonConvert.SerializeObject(_aggregate.State), Created = DateTime.UtcNow });
+            await Repository.SaveSnapshot(
+                _aggregateName, 
+                new Snapshot
+                { 
+                    AggregateId = AggregateId,
+                    AggregateVersion = _aggregateVersion,
+                    Data = JsonConvert.SerializeObject(_aggregate.State),
+                    Created = DateTime.UtcNow
+                }
+            );
         }
 
         /// <summary>
         /// save event to db then apply event to state
         /// snapshot will be created for every 10 events
+        /// Returns id of the newly applied event(from db)
         /// </summary>
-        protected async Task ApplyEvent(TEvent @event)
+        protected async Task<long> ApplyEvent(TEvent @event, long? rootEventId = null, long? parentEventId = null)
         {
             // serialize event for db
             var serialized = JsonSerializer.SerializeEvent(@event);
             // increment aggregate version 
             _aggregateVersion++;
             // save event to db
-            await Repository.SaveEvent(_aggregateName, new Persistance.Event { AggregateId = AggregateId, AggregateVersion = _aggregateVersion, Type = @event.Type, Data = serialized, Created = DateTime.UtcNow });
+            var eventId = await Repository.SaveEvent(
+                _aggregateName,
+                new Persistance.Event
+                { 
+                    AggregateId = AggregateId,
+                    AggregateVersion = _aggregateVersion,
+                    Type = @event.Type,
+                    Data = serialized,
+                    RootEventId = rootEventId,
+                    ParentEventId = parentEventId, 
+                    Created = DateTime.UtcNow
+                }
+            );
             // update state
             _aggregate.Apply(@event);
             // save snapshot if ShouldSaveSnapshot returns true
@@ -147,6 +179,9 @@ namespace EventSourcing.Grains
             {
                 await SaveSnapshot();
             }
+
+            // return id
+            return eventId;
         }
 
         public virtual bool ShouldSaveSnapshot(TEvent @event, long aggregateVersion)

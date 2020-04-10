@@ -33,10 +33,15 @@ namespace GrainInterfaces
     }
     public interface IAccountGrain: IGrainWithIntegerKey
     {
+        // return balance
         Task<AccountResponse<decimal>> GetBalance();
+        // withdraw and return new balance
         Task<AccountResponse<decimal>> Withdraw(decimal amount);
+        // deposit and return new balance
         Task<AccountResponse<decimal>> Deposit(decimal amount);
-        Task<AccountResponse<decimal>> TransferTo(int toAccountId, decimal amount);
-        Task<AccountResponse<bool>> TransferFrom(int fromAccountId, Guid transactionId, decimal amount);
+        // transfer to account and return new balance
+        Task<AccountResponse<decimal>> Transfer(int toAccountId, decimal amount);
+        // internal method - transfer debit and return eventId
+        Task<AccountResponse<long>> TransferDebit(int fromAccountId, Guid transactionId, decimal amount);
     }
 }
