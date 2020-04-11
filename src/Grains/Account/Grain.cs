@@ -82,5 +82,15 @@ namespace Grains.Account
             var eventId = await ApplyEvent(new TransferDebited{ AccountId = State.AccountId, FromAccountId = fromAccountId, Amount = amount, TransactionId = transactionId });
             return new AccountResponse<long>(eventId);
         }
+
+        public async Task ReverseTransferDebit(int fromAccountId, Guid transactionId, decimal amount, long rootEventId, long parentEventId)
+        {
+            // TODO: make this idempotent
+            await ApplyEvent(
+                new TransferDebitReversed{ AccountId = State.AccountId, FromAccountId = fromAccountId, Amount = amount, TransactionId = transactionId },
+                rootEventId,
+                parentEventId
+            );
+        }
     }
 }

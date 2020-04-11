@@ -38,6 +38,8 @@ namespace EventSourcing.Grains
 
         protected EventSourceGrain(string aggregateName, IAggregate<TState, TEvent> aggregate)
         {
+            // TODO: either validate aggregate name so that it can be prefixed as table name 
+            //          or convert to valid table name prefix and handle mapping between converted and aggregateName argument
             _aggregateName = aggregateName;
             _aggregate = aggregate;
         }

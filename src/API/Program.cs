@@ -39,7 +39,7 @@ namespace API
             })
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
-            .AddGrainService<EventSourcing.Services.AggregateStreamKeepAliveService>()
+            .AddGrainService<EventSourcing.Services.KeepAliveService>()
             .ConfigureLogging(logging => logging.AddConsole())
             .UseLinuxEnvironmentStatistics()
             .UseDashboard(x =>
@@ -50,7 +50,7 @@ namespace API
                 x.CounterUpdateIntervalMs = 10000;
             });
 
-            builder.ConfigureAggregateStream();
+            builder.ConfigureGrains();
         }
         
         private static void ConfigureLocalOrleans(ISiloBuilder builder)
@@ -65,7 +65,7 @@ namespace API
             .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
-            .AddGrainService<EventSourcing.Services.AggregateStreamKeepAliveService>()
+            .AddGrainService<EventSourcing.Services.KeepAliveService>()
             .ConfigureLogging(logging => logging.AddConsole())
             .UseDashboard(x =>
              {
@@ -74,7 +74,7 @@ namespace API
                 x.CounterUpdateIntervalMs = 10000;
              });
 
-            builder.ConfigureAggregateStream();
+            builder.ConfigureGrains();
         }
         
         public static void Main(string[] args)

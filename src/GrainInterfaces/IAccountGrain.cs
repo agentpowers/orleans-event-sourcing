@@ -43,5 +43,7 @@ namespace GrainInterfaces
         Task<AccountResponse<decimal>> Transfer(int toAccountId, decimal amount);
         // internal method - transfer debit and return eventId
         Task<AccountResponse<long>> TransferDebit(int fromAccountId, Guid transactionId, decimal amount);
+        // Reverse Transfer Debited
+        Task ReverseTransferDebit(int fromAccountId, Guid transactionId, decimal amount, long rootEventId, long parentEventId);
     }
 }

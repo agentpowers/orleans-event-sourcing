@@ -11,7 +11,7 @@ using EventSourcing.Stream;
 namespace EventSourcing.Grains
 {
     [Reentrant]
-    public class AggregateStreamGrain : EventSourceGrain<AggregateStreamState, IStreamEvent>, IAggregateStream
+    public class AggregateStreamGrain : EventSourceGrain<AggregateStreamState, IStreamEvent>, IAggregateStreamGrain
     {
         private Queue<EventSourcing.Persistance.AggregateEvent> _eventQueue = new Queue<EventSourcing.Persistance.AggregateEvent>();
         private IAggregateStreamSettings _aggregateStreamSettings;
