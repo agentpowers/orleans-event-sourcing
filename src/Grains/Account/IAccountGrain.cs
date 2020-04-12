@@ -3,7 +3,7 @@ using Orleans.Concurrency;
 using System;
 using System.Threading.Tasks;
 
-namespace GrainInterfaces
+namespace Grains.Account
 {
     [Flags]
     public enum ErrorCode

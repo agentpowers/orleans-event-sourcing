@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
-using GrainInterfaces;
+using Grains.Account;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
+using ErrorCode = Grains.Account.ErrorCode;
 
 namespace API.Controllers
 {
@@ -21,7 +22,7 @@ namespace API.Controllers
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
             var response = await grain.GetBalance();
-            if (response.ErrorCode != GrainInterfaces.ErrorCode.None)
+            if (response.ErrorCode != ErrorCode.None)
             {
                 return BadRequest(response.ErrorMessage);
             }
@@ -33,7 +34,7 @@ namespace API.Controllers
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
             var response = await grain.Deposit(amount);
-            if (response.ErrorCode != GrainInterfaces.ErrorCode.None)
+            if (response.ErrorCode != ErrorCode.None)
             {
                 return BadRequest(response.ErrorMessage);
             }
@@ -45,7 +46,7 @@ namespace API.Controllers
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
             var response = await grain.Withdraw(amount);
-            if (response.ErrorCode != GrainInterfaces.ErrorCode.None)
+            if (response.ErrorCode != ErrorCode.None)
             {
                 return BadRequest(response.ErrorMessage);
             }
@@ -57,7 +58,7 @@ namespace API.Controllers
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
             var response = await grain.Transfer(toId, amount);
-            if (response.ErrorCode != GrainInterfaces.ErrorCode.None)
+            if (response.ErrorCode != ErrorCode.None)
             {
                 return BadRequest(response.ErrorMessage);
             }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GrainInterfaces;
+using Grains.Cache;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using Orleans.Concurrency;
