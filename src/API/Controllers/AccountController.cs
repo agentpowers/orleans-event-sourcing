@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using API.Models;
 using Grains.Account;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
@@ -6,6 +7,7 @@ using ErrorCode = Grains.Account.ErrorCode;
 
 namespace API.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
     public class AccountController : ControllerBase
     {
@@ -30,10 +32,10 @@ namespace API.Controllers
         }
 
         [HttpPost("{id}/deposit")]
-        public async Task<IActionResult> Deposit(int id, decimal amount)
+        public async Task<IActionResult> Deposit(int id, [FromBody]AccountDepositModel body)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
-            var response = await grain.Deposit(amount);
+            var response = await grain.Deposit(body.Amount);
             if (response.ErrorCode != ErrorCode.None)
             {
                 return BadRequest(response.ErrorMessage);
@@ -42,10 +44,10 @@ namespace API.Controllers
         }
 
         [HttpPost("{id}/withdraw")]
-        public async Task<IActionResult> Withdraw(int id, decimal amount)
+        public async Task<IActionResult> Withdraw(int id, [FromBody]AccountWithdrawModel body)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
-            var response = await grain.Withdraw(amount);
+            var response = await grain.Withdraw(body.Amount);
             if (response.ErrorCode != ErrorCode.None)
             {
                 return BadRequest(response.ErrorMessage);
@@ -53,11 +55,11 @@ namespace API.Controllers
             return Ok(response.Value);
         }
 
-        [HttpPost("{id}/transfer/{toId}")]
-        public async Task<IActionResult> Transfer(int id, int toId, decimal amount)
+        [HttpPost("{id}/transfer")]
+        public async Task<IActionResult> Transfer(int id, [FromBody]AccountTransferModel body)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
-            var response = await grain.Transfer(toId, amount);
+            var response = await grain.Transfer(body.ToAccountId, body.Amount);
             if (response.ErrorCode != ErrorCode.None)
             {
                 return BadRequest(response.ErrorMessage);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using API.Models;
 using Grains.Cache;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
@@ -7,6 +8,7 @@ using Orleans.Concurrency;
 
 namespace API.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
     public class CacheController : ControllerBase
     {
@@ -27,10 +29,10 @@ namespace API.Controllers
 
         // POST
         [HttpPost("{key}")]
-        public async Task Set([FromRoute]string key, [FromForm]string value)
+        public async Task Set([FromRoute]string key, [FromBody]CacheModel body)
         {
             var grain = this.client.GetGrain<ICacheGrain<string>>(key);
-            var immutableValue = new Immutable<string>(value);
+            var immutableValue = new Immutable<string>(body.Value);
             await grain.Set(immutableValue, TimeSpan.MinValue);
         }
 
