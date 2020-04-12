@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "",
+		"_postman_id": "c7f79825-0b09-432c-8c6a-fbfffdfad6bf",
 		"name": "ORLEANS API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -67,14 +67,8 @@
 							}
 						],
 						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "value",
-									"value": "ok3",
-									"type": "text"
-								}
-							],
+							"mode": "raw",
+							"raw": "{\n\t\"value\": \"ok\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -194,6 +188,15 @@
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"amount\": 1000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "http://{{api}}/account/{{accountId}}/deposit?amount=1000",
 							"protocol": "http",
@@ -220,8 +223,17 @@
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"amount\": 1000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "http://{{api}}/account/{{accountId}}/withdraw?amount=500",
+							"raw": "http://{{api}}/account/{{accountId}}/withdraw",
 							"protocol": "http",
 							"host": [
 								"{{api}}"
@@ -230,11 +242,46 @@
 								"account",
 								"{{accountId}}",
 								"withdraw"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TRANSFER",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"amount\": 1000,\n\t\"toAccountId\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{api}}/account/{{accountId}}/transfer/{{toAccountId}}?amount=500",
+							"protocol": "http",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"account",
+								"{{accountId}}",
+								"transfer",
+								"{{toAccountId}}"
 							],
 							"query": [
 								{
 									"key": "amount",
 									"value": "500"
+								},
+								{
+									"key": "toAccountId",
+									"value": "5",
+									"disabled": true
 								}
 							]
 						}
