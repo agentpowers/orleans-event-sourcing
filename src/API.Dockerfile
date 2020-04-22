@@ -4,7 +4,6 @@ WORKDIR /src
 # Copy csproj and dependencies
 COPY ./API/ API/
 COPY ./Grains Grains/
-COPY ./GrainInterfaces/ GrainInterfaces/
 COPY ./EventSourcing EventSourcing/
 
 WORKDIR /src/API

@@ -29,7 +29,7 @@ metadata:
   labels:
     app: api
 spec:
-  replicas: 4
+  replicas: 6
   strategy:
     type: Recreate
   selector:
@@ -40,6 +40,10 @@ spec:
       labels:
         app: api
     spec:
+      initContainers:
+      - name: init-postgres
+        image: busybox:1.28
+        command: ['sh', '-c', "until nslookup postgres.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for postgres; sleep 2; done"]
       containers:
       - name: api
         image: api

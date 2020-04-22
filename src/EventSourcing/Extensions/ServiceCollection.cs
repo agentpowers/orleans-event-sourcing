@@ -3,7 +3,7 @@ using EventSourcing.Persistance;
 
 namespace EventSourcing.Extensions
 {
-    public static class Extensions
+    public static class ServiceCollection
     {
         public static void AddEventSourcing(this IServiceCollection services, string connectionString)
         {

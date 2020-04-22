@@ -2,8 +2,13 @@ using System;
 
 namespace EventSourcing
 {
-    public abstract class Event
+    public interface IEvent
     {
-        public abstract string Type { get; set; }
+        string Type { get; set; }
+    }
+
+    public interface IState
+    {
+        void Init(string key);
     }
 }

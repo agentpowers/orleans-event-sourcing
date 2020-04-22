@@ -1,12 +1,11 @@
-using System;
 using EventSourcing;
 
 namespace Grains.Account
 {
-    public class AccountAggregate : IAggregate<Account, AccountEvent>
+    public class AccountAggregate : IAggregate<Account, IAccountEvent>
     {
         public Account State { get; set; }
-        public void Apply(AccountEvent @event)
+        public void Apply(IAccountEvent @event)
         {
             switch (@event)
             {
@@ -16,7 +15,12 @@ namespace Grains.Account
                 case Withdrawn withdrawn:
                     State.Amount -= withdrawn.Amount;
                     break;
-                case BalanceRetrieved balanceRetrieved:
+                case TransferCredited tranferCredited:
+                    State.Amount -= tranferCredited.Amount;
+                    break;
+                case TransferDebited transferDebited:
+                    State.Amount += transferDebited.Amount;
+                    break;
                 default:
                     break;
             }

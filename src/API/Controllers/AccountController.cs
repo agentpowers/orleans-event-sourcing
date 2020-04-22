@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using GrainInterfaces;
+﻿using System.Threading.Tasks;
+using API.Models;
+using Grains.Account;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
+using ErrorCode = Grains.Account.ErrorCode;
 
 namespace API.Controllers
 {
+    [ApiController]
     [Route("[controller]")]
     public class AccountController : ControllerBase
     {
@@ -20,24 +20,51 @@ namespace API.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<decimal> Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
-            return await grain.GetBalance();
+            var response = await grain.GetBalance();
+            if (response.ErrorCode != ErrorCode.None)
+            {
+                return BadRequest(response.ErrorMessage);
+            }
+            return Ok(response.Value);
         }
 
         [HttpPost("{id}/deposit")]
-        public async Task<decimal> Deposit(int id, decimal amount)
+        public async Task<IActionResult> Deposit(int id, [FromBody]AccountDepositModel body)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
-            return await grain.Deposit(amount);
+            var response = await grain.Deposit(body.Amount);
+            if (response.ErrorCode != ErrorCode.None)
+            {
+                return BadRequest(response.ErrorMessage);
+            }
+            return Ok(response.Value);
         }
 
         [HttpPost("{id}/withdraw")]
-        public async Task<decimal> Withdraw(int id, decimal amount)
+        public async Task<IActionResult> Withdraw(int id, [FromBody]AccountWithdrawModel body)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
-            return await grain.Withdraw(amount);
+            var response = await grain.Withdraw(body.Amount);
+            if (response.ErrorCode != ErrorCode.None)
+            {
+                return BadRequest(response.ErrorMessage);
+            }
+            return Ok(response.Value);
+        }
+
+        [HttpPost("{id}/transfer")]
+        public async Task<IActionResult> Transfer(int id, [FromBody]AccountTransferModel body)
+        {
+            var grain = this.client.GetGrain<IAccountGrain>(id);
+            var response = await grain.Transfer(body.ToAccountId, body.Amount);
+            if (response.ErrorCode != ErrorCode.None)
+            {
+                return BadRequest(response.ErrorMessage);
+            }
+            return Ok(response.Value);
         }
     }
 }

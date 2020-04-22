@@ -2,14 +2,14 @@
 
 namespace EventSourcing.Persistance
 {
-    internal class Aggregate
+    public sealed class Aggregate
     {
         public long AggregateId {get; set; }
         public string Type { get; set; }
         public DateTime Created {get; set;}
     }
 
-    internal class Event
+    public class Event
     {
         public long Id { get; set; }
         public long AggregateId { get; set; }
@@ -22,7 +22,12 @@ namespace EventSourcing.Persistance
         public DateTime Created { get; set; }
     }
 
-    internal class Snapshot
+    public class AggregateEvent: Event
+    {
+        public string AggregateType { get; set; }
+    }
+
+    public sealed class Snapshot
     {
         public long Id { get; set; }
         public long AggregateId { get; set; }

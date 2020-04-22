@@ -9,6 +9,7 @@ using Orleans.Statistics;
 using System;
 using System.Net;
 using Grains.Account;
+using Grains.Extensions;
 
 namespace API
 {
@@ -18,6 +19,7 @@ namespace API
         const int gatewayPort = 30000;
 
         public static bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
+
         
         //https://stackoverflow.com/questions/54841844/orleans-direct-client-in-asp-net-core-project/54842916#54842916
         private static void ConfigureOrleans(ISiloBuilder builder)
@@ -37,7 +39,7 @@ namespace API
             })
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
-            .ConfigureLogging(logging => logging.AddConsole())
+            .AddGrainService<EventSourcing.Services.KeepAliveService>()
             .UseLinuxEnvironmentStatistics()
             .UseDashboard(x =>
              {
@@ -46,6 +48,8 @@ namespace API
                 x.ScriptPath = "/api/dashboard";
                 x.CounterUpdateIntervalMs = 10000;
             });
+
+            builder.ConfigureGrains();
         }
         
         private static void ConfigureLocalOrleans(ISiloBuilder builder)
@@ -60,18 +64,26 @@ namespace API
             .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
-            .ConfigureLogging(logging => logging.AddConsole())
+            .AddGrainService<EventSourcing.Services.KeepAliveService>()
             .UseDashboard(x =>
              {
                 x.HostSelf = false;
                 x.BasePath = "/dashboard";
                 x.CounterUpdateIntervalMs = 10000;
              });
+
+            builder.ConfigureGrains();
         }
         
         public static void Main(string[] args)
         {
-            var hostBuilder = new HostBuilder()
+            var hostBuilder = 
+                Host.CreateDefaultBuilder(args)
+                .ConfigureLogging((hostingContext, logging) =>
+                {
+                    logging.ClearProviders();
+                    logging.AddConsole();
+                })
                 .ConfigureWebHostDefaults(builder =>
                 {
                     builder.UseStartup<Startup>();

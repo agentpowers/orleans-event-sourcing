@@ -3,29 +3,32 @@ using System.Threading.Tasks;
 using EventSourcing.Persistance;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 
 namespace EventSourcing.Grains
 {
     internal class EventWrapper
     {
         [JsonProperty(TypeNameHandling = TypeNameHandling.Auto)]
-        public Event Event { get; set; }
-        
+        public IEvent Event { get; set; }
     }
+
+
     public abstract class EventSourceGrain<TState, TEvent> : Grain 
-        where TState : new()
-        where TEvent : Event
+        where TState : IState, new()
+        where TEvent : IEvent
     {
         // aggregate name
         private readonly string _aggregateName;
         // aggregate
         private IAggregate<TState, TEvent> _aggregate;
-        // db aggregateid
-        private long _aggregateId;
-        // repository
-        private IRepository _repository;
         // version number for this instance of aggregate(incremented for each event)
         private long _aggregateVersion = 0;
+        
+        // db aggregateid
+        protected long AggregateId;
+        // repository
+        protected IRepository Repository {get; private set;}
 
         /// <summary>
         /// Get current state
@@ -35,44 +38,32 @@ namespace EventSourcing.Grains
 
         protected EventSourceGrain(string aggregateName, IAggregate<TState, TEvent> aggregate)
         {
+            // TODO: either validate aggregate name so that it can be prefixed as table name 
+            //          or convert to valid table name prefix and handle mapping between converted and aggregateName argument
             _aggregateName = aggregateName;
             _aggregate = aggregate;
         }
 
-        // serialize an event by wrapping that using EventWrapper and then uses JSON.NET typenamehandling
-        static string SerializeEvent(TEvent obj)
-        {
-            return JsonConvert.SerializeObject(new EventWrapper{ Event = obj });
-        }
-
-        // deserialize json to event
-        static TEvent DeserializeEvent(string json)
-        {
-            var eventWrapper =  JsonConvert.DeserializeObject<EventWrapper>(json);
-            return eventWrapper.Event as TEvent;
-        }
-
-        private const string defaultGuidString = "00000000-0000-0000-0100-000000000000";
         /// <summary>
         /// Get grain id string
         /// </summary>
         /// <returns></returns>
-        private string GetGrainKey()
+        public virtual string GetGrainKey()
         {
-            if (this.GetPrimaryKeyLong() > 0)
+            var interfaces = this.GetType().GetInterfaces().ToList();
+            if (interfaces.Any(x => x.Equals(typeof(IGrainWithIntegerKey))))
             {
                 return this.GetPrimaryKeyLong().ToString();
             }
-            if (this.GetPrimaryKeyString() != null)
+            if (interfaces.Any(x => x.Equals(typeof(IGrainWithStringKey))))
             {
                 return this.GetPrimaryKeyString();
             }
-            var guidKey = this.GetPrimaryKey().ToString();
-            if (guidKey != defaultGuidString)
+            if (interfaces.Any(x => x.Equals(typeof(IGrainWithGuidKey))))
             {
-                return guidKey;
+                return this.GetPrimaryKey().ToString();
             }
-            throw new ArgumentException("unable to get primary key");
+            throw new InvalidOperationException("unable to retrieve GrainKey");
         }
 
         /// <summary>
@@ -81,24 +72,38 @@ namespace EventSourcing.Grains
         /// <returns></returns>
         public override async Task OnActivateAsync()
         {
-            _repository = ServiceProvider.GetService(typeof(IRepository)) as IRepository;
+            Repository = ServiceProvider.GetService(typeof(IRepository)) as IRepository;
+            // get grain key
+            var grainKey = GetGrainKey();
             // generate aggregateType
-            var aggregateType = $"{_aggregateName}:{GetGrainKey()}";
+            var aggregateType = $"{_aggregateName}:{grainKey}";
             // get aggregate from db
-            var aggregate = await _repository.GetAggregateByTypeName(aggregateType);
+            var aggregate = await Repository.GetAggregateByTypeName(aggregateType);
             if (aggregate == null)
             {
                 // add new aggregate if it doesn't exist
-                _aggregateId = await _repository.SaveAggregate(_aggregateName, new Aggregate{ Type = aggregateType });
+                AggregateId = await Repository.SaveAggregate(
+                    _aggregateName,
+                    new Aggregate
+                    { 
+                        Type = aggregateType,
+                        Created = DateTime.UtcNow
+                    }
+                );
                 // set state as new instance of TState
                 _aggregate.State = new TState();
+                // init state with grain id
+                _aggregate.State.Init(grainKey);
             }
             else
             {
                 // use aggregate id from db
-                _aggregateId = aggregate.AggregateId;
+                AggregateId = aggregate.AggregateId;
                 // get snapshot and events
-                var (snapshot, events) = await _repository.GetSnapshotAndEvents(_aggregateName, _aggregateId);
+                var (snapshot, events) = await Repository.GetSnapshotAndEvents(
+                    _aggregateName,
+                    AggregateId
+                );
                 // apply snapshot if any
                 if(snapshot != null)
                 {
@@ -115,7 +120,7 @@ namespace EventSourcing.Grains
                 // apply events
                 foreach (var dbEvent in events)
                 {
-                    var @event = DeserializeEvent(dbEvent.Data);
+                    var @event = JsonSerializer.DeserializeEvent<TEvent>(dbEvent.Data);
                     _aggregate.Apply(@event);
                     // store aggregate version number
                     _aggregateVersion = dbEvent.AggregateVersion;
@@ -132,29 +137,58 @@ namespace EventSourcing.Grains
         /// <returns></returns>
         private async Task SaveSnapshot()
         {
-            await _repository.SaveSnapshot(_aggregateName, new Snapshot{ AggregateId = _aggregateId, AggregateVersion = _aggregateVersion, Data = JsonConvert.SerializeObject(_aggregate.State) });
+            await Repository.SaveSnapshot(
+                _aggregateName, 
+                new Snapshot
+                { 
+                    AggregateId = AggregateId,
+                    AggregateVersion = _aggregateVersion,
+                    Data = JsonConvert.SerializeObject(_aggregate.State),
+                    Created = DateTime.UtcNow
+                }
+            );
         }
 
         /// <summary>
         /// save event to db then apply event to state
         /// snapshot will be created for every 10 events
+        /// Returns id of the newly applied event(from db)
         /// </summary>
-        protected async Task ApplyEvent(TEvent @event)
+        protected async Task<long> ApplyEvent(TEvent @event, long? rootEventId = null, long? parentEventId = null)
         {
             // serialize event for db
-            var serialized = SerializeEvent(@event);
+            var serialized = JsonSerializer.SerializeEvent(@event);
             // increment aggregate version 
             _aggregateVersion++;
             // save event to db
-            await _repository.SaveEvent(_aggregateName, new Persistance.Event { AggregateId = _aggregateId, AggregateVersion = _aggregateVersion, Type = @event.Type, Data = serialized });
+            var eventId = await Repository.SaveEvent(
+                _aggregateName,
+                new Persistance.Event
+                { 
+                    AggregateId = AggregateId,
+                    AggregateVersion = _aggregateVersion,
+                    Type = @event.Type,
+                    Data = serialized,
+                    RootEventId = rootEventId,
+                    ParentEventId = parentEventId, 
+                    Created = DateTime.UtcNow
+                }
+            );
             // update state
             _aggregate.Apply(@event);
-            // save snapshot when needed(every 10 events)
-            // TODO: make it configurable when to save snapshot
-            if (_aggregateVersion % 10 == 0)
+            // save snapshot if ShouldSaveSnapshot returns true
+            if (ShouldSaveSnapshot(@event, _aggregateVersion))
             {
                 await SaveSnapshot();
             }
+
+            // return id
+            return eventId;
+        }
+
+        public virtual bool ShouldSaveSnapshot(TEvent @event, long aggregateVersion)
+        {
+            return aggregateVersion % 20 == 0;
         }
     }
 }
