@@ -16,6 +16,7 @@ namespace EventSourcing.Services
     public class KeepAliveService : GrainService, IKeepAliveService
     {
         private readonly IGrainFactory _grainFactory;
+        private readonly static TimeSpan DueTime = TimeSpan.FromSeconds(10);
         
         public KeepAliveService(IGrainIdentity grainId, Silo silo, ILoggerFactory loggerFactory, IGrainFactory grainFactory) : base(grainId, silo, loggerFactory)
         {
@@ -30,7 +31,7 @@ namespace EventSourcing.Services
             {
                 foreach (var setting in keepAliveSettings.GrainKeepAliveSettings)
                 {
-                    this.RegisterTimer(HandlePing, setting, TimeSpan.Zero, setting.Interval);
+                    this.RegisterTimer(HandlePing, setting, DueTime, setting.Interval);
                 }
             }
 
@@ -38,7 +39,7 @@ namespace EventSourcing.Services
             var aggregateNames = serviceProvider.GetServices<IAggregateStreamSettings>().Select(g => g.AggregateName).ToArray();
             foreach (var aggregateName in aggregateNames)
             {
-                this.RegisterTimer(HandleAggregateStreamPing, aggregateName, TimeSpan.Zero, TimeSpan.FromMinutes(60));
+                this.RegisterTimer(HandleAggregateStreamPing, aggregateName, DueTime, TimeSpan.FromMinutes(60));
             }
 
             await base.Init(serviceProvider);

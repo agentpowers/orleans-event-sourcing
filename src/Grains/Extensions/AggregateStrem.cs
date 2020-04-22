@@ -30,7 +30,7 @@ namespace Grains.Extensions
                 // account reconciler
                 aggregateStreamSettings.EventReceiverGrainResolverMap.Add(nameof(AccountReconciler), (aggregateEvent, grainFactory) =>
                 {
-                    return (IAccountReconcilerReceiver)grainFactory.GetGrain(typeof(IAccountReconcilerReceiver), nameof(AccountReconcilerGrain));
+                    return (IAccountReconcilerGrain)grainFactory.GetGrain(typeof(IAccountReconcilerGrain), nameof(AccountReconcilerGrain));
                 });
             });
 

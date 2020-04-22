@@ -40,7 +40,6 @@ namespace API
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
             .AddGrainService<EventSourcing.Services.KeepAliveService>()
-            .ConfigureLogging(logging => logging.AddConsole())
             .UseLinuxEnvironmentStatistics()
             .UseDashboard(x =>
              {
@@ -66,7 +65,6 @@ namespace API
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
             .AddGrainService<EventSourcing.Services.KeepAliveService>()
-            .ConfigureLogging(logging => logging.AddConsole())
             .UseDashboard(x =>
              {
                 x.HostSelf = false;
@@ -79,7 +77,13 @@ namespace API
         
         public static void Main(string[] args)
         {
-            var hostBuilder = new HostBuilder()
+            var hostBuilder = 
+                Host.CreateDefaultBuilder(args)
+                .ConfigureLogging((hostingContext, logging) =>
+                {
+                    logging.ClearProviders();
+                    logging.AddConsole();
+                })
                 .ConfigureWebHostDefaults(builder =>
                 {
                     builder.UseStartup<Startup>();

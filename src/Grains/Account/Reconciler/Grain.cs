@@ -13,12 +13,12 @@ using EventSourcing.Keeplive;
 namespace Grains.Account.Reconciler
 {
     public interface IAccountReconcilerReceiver: IAggregateStreamReceiver{}
-    public interface IAccountReconcilerGrain: IKeepAliveGrain, IGrainWithStringKey
+    public interface IAccountReconcilerGrain: IKeepAliveGrain, IGrainWithStringKey, IAccountReconcilerReceiver
     {
     }
 
     [Reentrant]
-    public class AccountReconcilerGrain : EventSourceGrain<AccountReconciler, IAccountReconcilerEvent>, IAccountReconcilerGrain, IAccountReconcilerReceiver
+    public class AccountReconcilerGrain : EventSourceGrain<AccountReconciler, IAccountReconcilerEvent>, IAccountReconcilerGrain
     {
         public const string AggregateName = "accountReconciler";
         private readonly ILogger<AccountGrain> _logger;
