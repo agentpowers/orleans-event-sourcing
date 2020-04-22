@@ -1,0 +1,14 @@
+{
+	"id": "05462730-fbac-419b-a3ff-4142d40eb728",
+	"name": "local",
+	"values": [
+		{
+			"key": "api",
+			"value": "localhost:5000",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2020-04-22T01:52:54.239Z",
+	"_postman_exported_using": "Postman/7.22.1"
+}

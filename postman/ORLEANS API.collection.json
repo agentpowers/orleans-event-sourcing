@@ -39,15 +39,14 @@
 							]
 						},
 						"url": {
-							"raw": "http://localhost:5000/cache/ok3",
+							"raw": "http://{{api}}/cache/{{cache_key}}",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
 								"cache",
-								"ok3"
+								"{{cache_key}}"
 							]
 						},
 						"description": "get value by id\t"
@@ -76,15 +75,14 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/cache/ok3",
+							"raw": "http://{{api}}/cache/{{cache_key}}",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
 								"cache",
-								"ok3"
+								"{{cache_key}}"
 							]
 						}
 					},
@@ -118,15 +116,14 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/cache/ok3",
+							"raw": "http://{{api}}/cache/{{cache_key}}",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
 								"cache",
-								"ok3"
+								"{{cache_key}}"
 							]
 						}
 					},
@@ -163,15 +160,14 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/cache/ok2",
+							"raw": "http://{{api}}/cache/{{cache_key}}",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{api}}"
 							],
-							"port": "5000",
 							"path": [
 								"cache",
-								"ok2"
+								"{{cache_key}}"
 							]
 						}
 					},
@@ -190,7 +186,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"amount\": 1000\n}",
+							"raw": "{\n\t\"amount\": {{amount}}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -198,7 +194,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://{{api}}/account/{{accountId}}/deposit?amount=1000",
+							"raw": "http://{{api}}/account/{{accountId}}/deposit",
 							"protocol": "http",
 							"host": [
 								"{{api}}"
@@ -207,12 +203,6 @@
 								"account",
 								"{{accountId}}",
 								"deposit"
-							],
-							"query": [
-								{
-									"key": "amount",
-									"value": "1000"
-								}
 							]
 						}
 					},
@@ -254,7 +244,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"amount\": 1000,\n\t\"toAccountId\": 5\n}",
+							"raw": "{\n\t\"amount\": {{amount}},\n\t\"toAccountId\": {{toAccountId}}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -262,7 +252,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://{{api}}/account/{{accountId}}/transfer/{{toAccountId}}?amount=500",
+							"raw": "http://{{api}}/account/{{accountId}}/transfer",
 							"protocol": "http",
 							"host": [
 								"{{api}}"
@@ -270,14 +260,9 @@
 							"path": [
 								"account",
 								"{{accountId}}",
-								"transfer",
-								"{{toAccountId}}"
+								"transfer"
 							],
 							"query": [
-								{
-									"key": "amount",
-									"value": "500"
-								},
 								{
 									"key": "toAccountId",
 									"value": "5",

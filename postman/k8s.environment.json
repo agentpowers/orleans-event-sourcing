@@ -1,0 +1,14 @@
+{
+	"id": "e1c1e98c-64a6-4d23-94dd-67c0bbf3a2a3",
+	"name": "k8s",
+	"values": [
+		{
+			"key": "api",
+			"value": "localhost/api",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2020-04-22T01:52:47.362Z",
+	"_postman_exported_using": "Postman/7.22.1"
+}

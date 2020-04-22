@@ -1,0 +1,29 @@
+{
+	"id": "146e52f0-fd32-4814-8e58-8a3c0f4d5eb7",
+	"values": [
+		{
+			"key": "accountId",
+			"value": "1",
+			"enabled": true
+		},
+		{
+			"key": "toAccountId",
+			"value": "5",
+			"enabled": true
+		},
+		{
+			"key": "amount",
+			"value": "1000",
+			"enabled": true
+		},
+		{
+			"key": "cache_key",
+			"value": "cache1",
+			"enabled": true
+		}
+	],
+	"name": "My Workspace Globals",
+	"_postman_variable_scope": "globals",
+	"_postman_exported_at": "2020-04-22T01:53:07.194Z",
+	"_postman_exported_using": "Postman/7.22.1"
+}
