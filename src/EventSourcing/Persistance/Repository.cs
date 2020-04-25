@@ -22,27 +22,11 @@ namespace EventSourcing.Persistance
             _connectionString = connectionString;
         }
 
-        public async Task<Aggregate> GetAggregate(long id, string type)
-        {
-            using (IDbConnection conn = Connection)
-            {
-                return await conn.QueryFirstOrDefaultAsync<Aggregate>(Queries.GetAggregateSql, new { id, type });
-            }
-        }
-
         public async Task<Aggregate> GetAggregateByTypeName(string type)
         {
             using (IDbConnection conn = Connection)
             {
                 return await conn.QueryFirstOrDefaultAsync<Aggregate>(Queries.GetAggregateByTypeSql, new { type });
-            }
-        }
-
-        public async Task<Aggregate[]> GetAggregatesByTypeName(string type)
-        {
-            using (IDbConnection conn = Connection)
-            {
-                return (await conn.QueryAsync<Aggregate>(Queries.GetAggregatesByTypeSql, new { type })).ToArray();
             }
         }
 
@@ -54,28 +38,12 @@ namespace EventSourcing.Persistance
             }
         }
 
-        public async Task<Event> GetLastEvent(string aggregateName, long aggregateId)
-        {
-            using (IDbConnection conn = Connection)
-            {
-                return await conn.QueryFirstAsync<Event>(Queries.GetLastEventsSql(aggregateName), new { id = aggregateId });
-            }
-        }
-
         public async Task<(Snapshot, Event[])> GetSnapshotAndEvents(string aggregateName, long aggregateId)
         {
             using (IDbConnection conn = Connection)
             {
                 var snapshot  = await conn.QueryFirstOrDefaultAsync<Snapshot>(Queries.GetSnapshotSql(aggregateName), new { id = aggregateId });
                 return (snapshot, (await conn.QueryAsync<Event>(Queries.GetEventsByAggregateIdSql(aggregateName), new { id = aggregateId, aggregateVersion = (snapshot?.AggregateVersion).GetValueOrDefault() })).ToArray());
-            }
-        }
-
-        public async Task<long> GetSnapshotAggregateVersion(string aggregateName, long aggregateId)
-        {
-            using (IDbConnection conn = Connection)
-            {
-                return await conn.QueryFirstAsync<long>(Queries.GetSnapshotAggregateVersionSql(aggregateName), new { id = aggregateId });
             }
         }
 

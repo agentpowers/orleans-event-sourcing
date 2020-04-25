@@ -2,12 +2,6 @@ namespace EventSourcing.Persistance
 {
     internal static class Queries
     {   
-        public const string NewAggregateTableSql= 
-            @"CREATE TABLE IF NOT EXISTS Aggregate (
-                AggregateId bigint primary key not null generated always as identity,
-                Type varchar(255) not null UNIQUE,
-                Created timestamp not null
-            );";
         public static string CreateEventsTableSql(string aggregateType) =>
             @"CREATE TABLE IF NOT EXISTS " + aggregateType + @"_events (
                 Id bigint primary key not null generated always as identity,
@@ -54,16 +48,9 @@ namespace EventSourcing.Persistance
                         values (@AggregateId, @AggregateVersion, @Data, @Created)
                         returning Id;";
         }
-        public const string GetAggregateSql =
-            @"select * from Aggregate
-                where AggregateId=@id and Type=@type
-                limit 1;";
         public const string GetAggregateByTypeSql =
             @"select * from Aggregate
                 where Type=@type limit 1;";
-        public const string GetAggregatesByTypeSql =
-            @"select * from Aggregate
-                where Type=@type;";
         public static string GetSnapshotSql(string aggregateType)
         {
             return $@"select * from {aggregateType}_snapshots
@@ -107,13 +94,6 @@ namespace EventSourcing.Persistance
                         join aggregate ag on ag.aggregateid = ev.aggregateid
                         where ag.type=@AggregateTypeName and ev.AggregateVersion > @AggregateVersion
                         order by ev.Id asc;";
-        }
-        public static string GetLastEventsSql(string aggregateType)
-        {
-            return $@"select * from {aggregateType}_events
-                        where AggregateId=@id
-                        order by Id desc
-                        limit 1;";
-        }       
+        }   
     }
 }
