@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace EventSourcing.Persistance
 {
-    internal class Repository : IRepository
+    public class Repository : IRepository
     {
         private string _connectionString;
         private IDbConnection Connection
