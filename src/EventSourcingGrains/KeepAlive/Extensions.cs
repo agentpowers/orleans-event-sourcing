@@ -2,7 +2,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Hosting;
 
-namespace EventSourcing.Keeplive
+namespace EventSourcingGrains.Keeplive
 {
     public static class ConfigureKeepAliveSettingsExtensions
     {

@@ -1,5 +1,4 @@
-﻿using EventSourcing.Grains;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace EventSourcing
 {

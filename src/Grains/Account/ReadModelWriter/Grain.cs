@@ -1,6 +1,6 @@
-using EventSourcing.Grains;
+using EventSourcingGrains.Grains;
 using EventSourcing.Persistance;
-using EventSourcing.Stream;
+using EventSourcingGrains.Stream;
 using Grains.Repositories;
 using Orleans;
 using System;

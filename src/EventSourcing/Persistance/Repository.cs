@@ -51,7 +51,7 @@ namespace EventSourcing.Persistance
         {
             using (IDbConnection conn = Connection)
             {
-                return await conn.ExecuteScalarAsync<long>(Queries.NewAggregate(aggregateName), aggregate);
+                return await conn.ExecuteScalarAsync<long>(Queries.NewAggregate, aggregate);
             }
         }
 

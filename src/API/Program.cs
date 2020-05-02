@@ -10,6 +10,7 @@ using System;
 using System.Net;
 using Grains.Account;
 using Grains.Extensions;
+using EventSourcingGrains.Services;
 
 namespace API
 {
@@ -39,7 +40,7 @@ namespace API
             })
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
-            .AddGrainService<EventSourcing.Services.KeepAliveService>()
+            .AddGrainService<KeepAliveService>()
             .UseLinuxEnvironmentStatistics()
             .UseDashboard(x =>
              {
@@ -64,7 +65,7 @@ namespace API
             .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
-            .AddGrainService<EventSourcing.Services.KeepAliveService>()
+            .AddGrainService<KeepAliveService>()
             .UseDashboard(x =>
              {
                 x.HostSelf = false;

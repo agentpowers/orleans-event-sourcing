@@ -1,5 +1,6 @@
 using System;
 using EventSourcing;
+using EventSourcingGrains;
 
 namespace Grains.Account
 {

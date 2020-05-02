@@ -1,4 +1,6 @@
-namespace EventSourcing.Stream
+using EventSourcing;
+
+namespace EventSourcingGrains.Stream
 {
     public interface IStreamEvent : IEvent
     {

@@ -1,5 +1,5 @@
 using EventSourcing.Persistance;
-using EventSourcing.Stream;
+using EventSourcingGrains.Stream;
 using Orleans;
 using System;
 using System.Text.Json;

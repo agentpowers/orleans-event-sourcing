@@ -14,7 +14,8 @@
             "cwd": "${workspaceFolder}/API",
             "stopAtEntry": false,
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ORLEANS_ENV": "LOCAL"
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"

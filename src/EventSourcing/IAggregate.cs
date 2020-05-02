@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EventSourcing
+﻿namespace EventSourcing
 {
     public interface IAggregate<TState, TEvent>
     {       

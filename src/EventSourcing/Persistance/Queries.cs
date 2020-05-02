@@ -25,17 +25,16 @@ namespace EventSourcing.Persistance
                 Created timestamp not null
             );";
         public static string CreateEventsAndSnapshotsTableSql(string aggregateType) =>
-            $@"{CreateEventsTableSql(aggregateType)}
-               {CreateSnapshotsTableSql(aggregateType)}";
-        public static string NewAggregate(string aggregateType)
-        {
-            return $@"BEGIN TRANSACTION;
-                        {CreateEventsAndSnapshotsTableSql(aggregateType)}
-                        insert into Aggregate(Type) 
-                        values (@Type) 
-                        returning AggregateId;
-                    COMMIT;";
-        }
+            $@"BEGIN TRANSACTION;
+                {CreateEventsTableSql(aggregateType)}
+                {CreateSnapshotsTableSql(aggregateType)}
+            COMMIT;
+            ";
+        public static string NewAggregate = $@"BEGIN TRANSACTION;
+                                                insert into Aggregate(Type) 
+                                                values (@Type) 
+                                                returning AggregateId;
+                                            COMMIT;";
         public static string InsertEventSql(string aggregateType)
         {
             return $@"insert into {aggregateType}_events(AggregateId, AggregateVersion, EventVersion, ParentEventId, RootEventId, Type, Data, Created)
