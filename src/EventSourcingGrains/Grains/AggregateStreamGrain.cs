@@ -6,9 +6,9 @@ using Orleans.Concurrency;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using Microsoft.Extensions.Logging;
-using EventSourcing.Stream;
+using EventSourcingGrains.Stream;
 
-namespace EventSourcing.Grains
+namespace EventSourcingGrains.Grains
 {
     [Reentrant]
     public class AggregateStreamGrain : EventSourceGrain<AggregateStreamState, IStreamEvent>, IAggregateStreamGrain
@@ -47,10 +47,10 @@ namespace EventSourcing.Grains
             if(State.LastNotifiedEventId == 0)
             {
                 // init aggregate tables
-                await Repository.CreateEventsAndSnapshotsTables(_aggregateName);
+                await EventSource.InitPersistanceIfDoesNotExist(_aggregateName);
                 
                 // get last event from db
-                var lastEvent = await Repository.GetLastAggregateEvent(_aggregateName);
+                var lastEvent = await EventSource.GetLastAggregateEvent(_aggregateName);
 
                 // get LastNotifiedEventVersion as latest aggregate version from db or 0
                 await ApplyEvent(new UpdatedLastNotifiedEventId{ LastNotifiedEventId = lastEvent?.Id ?? 0 });
@@ -80,7 +80,7 @@ namespace EventSourcing.Grains
         private async Task PollForEvents(object args)
         {
             // get new events after last Queued Event Id
-            var newEvents = await Repository.GetAggregateEvents(_aggregateName, _lastQueuedEventId);
+            var newEvents = await EventSource.GetAggregateEvents(_aggregateName, _lastQueuedEventId);
 
             // short circuit if no events to process
             if (newEvents.Length == 0)

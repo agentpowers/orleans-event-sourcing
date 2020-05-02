@@ -1,9 +1,9 @@
 using Orleans.Hosting;
-using EventSourcing.Stream;
+using EventSourcingGrains.Stream;
 using Grains.Account;
 using Grains.Account.ReadModelWriter;
 using Grains.Account.Reconciler;
-using EventSourcing.Keeplive;
+using EventSourcingGrains.Keeplive;
 using System;
 
 namespace Grains.Extensions

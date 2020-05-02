@@ -1,14 +1,14 @@
 using System;
 using System.Threading.Tasks;
-using EventSourcing.Grains;
+using EventSourcingGrains.Grains;
 using Microsoft.Extensions.Logging;
 using Orleans;
-using EventSourcing.Stream;
+using EventSourcingGrains.Stream;
 using EventSourcing.Persistance;
 using System.Collections.Generic;
 using Orleans.Concurrency;
+using EventSourcingGrains.Keeplive;
 using EventSourcing;
-using EventSourcing.Keeplive;
 
 namespace Grains.Account.Reconciler
 {
@@ -22,7 +22,6 @@ namespace Grains.Account.Reconciler
     {
         public const string AggregateName = "accountReconciler";
         private readonly ILogger<AccountGrain> _logger;
-        private readonly EventSourcing.Persistance.IRepository _eventSourcingRepository;
         private TimeSpan _reverseTransactionWaitPeriod = TimeSpan.FromMinutes(2);
         // flag indicating if tranfer debited event queue is being processed
         private bool _isProcessingTransferDebitedEventQueue = false;
@@ -35,11 +34,8 @@ namespace Grains.Account.Reconciler
         private Queue<AggregateEvent> _eventQueue = new Queue<AggregateEvent>();
         // queue with TransferDebitedEvent TransactionId and AggregateEvent
         private Queue<(Guid TransactionId, AggregateEvent AggregateEvent)> _transferDebitedEventQueue = new Queue<(Guid, AggregateEvent)>();
-        public AccountReconcilerGrain(
-            EventSourcing.Persistance.IRepository eventSourcingRepository,
-            ILogger<AccountGrain> logger): base(AggregateName, new AccountReconcilerAggregate())
+        public AccountReconcilerGrain(ILogger<AccountGrain> logger): base(AggregateName, new AccountReconcilerAggregate())
         {
-            _eventSourcingRepository = eventSourcingRepository;
             _logger = logger;
         }
 
@@ -47,8 +43,11 @@ namespace Grains.Account.Reconciler
         {
             await base.OnActivateAsync();
 
+            // init account aggregate if needed
+            await EventSource.InitPersistanceIfDoesNotExist(AccountGrain.AggregateName);
+
             //load all account events after last event
-            var aggregateEvents = await _eventSourcingRepository.GetAggregateEvents(AccountGrain.AggregateName, State.lastProcessedEventId);
+            var aggregateEvents = await EventSource.GetAggregateEvents(AccountGrain.AggregateName, State.lastProcessedEventId);
             foreach (var aggregateEvent in aggregateEvents)
             {
                 // add event to queue

@@ -6,7 +6,7 @@ using Orleans;
 using Microsoft.Extensions.Hosting;
 using System;
 using Grains.Extensions;
-using EventSourcing.Extensions;
+using EventSourcingGrains.Extensions;
 
 namespace API
 {
@@ -26,8 +26,6 @@ namespace API
             var postgresConnectionString = Program.isLocal 
                 ? "host=localhost;database=EventSourcing;username=orleans;password=orleans"
                 : $"host={dbHost};database=postgresdb;username=postgresadmin;password=postgrespwd";
-            // add evensourcing related services
-            services.AddEventSourcing(postgresConnectionString);
             // add grain service
             services.AddGrainServices(postgresConnectionString);
             // add controllers

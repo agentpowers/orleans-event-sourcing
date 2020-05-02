@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Orleans;
 
-namespace EventSourcing.Keeplive
+namespace EventSourcingGrains.Keeplive
 {
     public class KeepAliveGrainSetting
     {

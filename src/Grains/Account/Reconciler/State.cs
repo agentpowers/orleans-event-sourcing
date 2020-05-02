@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using EventSourcing;
+using EventSourcingGrains;
 
 namespace Grains.Account.Reconciler
 {

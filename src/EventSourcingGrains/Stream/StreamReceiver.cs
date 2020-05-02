@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using EventSourcing.Persistance;
 using Orleans;
 
-namespace EventSourcing.Stream
+namespace EventSourcingGrains.Stream
 {
     public interface IAggregateStreamReceiver : IGrain
     {

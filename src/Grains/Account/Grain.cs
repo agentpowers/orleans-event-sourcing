@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using EventSourcing.Grains;
+using EventSourcingGrains.Grains;
 using Microsoft.Extensions.Logging;
 
 namespace Grains.Account

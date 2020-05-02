@@ -2,7 +2,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Hosting;
 
-namespace EventSourcing.Stream
+namespace EventSourcingGrains.Stream
 {
     public static class ConfigureAggregateStreamExtensions
     {

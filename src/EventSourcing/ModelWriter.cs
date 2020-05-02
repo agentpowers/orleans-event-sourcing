@@ -1,14 +1,12 @@
 using System.Threading.Tasks;
 using EventSourcing.Persistance;
-using Orleans;
 
-namespace EventSourcing.Grains
+namespace EventSourcing
 {
-    public abstract class ModelWriter<TState, TEvent>: Grain
+    public abstract class ModelWriter<TState, TEvent>
         where TState : class
         where TEvent : AggregateEvent
     {
-        public const string GrainPrefix = "writer:";
         // aggregate
         private IAggregate<TState, TEvent> _aggregate;
 

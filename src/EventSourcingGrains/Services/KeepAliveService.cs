@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using Orleans.Core;
 using Microsoft.Extensions.Logging;
 using Orleans.Services;
-using EventSourcing.Stream;
+using EventSourcingGrains.Stream;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
-using EventSourcing.Keeplive;
+using EventSourcingGrains.Keeplive;
 
-namespace EventSourcing.Services
+namespace EventSourcingGrains.Services
 {
     public interface IKeepAliveService: IGrainService{}
     public class KeepAliveService : GrainService, IKeepAliveService

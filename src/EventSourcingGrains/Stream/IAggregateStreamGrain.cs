@@ -1,8 +1,7 @@
-using System.Threading.Tasks;
-using EventSourcing.Keeplive;
+using EventSourcingGrains.Keeplive;
 using Orleans;
 
-namespace EventSourcing.Stream
+namespace EventSourcingGrains.Stream
 {
     public interface IAggregateStreamGrain: IKeepAliveGrain, IGrainWithStringKey
     {

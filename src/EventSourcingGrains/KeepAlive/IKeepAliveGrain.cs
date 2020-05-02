@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Orleans;
 
-namespace EventSourcing.Keeplive
+namespace EventSourcingGrains.Keeplive
 {
     public interface IKeepAliveGrain: IGrainWithStringKey
     {
