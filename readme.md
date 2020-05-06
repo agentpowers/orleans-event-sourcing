@@ -9,12 +9,10 @@ kubectl port-forward pods/postgres-demo-0 5432:5432 -n default
 
 
 # Runnig locally
-## set environment variable "ORLEANS_ENV" with value "LOCAL" - this is needed to switch orlean cluster config and database connection string to use local values.  If debugging using VSCODE this variable is already configured in .vscode/launch.json
+## set environment variable "ORLEANS_ENV" with value "LOCAL" - this is needed to switch orlean cluster config and database connection string to use local values.  **If debugging using VSCODE this variable is already configured in .vscode/launch.json**
 ## create a postgres database with name "EventSourcing". Create username "orleans" with password "orleans" with access to "EventSourcing" database
-## In local database run the following script(s)
-```
-src/sql-scripts/init-tables.sql
-```
+## In local database run script(s) in the following directory  
+src/sql-scripts/
 ## start application
 ```
 cd src/API && dotnet run
