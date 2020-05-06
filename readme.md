@@ -11,13 +11,9 @@ kubectl port-forward pods/postgres-demo-0 5432:5432 -n default
 # Runnig locally
 ## set environment variable "ORLEANS_ENV" with value "LOCAL" - this is needed to switch orlean cluster config and database connection string to use local values.  If debugging using VSCODE this variable is already configured in .vscode/launch.json
 ## create a postgres database with name "EventSourcing". Create username "orleans" with password "orleans" with access to "EventSourcing" database
-## In local database run the following script to add Aggregate table
+## In local database run the following script(s)
 ```
-CREATE TABLE IF NOT EXISTS Aggregate (
-    AggregateId bigint primary key not null generated always as identity,
-    Type varchar(255) not null UNIQUE,
-    Created timestamp default current_timestamp
-);
+src/sql-scripts/init-tables.sql
 ```
 ## start application
 ```
