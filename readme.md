@@ -1,5 +1,5 @@
 
-# Orleans Event Sourcing
+# Event Sourcing with [Orleans](https://github.com/dotnet/orleans)
 
 ## Deploy k8s (using [skaffold](https://skaffold.dev/))
 
