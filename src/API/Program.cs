@@ -36,6 +36,7 @@ namespace API
             .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
             .UseKubeMembership(opt =>
             {
+                opt.CanCreateResources = true;
                 opt.DropResourcesOnInit = true;
             })
             .AddMemoryGrainStorageAsDefault()

@@ -9,7 +9,7 @@
     <PackageReference Include="Microsoft.Orleans.Client" Version="3.1.6" />
     <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="3.1.6" />
     <PackageReference Include="Orleans.Clustering.Kubernetes" Version="1.2.2" />
-    <PackageReference Include="OrleansDashboard" Version="3.0.8" />
+    <PackageReference Include="OrleansDashboard" Version="3.1.0" />
     <PackageReference Include="Microsoft.Orleans.OrleansTelemetryConsumers.Linux" Version="3.1.6" />
   </ItemGroup>
   <ItemGroup>
