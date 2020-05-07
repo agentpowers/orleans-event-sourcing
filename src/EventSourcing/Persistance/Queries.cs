@@ -25,7 +25,9 @@ namespace EventSourcing.Persistance
                 Created timestamp not null
             );";
         public static string CreateEventsAndSnapshotsTableSql(string aggregateType) =>
+            // added adivsory lock to prevent concurrency issues when multiple session try to create same table
             $@"BEGIN TRANSACTION;
+                SELECT pg_advisory_xact_lock({aggregateType.GetHashCode()});
                 {CreateEventsTableSql(aggregateType)}
                 {CreateSnapshotsTableSql(aggregateType)}
             COMMIT;
