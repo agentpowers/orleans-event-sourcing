@@ -18,8 +18,8 @@ namespace EventSourcingGrains.Grains
         private readonly ILogger<AggregateStreamGrain> _logger;
         private bool _isNotifyingSubscribers = false;
         private long _lastQueuedEventId;
-        
         private string _aggregateName;
+        private static TimeSpan _pollingInterval = TimeSpan.FromSeconds(1);
 
         public AggregateStreamGrain(ILogger<AggregateStreamGrain> logger): base("stream", new AggregateStream())
         {
@@ -60,7 +60,7 @@ namespace EventSourcingGrains.Grains
             _lastQueuedEventId = State.LastNotifiedEventId;
 
             // register pollForEvents method
-            this.RegisterTimer(PollForEvents, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+            this.RegisterTimer(PollForEvents, null, TimeSpan.FromSeconds(1), _pollingInterval);
         }
 
         /// <summary>
