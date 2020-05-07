@@ -31,7 +31,7 @@ metadata:
 spec:
   replicas: 2
   strategy:
-    type: Recreate
+    type: RollingUpdate
   selector:
     matchLabels:
       app: api
@@ -49,9 +49,9 @@ spec:
         image: api
         resources:
           requests:
-            memory: "64Mi"
+            memory: "100Mi"
           limits:
-            memory: "98Mi"
+            memory: "128Mi"
         ports:
         - containerPort: 80
         - containerPort: 1111
