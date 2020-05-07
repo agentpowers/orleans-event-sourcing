@@ -60,6 +60,8 @@ namespace EventSourcingGrains.Grains
             var grainKey = GetGrainKey();
             // init EventSource
             await EventSource.Init(_aggregateName, _aggregate, ShouldSaveSnapshot, grainKey);
+            // restore EventSource State
+            await EventSource.Restore();
             // call base OnActivateAsync
             await base.OnActivateAsync();
         }
