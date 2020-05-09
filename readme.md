@@ -1,9 +1,10 @@
 
 # Event Sourcing with [Orleans](https://github.com/dotnet/orleans)
 
-## Deploy k8s (using [skaffold](https://skaffold.dev/))
+## Deploy to k8s (using [skaffold](https://skaffold.dev/))
 
-run  `skaffold run` or `skaffold dev` from src folder
+1. run  `cd src/k8s && skaffold run`
+2. Orleans Dashboard is available at - http://localhost/api/dashboard
 
 ### Access Postgres in k8s cluster
 
@@ -11,7 +12,9 @@ run  `skaffold run` or `skaffold dev` from src folder
 
 2. Then use any postgres database GUI like azure data studio to access the db.
 ```kubectl port-forward pods/postgres-demo-0 5432:5432 -n default```
-3. Orleans Dashboard - http://localhost/api/dashboard
+    * database: postgresdb
+    * user: postgresadmin
+    * password: postgrespwd
 
 ## Running locally
 
@@ -21,11 +24,12 @@ run  `skaffold run` or `skaffold dev` from src folder
 2. Create a postgres database with name "EventSourcing".
 
 3. Create username "orleans" with password "orleans" with access to "EventSourcing" database
-4. In local database run script(s) in the following directory  
-`src/sql-scripts`
+4. In local database run script(s) in the following directories
+    * `src/EventSourcing/sql-scripts`
+    * `src/examples/Account/sql-scripts`
 5. start application  
-`cd src/API && dotnet run`
-6. Orleans Dashboard - http://localhost:5000/dashboard
+`cd src/examples/Account && dotnet run`
+6. Orleans Dashboard is available at - http://localhost:5000/dashboard
 
 ### OR
 
