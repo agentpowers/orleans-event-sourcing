@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: account
+  labels:
+    app: account
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: account-port
+    - port: 11111
+      targetPort: 11111
+      protocol: TCP
+      name: silo-port
+    - port: 30000
+      targetPort: 30000
+      protocol: TCP
+      name: gateway-port
+  selector:
+    app: account
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: account
+  labels:
+    app: account
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: account
+  template:
+    metadata:
+      labels:
+        app: account
+    spec:
+      initContainers:
+      - name: init-postgres
+        image: busybox:1.28
+        command: ['sh', '-c', "until nslookup postgres.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for postgres; sleep 2; done"]
+      containers:
+      - name: account
+        image: account
+        resources:
+          requests:
+            memory: "100Mi"
+          limits:
+            memory: "128Mi"
+        ports:
+        - containerPort: 80
+        - containerPort: 1111
+        - containerPort: 30000
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP

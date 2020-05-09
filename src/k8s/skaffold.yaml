@@ -1,0 +1,20 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: account
+    context: ../
+    docker:
+      dockerfile: docker/Account.Dockerfile
+  - image: postgres
+    context: ../
+    docker:
+      dockerfile: docker/Postgres.Dockerfile
+deploy:
+  kubectl:
+    manifests:
+    - ClusterVersionCRD.yaml
+    - SiloEntryCRD.yaml
+    - postgres.yaml
+    - ingress.yaml
+    - account.yaml
