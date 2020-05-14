@@ -4,7 +4,6 @@ using Orleans.Hosting;
 using Orleans;
 using Orleans.Configuration;
 using Microsoft.Extensions.Hosting;
-using Orleans.Clustering.Kubernetes;
 using Orleans.Statistics;
 using System;
 using System.Net;
@@ -17,25 +16,26 @@ namespace Caching
         const int siloPort = 11111;
         const int gatewayPort = 30000;
 
-        public static bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
+        public static bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Development");
 
-        
-        //https://stackoverflow.com/questions/54841844/orleans-direct-client-in-asp-net-core-project/54842916#54842916
+        public static string connectionString = Program.isLocal 
+				? "host=localhost;database=EventSourcing;username=orleans;password=orleans"
+				: $"host={Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST")};database=postgresdb;username=postgresadmin;password=postgrespwd";
         private static void ConfigureOrleans(ISiloBuilder builder)
         {
             // get injected pod ip address 
             var podIPAddress = Environment.GetEnvironmentVariable("POD_IP");
             builder.Configure<ClusterOptions>(options => 
             {
-                options.ClusterId = "cache-cluster";
-                options.ServiceId = "CACHING";
+                options.ClusterId = "account-cluster";
+                options.ServiceId = "ACCOUNT";
             })
             .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Parse(podIPAddress))
             .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
-            .UseKubeMembership(opt =>
+            .UseAdoNetClustering(options =>
             {
-                opt.CanCreateResources = true;
-                opt.DropResourcesOnInit = true;
+                options.Invariant = "Npgsql";
+                options.ConnectionString = connectionString;
             })
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CacheGrain<>).Assembly).WithReferences())
@@ -53,12 +53,16 @@ namespace Caching
         {
             builder.Configure<ClusterOptions>(options => 
             {
-                options.ClusterId = "cache-cluster";
-                options.ServiceId = "CACHING";
+                options.ClusterId = "account-cluster";
+                options.ServiceId = "ACCOUNT";
             })
-            .UseLocalhostClustering()
             .ConfigureEndpoints(new Random(1).Next(10001, 10100), new Random(1).Next(20001, 20100))
             .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
+            .UseAdoNetClustering(options =>
+            {
+                options.Invariant = "Npgsql";
+                options.ConnectionString = connectionString;
+            })
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CacheGrain<>).Assembly).WithReferences())
             .UseDashboard(x =>
@@ -82,6 +86,7 @@ namespace Caching
                 {
                     builder.UseStartup<Startup>();
                 });
+            // configure
             if(isLocal)
             {
                 hostBuilder.UseOrleans(ConfigureLocalOrleans);
