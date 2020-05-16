@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "c7f79825-0b09-432c-8c6a-fbfffdfad6bf",
-		"name": "ORLEANS API",
+		"_postman_id": "352a0535-65ed-44a3-a396-65bd2e2dfe1f",
+		"name": "ORLEANS_Cache",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -168,126 +168,6 @@
 							"path": [
 								"cache",
 								"{{cache_key}}"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
-			"name": "account",
-			"item": [
-				{
-					"name": "DEPOSIT",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"amount\": {{amount}}\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://{{api}}/account/{{accountId}}/deposit",
-							"protocol": "http",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"account",
-								"{{accountId}}",
-								"deposit"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "WITHDRAW",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"amount\": 1000\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://{{api}}/account/{{accountId}}/withdraw",
-							"protocol": "http",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"account",
-								"{{accountId}}",
-								"withdraw"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "TRANSFER",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"amount\": {{amount}},\n\t\"toAccountId\": {{toAccountId}}\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://{{api}}/account/{{accountId}}/transfer",
-							"protocol": "http",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"account",
-								"{{accountId}}",
-								"transfer"
-							],
-							"query": [
-								{
-									"key": "toAccountId",
-									"value": "5",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "BALANCE",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://{{api}}/account/{{accountId}}/",
-							"protocol": "http",
-							"host": [
-								"{{api}}"
-							],
-							"path": [
-								"account",
-								"{{accountId}}",
-								""
 							]
 						}
 					},
