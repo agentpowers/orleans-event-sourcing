@@ -46,3 +46,5 @@
 * import k8s.environment.json for k8s variables
 * import local.environment.json for local variables
 * import ORLEANS API.collection for endpoints
+
+### to run postman runners in parallel see postman/parallel_runner directory
