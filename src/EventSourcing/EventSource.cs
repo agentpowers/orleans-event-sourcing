@@ -44,7 +44,7 @@ namespace EventSourcing
         /// </summary>
         Task<long> ApplyEvent(TEvent @event, long? rootEventId = null, long? parentEventId = null);
         /// <summary>
-        /// Get Aggregate events that occured after eventId
+        /// Get Aggregate events that occurred after eventId
         /// </summary>
         /// <param name="eventId"></param>
         /// <returns></returns>
@@ -55,7 +55,7 @@ namespace EventSourcing
         /// <returns></returns>
         Task<AggregateEvent> GetLastAggregateEvent();
         /// <summary>
-        /// Get Aggregate events that occured after eventId
+        /// Get Aggregate events that occurred after eventId
         /// </summary>
         /// <param name="eventId"></param>
         /// <returns></returns>
