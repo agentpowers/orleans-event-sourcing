@@ -21,7 +21,7 @@ namespace Account
 		public void ConfigureServices(IServiceCollection services)
 		{
 			var dbHost = Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST");
-			// configure postgres connection string
+			// configure postgre connection string
 			var postgresConnectionString = Program.isLocal 
 				? "host=localhost;database=EventSourcing;username=orleans;password=orleans"
 				: $"host={dbHost};database=postgresdb;username=postgresadmin;password=postgrespwd";

@@ -3,7 +3,7 @@
 
 ## Running locally
 
-1. Set environment variable "ORLEANS_ENV" with value "LOCAL" - this is needed to switch orlean cluster config and database connection string to use local values.
+1. Set environment variable "ORLEANS_ENV" with value "LOCAL" - this is needed to switch orleans cluster config and database connection string to use local values.
     > If debugging using VSCODE this variable is already configured in .vscode/launch.json
 
 2. Create a postgres database with name "EventSourcing".
