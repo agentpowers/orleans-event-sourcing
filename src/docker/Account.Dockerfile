@@ -1,6 +1,8 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS build
 WORKDIR /src
 
+#TODO: split nuget restore and build into multiple steps
+
 # Copy csproj and dependencies
 COPY ./examples/Account examples/Account
 COPY ./examples/Account.Grains examples/Account.Grains
