@@ -77,7 +77,7 @@ namespace EventSourcingGrains.Grains
 
         /// <summary>
         /// save event to db then apply event to state
-        /// snapshot will be created for every 10 events
+        /// snapshot will be created for every 20 events
         /// Returns id of the newly applied event(from db)
         /// </summary>
         protected Task<long> ApplyEvent(TEvent @event, long? rootEventId = null, long? parentEventId = null)

@@ -28,7 +28,7 @@ namespace EventSourcingGrains.Grains
         
         public override async Task OnActivateAsync()
         {
-            // set current grian key as aggregateName
+            // set current grain key as aggregateName
             _aggregateName = GrainReference.GetPrimaryKeyString();
 
             // get IAggregateStreamSettings instance from service collection filtered by grainKey

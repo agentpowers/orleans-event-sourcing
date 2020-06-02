@@ -9,7 +9,7 @@ build:
   - image: postgres
     context: ../
     docker:
-      dockerfile: docker/Postgres.Dockerfile
+      dockerfile: docker/Account.Postgres.Dockerfile
 deploy:
   kubectl:
     manifests:

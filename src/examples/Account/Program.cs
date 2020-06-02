@@ -16,23 +16,27 @@ namespace Account
 {
     public class Program
     {
-        const int siloPort = 11111;
-        const int gatewayPort = 30000;
+        const int defaultSiloPort = 11111;
+        const int defaultGatewayPort = 30000;
 
-        public static bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
-        
+        private static bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
+        private static string siloPortEnv = Environment.GetEnvironmentVariable("SILO_PORT");
+        private static string gatewayPortEnv = Environment.GetEnvironmentVariable("GATEWAY_PORT");
+        private static string podIPAddressEnv = Environment.GetEnvironmentVariable("POD_IP");
+        private static string customPortEnv = Environment.GetEnvironmentVariable("CUSTOM_PORT");
+        private static string postgresServiceHostEnv = Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST");
+        public static string ConnectionString = $"host={(string.IsNullOrEmpty(postgresServiceHostEnv) ? "localhost" : postgresServiceHostEnv)};database=postgresdb;username=postgresadmin;password=postgrespwd";
+       
         //https://stackoverflow.com/questions/54841844/orleans-direct-client-in-asp-net-core-project/54842916#54842916
         private static void ConfigureOrleans(ISiloBuilder builder)
         {
-            // get injected pod ip address 
-            var podIPAddress = Environment.GetEnvironmentVariable("POD_IP");
             builder.Configure<ClusterOptions>(options => 
             {
                 options.ClusterId = "account-cluster";
                 options.ServiceId = "ACCOUNT";
             })
-            .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Parse(podIPAddress))
-            .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
+            .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Parse(podIPAddressEnv))
+            .ConfigureEndpoints(siloPort: defaultSiloPort, gatewayPort: defaultGatewayPort)
             .UseKubeMembership(opt =>
             {
                 opt.CanCreateResources = true;
@@ -60,9 +64,14 @@ namespace Account
                 options.ClusterId = "account-cluster";
                 options.ServiceId = "ACCOUNT";
             })
-            .UseLocalhostClustering()
-            .ConfigureEndpoints(new Random(1).Next(10001, 10100), new Random(1).Next(20001, 20100))
-            .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
+            .ConfigureEndpoints(
+                string.IsNullOrEmpty(siloPortEnv) ? defaultSiloPort : int.Parse(siloPortEnv),
+                string.IsNullOrEmpty(gatewayPortEnv) ? defaultGatewayPort : int.Parse(gatewayPortEnv))
+            .UseAdoNetClustering(options =>
+            {
+                options.Invariant = "Npgsql";
+                options.ConnectionString = ConnectionString;
+            })
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
             .AddGrainService<KeepAliveService>()
@@ -88,6 +97,15 @@ namespace Account
                 .ConfigureWebHostDefaults(builder =>
                 {
                     builder.UseStartup<Startup>();
+                    //use custom port if provided for kestrel
+                    if (!string.IsNullOrEmpty(customPortEnv))
+                    {
+                        Console.WriteLine($"Starting Kestrel in port {customPortEnv}");
+                        builder.UseKestrel(kestrelOptions =>
+                        {
+                            kestrelOptions.ListenAnyIP(int.Parse(customPortEnv));
+                        });
+                    }
                 });
             if(isLocal)
             {
