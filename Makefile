@@ -68,6 +68,14 @@ cleanup_account:
 	docker rm ev_account; \
 	docker network rm account_net;
 
+run_account_db:
+	docker build --tag account_db -f src/docker/Account.Postgres.Dockerfile src
+	docker run -v /tmp/ev_account:/var/lib/postgresql/data -e POSTGRES_DB=postgresdb -e POSTGRES_USER=postgresadmin -e POSTGRES_PASSWORD=postgrespwd -p 5432:5432 --detach --name ev_account account_db
+
+cleanup_account_db:
+	docker kill ev_account; \
+	docker rm ev_account; \
+
 # deploy to k8s
 k8s_run_account:
 	cd src/k8s && skaffold run
