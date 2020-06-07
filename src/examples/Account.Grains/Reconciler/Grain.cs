@@ -43,9 +43,6 @@ namespace Account.Grains.Reconciler
         {
             await base.OnActivateAsync();
 
-            // init account aggregate if needed
-            await EventSource.InitPersistanceIfDoesNotExist(AccountGrain.AggregateName);
-
             //load all account events after last event
             var aggregateEvents = await EventSource.GetAggregateEvents(AccountGrain.AggregateName, State.lastProcessedEventId);
             foreach (var aggregateEvent in aggregateEvents)

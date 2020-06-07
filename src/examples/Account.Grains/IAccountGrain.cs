@@ -12,6 +12,7 @@ namespace Account.Grains
         Unknown = 1,
         InsufficientFunds = 2
     }
+    [Immutable]
     public struct AccountResponse<T>
     {
         public T Value { get; set; }

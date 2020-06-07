@@ -22,8 +22,9 @@ namespace EventSourcing
         /// <param name="aggregate"></param>
         /// <param name="shouldSaveSnapshot"></param>
         /// <param name="aggregateIdString"></param>
+        /// <param name="shouldThrowIfAggregateDoesNotExist"></param>
         /// <returns></returns>
-        Task Init(string aggregateName, IAggregate<TState, TEvent> aggregate, Func<TEvent, long, bool> shouldSaveSnapshot, string aggregateIdString);
+        Task Init(string aggregateName, IAggregate<TState, TEvent> aggregate, Func<TEvent, long, bool> shouldSaveSnapshot, string aggregateIdString, bool shouldThrowIfAggregateDoesNotExist);
         /// <summary>
         /// Get State
         /// </summary>
@@ -65,7 +66,6 @@ namespace EventSourcing
         /// </summary>
         /// <returns></returns>
         Task<AggregateEvent> GetLastAggregateEvent(string aggregateName);
-        Task InitPersistanceIfDoesNotExist(string aggregateName);
     }
 
     public class EventSource<TState, TEvent> : IEventSource<TState, TEvent>
@@ -112,7 +112,8 @@ namespace EventSourcing
             string aggregateName,
             IAggregate<TState, TEvent> aggregate,
             Func<TEvent, long, bool> shouldSaveSnapshot,
-            string aggregateIdString)
+            string aggregateIdString,
+            bool shouldThrowIfAggregateDoesNotExist)
         {
             // TODO: either validate aggregate name so that it can be prefixed as table name 
             // or convert to valid table name prefix and handle mapping between converted and aggregateName argument
@@ -127,8 +128,11 @@ namespace EventSourcing
             var dbAggregate = await _repository.GetAggregateByTypeName(aggregateType);
             if (dbAggregate == null)
             {
-                // init tables for aggregateName
-                await InitPersistanceIfDoesNotExist(_aggregateName);
+                // throw if settings
+                if (shouldThrowIfAggregateDoesNotExist)
+                {
+                    throw new AggregateDoesNotExistException(_aggregateName);
+                }
                 // add new aggregate if it doesn't exist
                 AggregateId = await _repository.SaveAggregate(
                     _aggregateName,
@@ -254,8 +258,5 @@ namespace EventSourcing
         
         public Task<AggregateEvent> GetLastAggregateEvent(string aggregateName) => 
             _repository.GetLastAggregateEvent(aggregateName);
-
-        public Task InitPersistanceIfDoesNotExist(string aggregateName) =>
-            _repository.CreateEventsAndSnapshotsTables(aggregateName);
     }
 }

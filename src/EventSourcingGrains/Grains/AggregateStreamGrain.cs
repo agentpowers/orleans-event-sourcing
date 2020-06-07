@@ -20,8 +20,9 @@ namespace EventSourcingGrains.Grains
         private long _lastQueuedEventId;
         private string _aggregateName;
         private static TimeSpan _pollingInterval = TimeSpan.FromSeconds(1);
+        public const string AggregateName = "aggregate_stream";
 
-        public AggregateStreamGrain(ILogger<AggregateStreamGrain> logger): base("stream", new AggregateStream())
+        public AggregateStreamGrain(ILogger<AggregateStreamGrain> logger): base(AggregateName, new AggregateStream())
         {
             _logger = logger;
         }
@@ -46,9 +47,6 @@ namespace EventSourcingGrains.Grains
             // set LastNotifiedEventVersion if needed
             if(State.LastNotifiedEventId == 0)
             {
-                // init aggregate tables
-                await EventSource.InitPersistanceIfDoesNotExist(_aggregateName);
-                
                 // get last event from db
                 var lastEvent = await EventSource.GetLastAggregateEvent(_aggregateName);
 
