@@ -11,6 +11,7 @@ namespace EventSourcingGrains.Grains
         where TEvent : IEvent
     {
         protected IEventSource<TState, TEvent> EventSource;
+        private EventSourceGrainSetting _eventSourceGrainSettings = null;
         private string _aggregateName;
         private IAggregate<TState, TEvent> _aggregate;
         
@@ -54,12 +55,15 @@ namespace EventSourcingGrains.Grains
         /// <returns></returns>
         public override async Task OnActivateAsync()
         {
+            // get grain settings
+            var eventSourceGrainSettingsMap = (IEventSourceGrainSettingsMap)ServiceProvider.GetService(typeof(IEventSourceGrainSettingsMap));
+            eventSourceGrainSettingsMap.TryGetValue(_aggregateName, out _eventSourceGrainSettings);
             // get instance of EventSource
             EventSource = (IEventSource<TState, TEvent>)ServiceProvider.GetService(typeof(IEventSource<TState, TEvent>));
             // get grain key
             var grainKey = GetGrainKey();
             // init EventSource
-            await EventSource.Init(_aggregateName, _aggregate, ShouldSaveSnapshot, grainKey);
+            await EventSource.Init(_aggregateName, _aggregate, ShouldSaveSnapshot, grainKey, _eventSourceGrainSettings?.ShouldThrowIfAggregateDoesNotExist ?? false);
             // restore EventSource State
             await EventSource.Restore();
             // call base OnActivateAsync

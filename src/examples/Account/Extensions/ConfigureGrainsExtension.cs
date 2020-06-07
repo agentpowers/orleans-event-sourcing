@@ -1,4 +1,5 @@
 using Orleans.Hosting;
+using EventSourcingGrains.Grains;
 using EventSourcingGrains.Stream;
 using EventSourcingGrains.Keeplive;
 using System;
@@ -39,13 +40,22 @@ namespace Account.Extensions
             {
                 keepAliveSettings.GrainKeepAliveSettings.Add(new KeepAliveGrainSetting
                 { 
-                    Interval = TimeSpan.FromMinutes(60),
+                    Interval = TimeSpan.FromMinutes(10),
                     GrainResolver = (grainFactory) => 
                     {
                         var grain = grainFactory.GetGrain<IAccountReconcilerGrain>(nameof(AccountReconcilerGrain));
                         return grain;
                     }
                 });
+            });
+
+            // eventsourcing grain configuration
+            builder.ConfigureEventSourcingGrains((settings) => 
+            {
+                // account grain
+                settings.Add(AccountGrain.AggregateName, new EventSourceGrainSetting());
+                // account reconciler grain
+                settings.Add(AccountReconcilerGrain.AggregateName, new EventSourceGrainSetting());
             });
         }
     }
