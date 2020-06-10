@@ -22,7 +22,7 @@ namespace Caching
         private static string podIPAddressEnv = Environment.GetEnvironmentVariable("POD_IP");
         private static string customPortEnv = Environment.GetEnvironmentVariable("CUSTOM_PORT");
         private static string postgresServiceHostEnv = Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST");
-        private static string connectionString = $"host={(string.IsNullOrEmpty(postgresServiceHostEnv) ? "localhost" : postgresServiceHostEnv)};database=postgresdb;username=postgresadmin;password=postgrespwd";
+        private static string connectionString = $"host={(string.IsNullOrEmpty(postgresServiceHostEnv) ? "localhost" : postgresServiceHostEnv)};database=postgresdb;username=postgresadmin;password=postgrespwd;Enlist=false;";
         private static void ConfigureOrleans(ISiloBuilder builder)
         {
             builder.Configure<ClusterOptions>(options => 

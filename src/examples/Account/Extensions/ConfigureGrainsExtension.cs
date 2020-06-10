@@ -16,22 +16,22 @@ namespace Account.Extensions
             // configure stream
             builder.ConfigureAggregateStream(AccountGrain.AggregateName, (aggregateStreamSettings) => 
             {
-                // test
-                aggregateStreamSettings.EventReceiverGrainResolverMap.Add(nameof(AccountAggregateReceiver), (aggregateEvent, grainFactory) =>
-                {
-                    return (IAccountAggregateReceiver)grainFactory.GetGrain(typeof(IAccountAggregateReceiver), aggregateEvent.AggregateType);
-                });
-
                 // account writer
-                aggregateStreamSettings.EventReceiverGrainResolverMap.Add(nameof(AccountModelWriterGrain), (aggregateEvent, grainFactory) =>
+                aggregateStreamSettings.EventDispatcherSettingsMap.Add(nameof(AccountModelWriterGrain), new EventDispatcherSettings
                 {
-                    return (IAccountModelWriterAggregateStreamReceiver)grainFactory.GetGrain(typeof(IAccountModelWriterAggregateStreamReceiver), $"{AccountModelWriterGrain.GrainPrefix}{aggregateEvent.AggregateType}");
+                    ReceiverGrainResolver = (aggregateEvent, grainFactory) =>
+                    {
+                        return (IAccountModelWriterAggregateStreamReceiver)grainFactory.GetGrain(typeof(IAccountModelWriterAggregateStreamReceiver), $"{AccountModelWriterGrain.GrainPrefix}{aggregateEvent.AggregateType}");
+                    }
                 });
 
                 // account reconciler
-                aggregateStreamSettings.EventReceiverGrainResolverMap.Add(nameof(AccountReconciler), (aggregateEvent, grainFactory) =>
+                aggregateStreamSettings.EventDispatcherSettingsMap.Add(nameof(AccountReconciler), new EventDispatcherSettings
                 {
-                    return (IAccountReconcilerGrain)grainFactory.GetGrain(typeof(IAccountReconcilerGrain), nameof(AccountReconcilerGrain));
+                    ReceiverGrainResolver = (aggregateEvent, grainFactory) =>
+                    {
+                        return (IAccountReconcilerGrain)grainFactory.GetGrain(typeof(IAccountReconcilerGrain), nameof(AccountReconcilerGrain));
+                    }
                 });
             });
 

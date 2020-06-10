@@ -21,7 +21,7 @@ namespace Account.Grains.Reconciler
     public class AccountReconcilerGrain : EventSourceGrain<AccountReconciler, IAccountReconcilerEvent>, IAccountReconcilerGrain
     {
         public const string AggregateName = "accountReconciler";
-        private readonly ILogger<AccountGrain> _logger;
+        private readonly ILogger<AccountReconcilerGrain> _logger;
         private TimeSpan _reverseTransactionWaitPeriod = TimeSpan.FromMinutes(2);
         // flag indicating if tranfer debited event queue is being processed
         private bool _isProcessingTransferDebitedEventQueue = false;
@@ -34,7 +34,7 @@ namespace Account.Grains.Reconciler
         private Queue<AggregateEvent> _eventQueue = new Queue<AggregateEvent>();
         // queue with TransferDebitedEvent TransactionId and AggregateEvent
         private Queue<(Guid TransactionId, AggregateEvent AggregateEvent)> _transferDebitedEventQueue = new Queue<(Guid, AggregateEvent)>();
-        public AccountReconcilerGrain(ILogger<AccountGrain> logger): base(AggregateName, new AccountReconcilerAggregate())
+        public AccountReconcilerGrain(ILogger<AccountReconcilerGrain> logger): base(AggregateName, new AccountReconcilerAggregate())
         {
             _logger = logger;
         }
@@ -44,14 +44,7 @@ namespace Account.Grains.Reconciler
             await base.OnActivateAsync();
 
             //load all account events after last event
-            var aggregateEvents = await EventSource.GetAggregateEvents(AccountGrain.AggregateName, State.lastProcessedEventId);
-            foreach (var aggregateEvent in aggregateEvents)
-            {
-                // add event to queue
-                _eventQueue.Enqueue(aggregateEvent);
-                _lastQueuedEventId = aggregateEvent.Id;
-            }
-
+            await RecoverEventQueue();
             //initialize timer to clear queue
             this.RegisterTimer(ProcessQueue, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
 
@@ -65,15 +58,20 @@ namespace Account.Grains.Reconciler
             return Task.CompletedTask;
         }
 
-        public Task Receive(AggregateEvent @event)
+        public async Task Receive(AggregateEvent @event)
         {
             if(@event.Id > _lastQueuedEventId)
             {
+                // check to see if we missed to receive any events
+                if (@event.Id != _lastQueuedEventId + 1)
+                {
+                    _logger.LogInformation($"Missed event, current={_lastQueuedEventId}, received={@event.Id}");
+                    await RecoverEventQueue();
+                }
                 // add to queue
                 _eventQueue.Enqueue(@event);
                 _lastQueuedEventId = @event.Id;
             }
-            return Task.CompletedTask;
         }
 
         private async Task ProcessQueue(object args)
@@ -193,6 +191,17 @@ namespace Account.Grains.Reconciler
             finally
             {
                 _isProcessingTransferDebitedEventQueue = false;
+            }
+        }
+
+        private async Task RecoverEventQueue()
+        {
+            var aggregateEvents = await EventSource.GetAggregateEvents(AccountGrain.AggregateName, State.lastProcessedEventId);
+            foreach (var aggregateEvent in aggregateEvents)
+            {
+                // add event to queue
+                _eventQueue.Enqueue(aggregateEvent);
+                _lastQueuedEventId = aggregateEvent.Id;
             }
         }
     }
