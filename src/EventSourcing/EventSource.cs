@@ -142,7 +142,7 @@ namespace EventSourcing
                         Created = DateTime.UtcNow
                     }
                 );
-                // flag that we just created this aggregate
+                // flag that aggregate was just created 
                 _isNewDbAggregate = true;
             }
             else

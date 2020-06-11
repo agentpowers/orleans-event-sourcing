@@ -58,7 +58,7 @@ namespace EventSourcingGrains.Grains
             {
                 // get last event from db
                 var lastEvent = await _repository.GetLastAggregateEvent(_aggregateName);
-                _lastDispatchedEventId = lastEvent?.AggregateVersion ?? 0;
+                _lastDispatchedEventId = lastEvent?.Id ?? 0;
             }
 
             // register pollForEvents method
@@ -87,7 +87,7 @@ namespace EventSourcingGrains.Grains
         /// <returns></returns>
         private async Task PollForEvents(object args)
         {
-            // if there is no notification of new event and we haven't reached PollingSkipThreshold then break
+            // if there is no notification of new event and haven't reached PollingSkipThreshold then break
             if(_lastNotifiedEventId <= _lastDispatchedEventId)
             {
                 _skippedPollingCount++;

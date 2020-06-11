@@ -48,7 +48,7 @@ namespace Account.Grains.ReadModelWriter
             // idempotency
             if (@event.AggregateVersion > State.Version)
             {
-                // check to see if we missed to receive any events
+                // check to see if any events were missed
                 if (@event.AggregateVersion != State.Version + 1)
                 {
                     _logger.LogInformation($"Missed event, current={State.Version}, received={@event.AggregateVersion}");

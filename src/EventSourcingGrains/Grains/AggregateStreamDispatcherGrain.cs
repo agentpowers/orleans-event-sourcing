@@ -57,27 +57,24 @@ namespace EventSourcingGrains.Grains
             {
                 // call base OnActivateAsync
                 await base.OnActivateAsync();
-            }
 
-            // set LastNotifiedEventVersion if needed
-            if(State.LastNotifiedEventId == 0)
-            {
-                // get last event from db
-                var lastEvent = await EventSource.GetLastAggregateEvent(rootAggregateName);
-
-                if (_eventDispatcherSettings.PersistDispatcherState)
+                // set LastNotifiedEventVersion if needed
+                if (State.LastNotifiedEventId == 0)
                 {
+                    // get last event from db
+                    var lastEvent = await EventSource.GetLastAggregateEvent(rootAggregateName);
+                    
                     // get LastNotifiedEventVersion as latest aggregate version from db or 0
                     await ApplyEvent(new UpdatedLastNotifiedEventId{ LastNotifiedEventId = lastEvent?.Id ?? 0 });
-                }
-                else
-                {
-                    _lastNotifiedEventId = lastEvent?.Id ?? 0;
-                }
-            }
 
-            // sync up lastQueuedEventId and LastNotifiedEventId
-            _lastQueuedEventId = State.LastNotifiedEventId;
+                    // sync up lastQueuedEventId and LastNotifiedEventId
+                    _lastQueuedEventId = State.LastNotifiedEventId;
+                }
+
+                // sync up lastQueuedEventId and LastNotifiedEventId
+                _lastQueuedEventId = State.LastNotifiedEventId;
+
+            }
 
             // register pollForEvents method
             this.RegisterTimer(NotifySubscribers, null, TimeSpan.FromSeconds(1), _pollingInterval);

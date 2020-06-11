@@ -62,7 +62,7 @@ namespace Account.Grains.Reconciler
         {
             if(@event.Id > _lastQueuedEventId)
             {
-                // check to see if we missed to receive any events
+                // check to see if any events were missed
                 if (@event.Id != _lastQueuedEventId + 1)
                 {
                     _logger.LogInformation($"Missed event, current={_lastQueuedEventId}, received={@event.Id}");
@@ -139,7 +139,7 @@ namespace Account.Grains.Reconciler
             }
             else
             {
-                //we may have reversed transaction already, or something catastrophic
+                //transaction was reversed already or something catastrophic
                 await ApplyEvent(
                     new ManualInterventionRequired{ TransactionId = transactionId, EventId = @event.Id},
                     @event.RootEventId,
