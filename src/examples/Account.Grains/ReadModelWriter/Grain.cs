@@ -51,9 +51,10 @@ namespace Account.Grains.ReadModelWriter
                 // check to see if any events were missed
                 if (@event.AggregateVersion != State.Version + 1)
                 {
-                    _logger.LogInformation($"Missed event, current={State.Version}, received={@event.AggregateVersion}");
                     // restore state by getting new events from repository(this will not save state.  ApplyEvent below will save)
                     await RecoverState();
+                    _logger.LogWarning($"Missed event, recovered={State.Version}, received={@event.AggregateVersion}");
+
                 }
                 await ApplyEvent(@event);
             }

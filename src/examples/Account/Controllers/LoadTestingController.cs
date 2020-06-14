@@ -32,20 +32,23 @@ namespace Account.Controllers
                 var response = await grain.Deposit(1000);
             });
             sw.Stop();
-            return Ok($"{count} Took ticks={sw.ElapsedTicks}, ms={sw.ElapsedMilliseconds}, started={started}");
+            var ended = started.Add(sw.Elapsed);
+            return Ok($"{count} Took ticks={sw.ElapsedTicks}, ms={sw.ElapsedMilliseconds}, started={started}, ended={ended}");
         }
 
         [HttpGet("withdraw")]
         public async Task<IActionResult> Withdraw(int count = 10000)
         {
+            var started = DateTime.UtcNow;
             var sw = Stopwatch.StartNew();
-            await Enumerable.Range(1, count).ForEachAsyncSemaphore(Environment.ProcessorCount, body: async entry =>
+            await Enumerable.Range(1, count).ForEachAsyncSemaphore(Environment.ProcessorCount -2, body: async entry =>
             {
                 var grain = this.client.GetGrain<IAccountGrain>(entry);
                 var response = await grain.Withdraw(1000);
             });
             sw.Stop();
-            return Ok($"{count} Took ticks={sw.ElapsedTicks}, ms={sw.ElapsedMilliseconds}");
+            var ended = started.Add(sw.Elapsed);
+            return Ok($"{count} Took ticks={sw.ElapsedTicks}, ms={sw.ElapsedMilliseconds}, started={started}, ended={ended}");
         }
     }
 

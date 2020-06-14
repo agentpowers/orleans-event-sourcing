@@ -10,6 +10,7 @@ namespace Account.Grains.ReadModelWriter
         {
             State.Version = aggregateEvent.AggregateVersion;
             State.Modified = aggregateEvent.Created;
+            //State.Modified = System.DateTime.UtcNow;
             var accountEvent = JsonSerializer.DeserializeEvent<IAccountEvent>(aggregateEvent.Data);
             switch (accountEvent)
             {

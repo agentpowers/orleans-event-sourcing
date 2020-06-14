@@ -21,7 +21,6 @@ namespace EventSourcingGrains.Grains
         private int _skippedPollingCount;
         private string _aggregateName;
         private static TimeSpan _pollingInterval = TimeSpan.FromSeconds(1);
-        public const string AggregateName = "aggregate_stream";
         private const int SkippedPollingCountThreshold = 60;
 
         public AggregateStreamGrain(ILogger<AggregateStreamGrain> logger, IRepository repository, IAggregateStreamSettings aggregateStreamSettings)
@@ -61,6 +60,11 @@ namespace EventSourcingGrains.Grains
                 _lastDispatchedEventId = lastEvent?.Id ?? 0;
             }
 
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.LogDebug($"Activated stream grain, lastDispatchedEventId={_lastDispatchedEventId}, aggregateGrainName={_aggregateName}");
+            }
+
             // register pollForEvents method
             this.RegisterTimer(PollForEvents, null, TimeSpan.FromSeconds(1), _pollingInterval);
         }
@@ -77,6 +81,10 @@ namespace EventSourcingGrains.Grains
         public Task Notify(long eventId)
         {
             _lastNotifiedEventId = eventId;
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.LogDebug($"Received notification, eventId={eventId}");
+            }
             return Task.CompletedTask;
         }
 
@@ -113,6 +121,10 @@ namespace EventSourcingGrains.Grains
             {
                 var dispatcherGrain = GrainFactory.GetGrain<IAggregateStreamDispatcherGrain>($"{_aggregateName}:{eventDispatcherSettings.Key}");
                 await dispatcherGrain.AddToQueue(new Immutable<AggregateEvent[]>(newEvents));
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    _logger.LogDebug($"Send to dispatcher, dispatcher={dispatcherGrain}, eventIds={String.Join(',', newEvents.Select(g => g.Id))}");
+                }
             }
 
             // record last dispatched items id

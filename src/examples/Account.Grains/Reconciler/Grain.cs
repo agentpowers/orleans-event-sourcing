@@ -65,8 +65,9 @@ namespace Account.Grains.Reconciler
                 // check to see if any events were missed
                 if (@event.Id != _lastQueuedEventId + 1)
                 {
-                    _logger.LogInformation($"Missed event, current={_lastQueuedEventId}, received={@event.Id}");
                     await RecoverEventQueue();
+                    _logger.LogWarning($"Missed event, recovered={_lastQueuedEventId}, received={@event.Id}");
+
                 }
                 // add to queue
                 _eventQueue.Enqueue(@event);

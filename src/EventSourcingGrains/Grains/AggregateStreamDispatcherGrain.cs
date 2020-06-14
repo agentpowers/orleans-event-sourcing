@@ -120,6 +120,10 @@ namespace EventSourcingGrains.Grains
                         {
                             // send event
                             await subscriberGrain.Receive(@event);
+                            if (_logger.IsEnabled(LogLevel.Debug))
+                            {
+                                _logger.LogDebug($"Dispatched event, subscriber={subscriberGrain}, event={Newtonsoft.Json.JsonConvert.SerializeObject(@event)}");
+                            }
                         }
                     }
                     catch (System.Exception ex)

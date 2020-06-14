@@ -97,7 +97,9 @@ namespace EventSourcingGrains.Grains
             if (_hasAggregateStream)
             {
                 // notify AggregateStreamGrain about new event
-                await GrainFactory.GetGrain<IAggregateStreamGrain>(_aggregateName).Notify(eventId);
+                var aggregateGrain = GrainFactory.GetGrain<IAggregateStreamGrain>(_aggregateName);
+                // fire and forget request
+                aggregateGrain.InvokeOneWay(handler=> handler.Notify(eventId));
             }
             // return eventId
             return eventId;
