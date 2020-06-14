@@ -5,8 +5,13 @@ using Orleans;
 
 namespace EventSourcingGrains.Grains
 {
+    public interface IModelWriterState
+    {
+        long Version { get;}
+    }
+
     public abstract class ModelWriter<TState, TEvent>: Grain
-        where TState : class
+        where TState : IModelWriterState
         where TEvent : AggregateEvent
     {
         public const string GrainPrefix = "writer:";
@@ -25,8 +30,10 @@ namespace EventSourcingGrains.Grains
             _aggregate = aggregate;
         }
 
-        // abstract method to retrieve state and events
-        public abstract Task<(TState, TEvent[])> GetCurrentStateAndPendingEvents();
+        // abstract method to retrieve state
+        public abstract Task<TState> GetCurrentState();
+        // abstract method to retrieve events
+        public abstract Task<TEvent[]> GetPendingEvents(long currentVersion);
 
         // abstract method to persist state
         public abstract Task PersistState(TState state);
@@ -35,7 +42,9 @@ namespace EventSourcingGrains.Grains
         public async Task Init()
         {
             // get current state
-            var (currentState, pendingEvents) = await GetCurrentStateAndPendingEvents();
+            var currentState = await GetCurrentState();
+            // get pending events
+            var pendingEvents = await GetPendingEvents(currentState.Version);
             
             // set aggregate state
             _aggregate.State = currentState;
@@ -50,6 +59,22 @@ namespace EventSourcingGrains.Grains
                 }
                 // persist updated state
                 await PersistState(_aggregate.State);
+            }
+        }
+
+        public async Task RecoverState()
+        {
+            // get pending events
+            var pendingEvents = await GetPendingEvents(State.Version);
+
+            // if there are pending events apply them
+            if (pendingEvents != null && pendingEvents.Length > 0)
+            {
+                // apply each event
+                foreach (var dbEvent in pendingEvents)
+                {
+                    _aggregate.Apply(dbEvent);
+                }
             }
         }
 

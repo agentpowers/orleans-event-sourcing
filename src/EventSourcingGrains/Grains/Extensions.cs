@@ -13,8 +13,8 @@ namespace EventSourcingGrains.Grains
             configure.Invoke(settings);
 
             // add internal EventSourceGrains
-            // add AggregateStreamGrain settings
-            settings.Add(AggregateStreamGrain.AggregateName, new EventSourceGrainSetting());
+            // add AggregateStreamDispatcherGrain settings
+            settings.Add(AggregateStreamDispatcherGrain.AggregateName, new EventSourceGrainSetting());
 
             builder.ConfigureServices((hostBuilder, serviceCollection) => 
             {

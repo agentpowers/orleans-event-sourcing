@@ -16,7 +16,7 @@ namespace EventSourcingGrains.Services
     public class KeepAliveService : GrainService, IKeepAliveService
     {
         private readonly IGrainFactory _grainFactory;
-        private readonly static TimeSpan DueTime = TimeSpan.FromSeconds(10);
+        private readonly static TimeSpan DueTime = TimeSpan.Zero;
         
         public KeepAliveService(IGrainIdentity grainId, Silo silo, ILoggerFactory loggerFactory, IGrainFactory grainFactory) : base(grainId, silo, loggerFactory)
         {

@@ -45,7 +45,7 @@
 
 ## Debug via VSCODE
 
-1. Follow Running locally steps 1-2
+1. Follow 'Running locally' steps 1-2
 2. Start Debugging in vscode by launching __Launch account app__.  This is configured to debug examples/account
 
 ## Deploy to k8s (using [skaffold](https://skaffold.dev/))

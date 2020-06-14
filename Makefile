@@ -48,6 +48,9 @@ up_account1:
 up_account2:
 	docker run --network account_net -e SILO_PORT=11112 -e GATEWAY_PORT=30001 -e ORLEANS_ENV=LOCAL -e CUSTOM_PORT=8002 -e POSTGRES_SERVICE_HOST=ev_account -p 8002:8002 -p 11112:11112 -p 30001:30001 --detach --name account2 account_app
 
+up_account3:
+	docker run --network account_net -e SILO_PORT=11112 -e GATEWAY_PORT=30002 -e ORLEANS_ENV=LOCAL -e CUSTOM_PORT=8003 -e POSTGRES_SERVICE_HOST=ev_account -p 8003:8003 -p 11113:11113 -p 30002:30002 --detach --name account3 account_app
+
 down_account_db:
 	docker kill ev_account
 
@@ -62,9 +65,11 @@ down_account2:
 cleanup_account:
 	docker kill account1; \
 	docker kill account2; \
+	docker kill account2; \
 	docker kill ev_account; \
 	docker rm account1; \
 	docker rm account2; \
+	docker rm account3; \
 	docker rm ev_account; \
 	docker network rm account_net;
 

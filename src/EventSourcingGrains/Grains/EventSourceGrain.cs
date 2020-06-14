@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using EventSourcing;
+using EventSourcingGrains.Stream;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EventSourcingGrains.Grains
 {
@@ -14,6 +16,7 @@ namespace EventSourcingGrains.Grains
         private EventSourceGrainSetting _eventSourceGrainSettings = null;
         private string _aggregateName;
         private IAggregate<TState, TEvent> _aggregate;
+        private bool _hasAggregateStream;
         
         /// <summary>
         /// Get current state
@@ -28,7 +31,7 @@ namespace EventSourcingGrains.Grains
         }
 
         /// <summary>
-        /// Get grain id string
+        /// Get grain id string.  Override this when possible, since this implementation uses reflection
         /// </summary>
         /// <returns></returns>
         public virtual string GetGrainKey()
@@ -55,6 +58,8 @@ namespace EventSourcingGrains.Grains
         /// <returns></returns>
         public override async Task OnActivateAsync()
         {
+            // does this aggregate has stream settings
+            _hasAggregateStream = ServiceProvider.GetServices<IAggregateStreamSettings>().Any(g => g.AggregateName == _aggregateName);
             // get grain settings
             var eventSourceGrainSettingsMap = (IEventSourceGrainSettingsMap)ServiceProvider.GetService(typeof(IEventSourceGrainSettingsMap));
             eventSourceGrainSettingsMap.TryGetValue(_aggregateName, out _eventSourceGrainSettings);
@@ -84,10 +89,20 @@ namespace EventSourcingGrains.Grains
         /// snapshot will be created for every 20 events
         /// Returns id of the newly applied event(from db)
         /// </summary>
-        protected Task<long> ApplyEvent(TEvent @event, long? rootEventId = null, long? parentEventId = null)
+        protected async Task<long> ApplyEvent(TEvent @event, long? rootEventId = null, long? parentEventId = null)
         {
-            // return id
-            return EventSource.ApplyEvent(@event, rootEventId, parentEventId);
+            // apply event to EventSource
+            var eventId = await EventSource.ApplyEvent(@event, rootEventId, parentEventId);
+            // does this aggregate has aggregate stream settings
+            if (_hasAggregateStream)
+            {
+                // notify AggregateStreamGrain about new event
+                var aggregateGrain = GrainFactory.GetGrain<IAggregateStreamGrain>(_aggregateName);
+                // fire and forget request
+                aggregateGrain.InvokeOneWay(handler=> handler.Notify(eventId));
+            }
+            // return eventId
+            return eventId;
         }
 
         public virtual bool ShouldSaveSnapshot(TEvent @event, long aggregateVersion)
