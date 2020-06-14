@@ -10,23 +10,21 @@ namespace Account.Grains.Reconciler
     }
 
     #region Events
+    [Event(nameof(TransactionMatched))]
     public class TransactionMatched: IAccountReconcilerEvent
     {
-        public string Type { get; set;} = nameof(TransactionMatched);
         public Guid TransactionId { get; set; }
         public long EventId { get; set; }
     }
-
+    [Event(nameof(TransactionReversed))]
     public class TransactionReversed: IAccountReconcilerEvent
     {
-        public string Type { get; set;} = nameof(TransactionReversed);
         public Guid TransactionId { get; set; }
         public long EventId { get; set; }
     }
-
+    [Event(nameof(ManualInterventionRequired))]
     public class ManualInterventionRequired: IAccountReconcilerEvent
     {
-        public string Type { get; set;} = nameof(ManualInterventionRequired);
         public Guid TransactionId { get; set; }
         public long EventId { get; set; }
     }

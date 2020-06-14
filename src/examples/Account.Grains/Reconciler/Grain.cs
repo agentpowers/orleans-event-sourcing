@@ -91,7 +91,7 @@ namespace Account.Grains.Reconciler
                 while(_eventQueue.Count > 0)
                 {
                     var @event = _eventQueue.Peek();
-                    var accountEvent = JsonSerializer.DeserializeEvent<IAccountEvent>(@event.Data);
+                    var accountEvent = EventSerializer.DeserializeEvent(@event);
                     switch (accountEvent)
                     {
                         case TransferCredited transferCredited:
@@ -178,7 +178,7 @@ namespace Account.Grains.Reconciler
                     {
                         // reverse transaction
                         // deserialize event
-                        var transferDebitedEvent = JsonSerializer.DeserializeEvent<TransferDebited>(nextEventToProcess.Data);
+                        var transferDebitedEvent = (TransferDebited)EventSerializer.DeserializeEvent(nextEventToProcess);
                         // get grain
                         var account = GrainFactory.GetGrain<IAccountGrain>(transferDebitedEvent.AccountId);
                         // reverse and get eventId back

@@ -6,9 +6,9 @@ namespace EventSourcingGrains.Stream
     {
     }
 
+    [Event(nameof(UpdatedLastNotifiedEventId))]
     public class UpdatedLastNotifiedEventId: IStreamEvent
     {
-        public string Type { get; set;} = nameof(UpdatedLastNotifiedEventId);
         public long LastNotifiedEventId { get; set; }
     }
 }

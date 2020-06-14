@@ -38,12 +38,12 @@ namespace EventSourcing.Persistance
             }
         }
 
-        public async Task<(Snapshot, Event[])> GetSnapshotAndEvents(string aggregateName, long aggregateId)
+        public async Task<(Snapshot, AggregateEventBase[])> GetSnapshotAndEvents(string aggregateName, long aggregateId)
         {
             using (IDbConnection conn = Connection)
             {
                 var snapshot  = await conn.QueryFirstOrDefaultAsync<Snapshot>(Queries.GetSnapshotSql(aggregateName), new { id = aggregateId });
-                return (snapshot, (await conn.QueryAsync<Event>(Queries.GetEventsByAggregateIdSql(aggregateName), new { id = aggregateId, aggregateVersion = (snapshot?.AggregateVersion).GetValueOrDefault() })).ToArray());
+                return (snapshot, (await conn.QueryAsync<AggregateEventBase>(Queries.GetEventsByAggregateIdSql(aggregateName), new { id = aggregateId, aggregateVersion = (snapshot?.AggregateVersion).GetValueOrDefault() })).ToArray());
             }
         }
 
@@ -55,7 +55,7 @@ namespace EventSourcing.Persistance
             }
         }
 
-        public async Task<long> SaveEvent(string aggregateName, Event @event)
+        public async Task<long> SaveEvent(string aggregateName, AggregateEventBase @event)
         {
             using (IDbConnection conn = Connection)
             {
