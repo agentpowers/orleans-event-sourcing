@@ -8,10 +8,10 @@ namespace EventSourcing.Persistance
         Task<AggregateEvent> GetLastAggregateEvent(string aggregateName);
         Task<AggregateEvent[]> GetAggregateEventsByAggregateTypeName(string aggregateName, string aggregateTypName, long aggregateVersion);
         Task<Aggregate> GetAggregateByTypeName(string type);
-        Task<(Snapshot, Event[])> GetSnapshotAndEvents(string aggregateName, long aggregateId);
+        Task<(Snapshot, AggregateEventBase[])> GetSnapshotAndEvents(string aggregateName, long aggregateId);
         Task <long> SaveAggregate(string aggregateName, Aggregate aggregate);
         Task<long> SaveSnapshot(string aggregateName, Snapshot snapshot);
-        Task<long> SaveEvent(string aggregateName, Event @event);
+        Task<long> SaveEvent(string aggregateName, AggregateEventBase @event);
         Task CreateEventsAndSnapshotsTables(string aggregateName);
     }
 }

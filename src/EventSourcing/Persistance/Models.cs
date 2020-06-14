@@ -10,7 +10,7 @@ namespace EventSourcing.Persistance
         public DateTime Created {get; set;}
     }
 
-    public class Event
+    public class AggregateEventBase
     {
         public long Id { get; set; }
         public long AggregateId { get; set; }
@@ -24,7 +24,7 @@ namespace EventSourcing.Persistance
     }
 
     [Immutable]
-    public class AggregateEvent: Event
+    public class AggregateEvent: AggregateEventBase
     {
         public string AggregateType { get; set; }
     }

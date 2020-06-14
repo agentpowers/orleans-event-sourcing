@@ -1,16 +1,10 @@
 using System.Threading.Tasks;
 using EventSourcing.Persistance;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System;
 
 namespace EventSourcing
 {
-    internal class EventWrapper
-    {
-        [JsonProperty(TypeNameHandling = TypeNameHandling.Auto)]
-        public IEvent Event { get; set; }
-    }
-
     public interface IEventSource<TState, TEvent>
         where TState : IState, new()
         where TEvent : IEvent
@@ -180,12 +174,12 @@ namespace EventSourcing
                 // store aggregate version number
                 _aggregateVersion = snapshot.AggregateVersion;
                 // set snapshot as state
-                _aggregate.State = JsonConvert.DeserializeObject<TState>(snapshot.Data);
+                _aggregate.State = JsonSerializer.Deserialize<TState>(snapshot.Data);
             }
             // apply events
             foreach (var dbEvent in events)
             {
-                var @event = EventSourcing.JsonSerializer.DeserializeEvent<TEvent>(dbEvent.Data);
+                var @event = (TEvent)EventSerializer.DeserializeEvent(dbEvent);
                 _aggregate.Apply(@event);
                 // store aggregate version number
                 _aggregateVersion = dbEvent.AggregateVersion;
@@ -204,7 +198,7 @@ namespace EventSourcing
                 { 
                     AggregateId = AggregateId,
                     AggregateVersion = _aggregateVersion,
-                    Data = JsonConvert.SerializeObject(_aggregate.State),
+                    Data = JsonSerializer.Serialize(_aggregate.State),
                     Created = DateTime.UtcNow
                 }
             );
@@ -217,18 +211,23 @@ namespace EventSourcing
         /// </summary>
         public async Task<long> ApplyEvent(TEvent @event, long? rootEventId = null, long? parentEventId = null)
         {
+            // get event type
+            var type = @event.GetType();
+            // get event type name and version
+            var eventIdentity = EventTypeHelper.GetEventIdentity(type);
             // serialize event for db
-            var serialized = JsonSerializer.SerializeEvent(@event);
+            var serialized = JsonSerializer.Serialize(@event, type);
             // increment aggregate version 
             _aggregateVersion++;
             // save event to db
             var eventId = await _repository.SaveEvent(
                 _aggregateName,
-                new Persistance.Event
+                new Persistance.AggregateEventBase
                 { 
                     AggregateId = AggregateId,
                     AggregateVersion = _aggregateVersion,
-                    Type = @event.Type,
+                    Type = eventIdentity.Name,
+                    EventVersion = eventIdentity.Version,
                     Data = serialized,
                     RootEventId = rootEventId,
                     ParentEventId = parentEventId, 

@@ -11,7 +11,8 @@ namespace Account.Grains.ReadModelWriter
             State.Version = aggregateEvent.AggregateVersion;
             State.Modified = aggregateEvent.Created;
             //State.Modified = System.DateTime.UtcNow;
-            var accountEvent = JsonSerializer.DeserializeEvent<IAccountEvent>(aggregateEvent.Data);
+            
+            var accountEvent = EventSerializer.DeserializeEvent(aggregateEvent);
             switch (accountEvent)
             {
                 case Deposited deposited: 
