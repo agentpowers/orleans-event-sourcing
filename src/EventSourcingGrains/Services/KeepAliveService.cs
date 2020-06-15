@@ -15,8 +15,10 @@ namespace EventSourcingGrains.Services
     public interface IKeepAliveService: IGrainService{}
     public class KeepAliveService : GrainService, IKeepAliveService
     {
+        private IServiceProvider _serviceProvider;
         private readonly IGrainFactory _grainFactory;
-        private readonly static TimeSpan DueTime = TimeSpan.FromSeconds(1);
+        private readonly static TimeSpan InitialInterval = TimeSpan.Zero;
+        private readonly static TimeSpan AggregateStreamInterval = TimeSpan.FromMinutes(10);
         
         public KeepAliveService(IGrainIdentity grainId, Silo silo, ILoggerFactory loggerFactory, IGrainFactory grainFactory) : base(grainId, silo, loggerFactory)
         {
@@ -25,24 +27,29 @@ namespace EventSourcingGrains.Services
 
         public override async Task Init(IServiceProvider serviceProvider)
         {
-            var keepAliveSettings = serviceProvider.GetService<IKeepAliveSettings>();
+            await base.Init(serviceProvider);
+            _serviceProvider = serviceProvider;
+        }
+
+        public override async Task Start()
+        {
+            await base.Start();
+            var keepAliveSettings = _serviceProvider.GetService<IKeepAliveSettings>();
 
             if (keepAliveSettings != null)
             {
                 foreach (var setting in keepAliveSettings.GrainKeepAliveSettings)
                 {
-                    this.RegisterTimer(HandlePing, setting, DueTime, setting.Interval);
+                    this.RegisterTimer(HandlePing, setting, InitialInterval, setting.Interval);
                 }
             }
 
             //  add AggregateStreams (INTERNAL)
-            var aggregateNames = serviceProvider.GetServices<IAggregateStreamSettings>().Select(g => g.AggregateName).ToArray();
+            var aggregateNames = _serviceProvider.GetServices<IAggregateStreamSettings>().Select(g => g.AggregateName).ToArray();
             foreach (var aggregateName in aggregateNames)
             {
-                this.RegisterTimer(HandleAggregateStreamPing, aggregateName, DueTime, TimeSpan.FromMinutes(60));
+                this.RegisterTimer(HandleAggregateStreamPing, aggregateName, InitialInterval, AggregateStreamInterval);
             }
-
-            await base.Init(serviceProvider);
         }
 
         private async Task HandlePing(object arg)
