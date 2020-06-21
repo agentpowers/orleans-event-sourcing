@@ -43,8 +43,8 @@ namespace Account.Grains.Reconciler
         {
             await base.OnActivateAsync();
 
-            //load all account events after last event
-            await RecoverEventQueue();
+            //load all account events after last processed event
+            await RecoverEventQueue(State.LastProcessedEventId);
             //initialize timer to clear queue
             this.RegisterTimer(ProcessQueue, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
 
@@ -65,8 +65,9 @@ namespace Account.Grains.Reconciler
                 // check to see if any events were missed
                 if (@event.Id != _lastQueuedEventId + 1)
                 {
-                    await RecoverEventQueue();
+                    await RecoverEventQueue(_lastQueuedEventId);
                     _logger.LogWarning($"Missed event, recovered={_lastQueuedEventId}, received={@event.Id}");
+                    return;
 
                 }
                 // add to queue
@@ -195,9 +196,9 @@ namespace Account.Grains.Reconciler
             }
         }
 
-        private async Task RecoverEventQueue()
+        private async Task RecoverEventQueue(long fromEventId)
         {
-            var aggregateEvents = await EventSource.GetAggregateEvents(AccountGrain.AggregateName, State.lastProcessedEventId);
+            var aggregateEvents = await EventSource.GetAggregateEvents(AccountGrain.AggregateName, fromEventId);
             foreach (var aggregateEvent in aggregateEvents)
             {
                 // add event to queue

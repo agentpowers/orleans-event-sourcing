@@ -21,9 +21,8 @@ namespace EventSourcingGrains.Grains
         private readonly ILogger<AggregateStreamDispatcherGrain> _logger;
         private bool _isNotifyingSubscribers = false;
         private long _lastQueuedEventId;
-        private long _lastNotifiedEventId;
         private string _aggregateName;
-        private static TimeSpan _pollingInterval = TimeSpan.FromSeconds(1);
+        private static TimeSpan _notifyInterval = TimeSpan.FromSeconds(1);
         public const string AggregateName = "aggregate_stream_dispatcher";
 
         public AggregateStreamDispatcherGrain(ILogger<AggregateStreamDispatcherGrain> logger): base(AggregateName, new AggregateStream())
@@ -77,7 +76,7 @@ namespace EventSourcingGrains.Grains
             }
 
             // register pollForEvents method
-            this.RegisterTimer(NotifySubscribers, null, TimeSpan.FromSeconds(1), _pollingInterval);
+            this.RegisterTimer(NotifySubscribers, null, TimeSpan.FromSeconds(1), _notifyInterval);
         }
 
         public Task AddToQueue(Immutable<AggregateEvent[]> events)
@@ -88,6 +87,11 @@ namespace EventSourcingGrains.Grains
                 // only add to queue if new(just in case)
                 if (ev.Id > _lastQueuedEventId)
                 {
+                    // check to see if any events were missed
+                    if (ev.Id != _lastQueuedEventId + 1)
+                    {
+                        _logger.LogWarning($"Missed event, recovered={_lastQueuedEventId}, received={ev.Id}");
+                    }
                     _eventQueue.Enqueue(ev);
                     _lastQueuedEventId = ev.Id;
                 }
@@ -122,7 +126,7 @@ namespace EventSourcingGrains.Grains
                             await subscriberGrain.Receive(@event);
                             if (_logger.IsEnabled(LogLevel.Debug))
                             {
-                                _logger.LogDebug($"Dispatched event, subscriber={subscriberGrain}, event={Newtonsoft.Json.JsonConvert.SerializeObject(@event)}");
+                                _logger.LogDebug($"Dispatched event, subscriber={subscriberGrain}, event={@event.Id}");
                             }
                         }
                     }
@@ -135,10 +139,6 @@ namespace EventSourcingGrains.Grains
                     {
                         // update state with LastNotifiedEventVersion
                         await ApplyEvent(new UpdatedLastNotifiedEventId{ LastNotifiedEventId = @event.Id });
-                    }
-                    else
-                    {
-                        _lastNotifiedEventId = @event.Id;
                     }
 
                     // remove from queue

@@ -20,6 +20,7 @@ namespace EventSourcingGrains.Grains
         private long _lastDispatchedEventId;
         private int _skippedPollingCount;
         private string _aggregateName;
+        private bool _isPollingForEvents;
         private static TimeSpan _pollingInterval = TimeSpan.FromSeconds(1);
         private const int SkippedPollingCountThreshold = 60;
 
@@ -89,46 +90,58 @@ namespace EventSourcingGrains.Grains
         }
 
         /// <summary>
-        /// This method will get events that are greater than last notified eventId from database and 
+        /// This method will get events that are greater than last notified eventId from database and push them to dispatchers
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
         private async Task PollForEvents(object args)
         {
-            // if there is no notification of new event and haven't reached PollingSkipThreshold then break
-            if(_lastNotifiedEventId <= _lastDispatchedEventId)
-            {
-                _skippedPollingCount++;
-                if (_skippedPollingCount != SkippedPollingCountThreshold)
-                {
-                    return;
-                }
-            }
-            // get new events after last Queued Event Id
-            var newEvents = await _repository.GetAggregateEvents(_aggregateName, _lastDispatchedEventId);
-
-            // reset skip count
-            _skippedPollingCount = 0;
-
-            // short circuit if no events to process
-            if (newEvents.Length == 0)
+            if (_isPollingForEvents)
             {
                 return;
             }
-            
-            // send events to dispatcher
-            foreach (var eventDispatcherSettings in _aggregateStreamSettings.EventDispatcherSettingsMap)
+            _isPollingForEvents = true;
+            try
             {
-                var dispatcherGrain = GrainFactory.GetGrain<IAggregateStreamDispatcherGrain>($"{_aggregateName}:{eventDispatcherSettings.Key}");
-                await dispatcherGrain.AddToQueue(new Immutable<AggregateEvent[]>(newEvents));
-                if (_logger.IsEnabled(LogLevel.Debug))
+                // if there is no notification of new event and haven't reached PollingSkipThreshold then break
+                if(_lastNotifiedEventId <= _lastDispatchedEventId)
                 {
-                    _logger.LogDebug($"Send to dispatcher, dispatcher={dispatcherGrain}, eventIds={String.Join(',', newEvents.Select(g => g.Id))}");
+                    _skippedPollingCount++;
+                    if (_skippedPollingCount != SkippedPollingCountThreshold)
+                    {
+                        return;
+                    }
                 }
-            }
+                // get new events after last Queued Event Id
+                var newEvents = await _repository.GetAggregateEvents(_aggregateName, _lastDispatchedEventId);
 
-            // record last dispatched items id
-            _lastDispatchedEventId = newEvents[newEvents.Length - 1].Id;
+                // reset skip count
+                _skippedPollingCount = 0;
+
+                // short circuit if no events to process
+                if (newEvents.Length == 0)
+                {
+                    return;
+                }
+                
+                // send events to dispatcher
+                foreach (var eventDispatcherSettings in _aggregateStreamSettings.EventDispatcherSettingsMap)
+                {
+                    var dispatcherGrain = GrainFactory.GetGrain<IAggregateStreamDispatcherGrain>($"{_aggregateName}:{eventDispatcherSettings.Key}");
+                    await dispatcherGrain.AddToQueue(new Immutable<AggregateEvent[]>(newEvents));
+                    if (_logger.IsEnabled(LogLevel.Debug))
+                    {
+                        _logger.LogDebug($"Send to dispatcher, dispatcher={dispatcherGrain}, eventIds={String.Join(',', newEvents.Select(g => g.Id))}");
+                    }
+                }
+
+                // record last dispatched items id
+                _lastDispatchedEventId = newEvents[newEvents.Length - 1].Id;
+            }
+            finally
+            {
+                _isPollingForEvents = false;
+            }
         }
     }
 }

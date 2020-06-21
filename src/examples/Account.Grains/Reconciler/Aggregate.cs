@@ -11,7 +11,7 @@ namespace Account.Grains.Reconciler
             switch (@event)
             {
                 default:
-                    State.lastProcessedEventId = @event.EventId;
+                    State.LastProcessedEventId = @event.EventId;
                     break;
             }
         }
