@@ -21,7 +21,7 @@ namespace Account
 		public void ConfigureServices(IServiceCollection services)
 		{
 			// add grain service
-			services.AddGrainServices(Program.ConnectionString);
+			services.AddGrainServices("Server=localhost;Database=eventsourcing;User Id=sa;Password=MyStrongPassword1!;");
 			// add controllers
 			services.AddControllers();
 			// add services for dashboard

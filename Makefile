@@ -77,6 +77,11 @@ run_account_db:
 	docker build --tag account_db -f src/docker/Account.Postgres.Dockerfile src
 	docker run -v /tmp/ev_account:/var/lib/postgresql/data -e POSTGRES_DB=postgresdb -e POSTGRES_USER=postgresadmin -e POSTGRES_PASSWORD=postgrespwd -p 5432:5432 --detach --name ev_account account_db
 
+run_account_db_sql_server: 
+	docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=MyStrongPassword1!" --name sql1 	\
+   		-p 1433:1433 																\
+   		-d mcr.microsoft.com/mssql/server:2019-CU5-ubuntu-18.04
+
 cleanup_account_db:
 	docker kill ev_account; \
 	docker rm ev_account; \

@@ -8,7 +8,7 @@ namespace Account.Extensions
     {
         public static void AddGrainServices(this IServiceCollection services, string connectionString)
         {
-            services.AddTransient<IAccountRepository>(g => new AccountRepository(connectionString));
+            services.AddTransient<IAccountRepository>(g => new AccountSqlServerRepository(connectionString));
             services.AddEventSourcingGrain(connectionString);
         }
     }
