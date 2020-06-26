@@ -1,6 +1,5 @@
 using Orleans;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Orleans.Concurrency;
 using Microsoft.Extensions.Logging;
@@ -122,6 +121,22 @@ namespace EventSourcingGrains.Grains
                 if (newEvents.Length == 0)
                 {
                     return;
+                }
+
+                // logic to handle missing event id
+                int i;
+                for (i = 0; i < newEvents.Length; i++)
+                {
+                    if (newEvents[i].Id != _lastDispatchedEventId + (i + 1))
+                    {
+                        _logger.LogWarning($"Missed event, missingId={_lastDispatchedEventId + (i + 1)}, index={i}, length={newEvents.Length}");
+                        break;
+                    }
+                }
+
+                if (i != newEvents.Length)
+                {
+                    newEvents = newEvents.AsSpan().Slice(0, i).ToArray();
                 }
                 
                 // send events to dispatcher
