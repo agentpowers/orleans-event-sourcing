@@ -88,9 +88,9 @@ namespace EventSourcingGrains.Grains
                 if (ev.Id > _lastQueuedEventId)
                 {
                     // check to see if any events were missed
-                    if (ev.Id != _lastQueuedEventId + 1)
+                    if (_lastQueuedEventId != 0 && ev.Id != _lastQueuedEventId + 1)
                     {
-                        _logger.LogWarning($"Missed event, recovered={_lastQueuedEventId}, received={ev.Id}");
+                        _logger.LogWarning($"Missed event, lastQueuedEventId={_lastQueuedEventId}, received={ev.Id}");
                     }
                     _eventQueue.Enqueue(ev);
                     _lastQueuedEventId = ev.Id;

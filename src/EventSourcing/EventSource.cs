@@ -129,7 +129,6 @@ namespace EventSourcing
                 }
                 // add new aggregate if it doesn't exist
                 AggregateId = await _repository.SaveAggregate(
-                    _aggregateName,
                     new Aggregate
                     { 
                         Type = aggregateType,
