@@ -125,19 +125,25 @@ namespace EventSourcingGrains.Grains
 
                 // logic to handle missing event id
                 int i;
-                for (i = 0; i < newEvents.Length; i++)
+                for (i = newEvents.Length - 1; i >= 0; i--)
                 {
-                    if (newEvents[i].Id != _lastDispatchedEventId + (i + 1))
+                    if (newEvents[i].Id == _lastDispatchedEventId + (i + 1))
                     {
-                        _logger.LogWarning($"Missed event, missingId={_lastDispatchedEventId + (i + 1)}, index={i}, length={newEvents.Length}");
                         break;
                     }
                 }
 
-                if (i != newEvents.Length)
+                if (i != newEvents.Length - 1)
                 {
+                    _logger.LogWarning($"Missed event, missingId={newEvents[i].Id + 1}, index={i}, length={newEvents.Length}");
                     newEvents = newEvents.AsSpan().Slice(0, i).ToArray();
                 }
+
+                //TODO: handle back-pressure
+                //      - make this grain store events in cache(configurable size) with dispatchers taking slices of events(configurable size)
+                //      - this grain should store positions last send to each disptacher
+                //      - disptacher should send back pending queue length when this grain sends events slices
+                //      - if a disptacher is falling behind then this grain should skip getting events from db or drop events cache
                 
                 // send events to dispatcher
                 foreach (var eventDispatcherSettings in _aggregateStreamSettings.EventDispatcherSettingsMap)
