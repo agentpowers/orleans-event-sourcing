@@ -1,16 +1,10 @@
 using System.Threading.Tasks;
 using EventSourcing.Persistance;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System;
 
 namespace EventSourcing
 {
-    internal class EventWrapper
-    {
-        [JsonProperty(TypeNameHandling = TypeNameHandling.Auto)]
-        public IEvent Event { get; set; }
-    }
-
     public interface IEventSource<TState, TEvent>
         where TState : IState, new()
         where TEvent : IEvent
@@ -22,8 +16,9 @@ namespace EventSourcing
         /// <param name="aggregate"></param>
         /// <param name="shouldSaveSnapshot"></param>
         /// <param name="aggregateIdString"></param>
+        /// <param name="shouldThrowIfAggregateDoesNotExist"></param>
         /// <returns></returns>
-        Task Init(string aggregateName, IAggregate<TState, TEvent> aggregate, Func<TEvent, long, bool> shouldSaveSnapshot, string aggregateIdString);
+        Task Init(string aggregateName, IAggregate<TState, TEvent> aggregate, Func<TEvent, long, bool> shouldSaveSnapshot, string aggregateIdString, bool shouldThrowIfAggregateDoesNotExist);
         /// <summary>
         /// Get State
         /// </summary>
@@ -44,7 +39,7 @@ namespace EventSourcing
         /// </summary>
         Task<long> ApplyEvent(TEvent @event, long? rootEventId = null, long? parentEventId = null);
         /// <summary>
-        /// Get Aggregate events that occured after eventId
+        /// Get Aggregate events that occurred after eventId
         /// </summary>
         /// <param name="eventId"></param>
         /// <returns></returns>
@@ -55,7 +50,7 @@ namespace EventSourcing
         /// <returns></returns>
         Task<AggregateEvent> GetLastAggregateEvent();
         /// <summary>
-        /// Get Aggregate events that occured after eventId
+        /// Get Aggregate events that occurred after eventId
         /// </summary>
         /// <param name="eventId"></param>
         /// <returns></returns>
@@ -65,7 +60,6 @@ namespace EventSourcing
         /// </summary>
         /// <returns></returns>
         Task<AggregateEvent> GetLastAggregateEvent(string aggregateName);
-        Task InitPersistanceIfDoesNotExist(string aggregateName);
     }
 
     public class EventSource<TState, TEvent> : IEventSource<TState, TEvent>
@@ -112,7 +106,8 @@ namespace EventSourcing
             string aggregateName,
             IAggregate<TState, TEvent> aggregate,
             Func<TEvent, long, bool> shouldSaveSnapshot,
-            string aggregateIdString)
+            string aggregateIdString,
+            bool shouldThrowIfAggregateDoesNotExist)
         {
             // TODO: either validate aggregate name so that it can be prefixed as table name 
             // or convert to valid table name prefix and handle mapping between converted and aggregateName argument
@@ -127,18 +122,20 @@ namespace EventSourcing
             var dbAggregate = await _repository.GetAggregateByTypeName(aggregateType);
             if (dbAggregate == null)
             {
-                // init tables for aggregateName
-                await InitPersistanceIfDoesNotExist(_aggregateName);
+                // throw if settings
+                if (shouldThrowIfAggregateDoesNotExist)
+                {
+                    throw new AggregateDoesNotExistException(_aggregateName);
+                }
                 // add new aggregate if it doesn't exist
                 AggregateId = await _repository.SaveAggregate(
-                    _aggregateName,
                     new Aggregate
                     { 
                         Type = aggregateType,
                         Created = DateTime.UtcNow
                     }
                 );
-                // flag that we just created this aggregate
+                // flag that aggregate was just created 
                 _isNewDbAggregate = true;
             }
             else
@@ -176,12 +173,12 @@ namespace EventSourcing
                 // store aggregate version number
                 _aggregateVersion = snapshot.AggregateVersion;
                 // set snapshot as state
-                _aggregate.State = JsonConvert.DeserializeObject<TState>(snapshot.Data);
+                _aggregate.State = JsonSerializer.Deserialize<TState>(snapshot.Data);
             }
             // apply events
             foreach (var dbEvent in events)
             {
-                var @event = EventSourcing.JsonSerializer.DeserializeEvent<TEvent>(dbEvent.Data);
+                var @event = (TEvent)EventSerializer.DeserializeEvent(dbEvent);
                 _aggregate.Apply(@event);
                 // store aggregate version number
                 _aggregateVersion = dbEvent.AggregateVersion;
@@ -200,7 +197,7 @@ namespace EventSourcing
                 { 
                     AggregateId = AggregateId,
                     AggregateVersion = _aggregateVersion,
-                    Data = JsonConvert.SerializeObject(_aggregate.State),
+                    Data = JsonSerializer.Serialize(_aggregate.State),
                     Created = DateTime.UtcNow
                 }
             );
@@ -213,18 +210,23 @@ namespace EventSourcing
         /// </summary>
         public async Task<long> ApplyEvent(TEvent @event, long? rootEventId = null, long? parentEventId = null)
         {
+            // get event type
+            var type = @event.GetType();
+            // get event type name and version
+            var eventIdentity = EventTypeHelper.GetEventIdentity(type);
             // serialize event for db
-            var serialized = JsonSerializer.SerializeEvent(@event);
+            var serialized = JsonSerializer.Serialize(@event, type);
             // increment aggregate version 
             _aggregateVersion++;
             // save event to db
             var eventId = await _repository.SaveEvent(
                 _aggregateName,
-                new Persistance.Event
+                new Persistance.AggregateEventBase
                 { 
                     AggregateId = AggregateId,
                     AggregateVersion = _aggregateVersion,
-                    Type = @event.Type,
+                    Type = eventIdentity.Name,
+                    EventVersion = eventIdentity.Version,
                     Data = serialized,
                     RootEventId = rootEventId,
                     ParentEventId = parentEventId, 
@@ -254,8 +256,5 @@ namespace EventSourcing
         
         public Task<AggregateEvent> GetLastAggregateEvent(string aggregateName) => 
             _repository.GetLastAggregateEvent(aggregateName);
-
-        public Task InitPersistanceIfDoesNotExist(string aggregateName) =>
-            _repository.CreateEventsAndSnapshotsTables(aggregateName);
     }
 }

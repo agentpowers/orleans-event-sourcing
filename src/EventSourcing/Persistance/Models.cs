@@ -1,4 +1,5 @@
 ﻿using System;
+using Orleans.Concurrency;
 
 namespace EventSourcing.Persistance
 {
@@ -9,7 +10,7 @@ namespace EventSourcing.Persistance
         public DateTime Created {get; set;}
     }
 
-    public class Event
+    public class AggregateEventBase
     {
         public long Id { get; set; }
         public long AggregateId { get; set; }
@@ -22,7 +23,8 @@ namespace EventSourcing.Persistance
         public DateTime Created { get; set; }
     }
 
-    public class AggregateEvent: Event
+    [Immutable]
+    public class AggregateEvent: AggregateEventBase
     {
         public string AggregateType { get; set; }
     }

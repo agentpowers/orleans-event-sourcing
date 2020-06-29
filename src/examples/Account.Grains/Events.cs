@@ -1,6 +1,5 @@
 using System;
 using EventSourcing;
-using EventSourcingGrains;
 
 namespace Account.Grains
 {
@@ -10,51 +9,51 @@ namespace Account.Grains
     }
 
     #region Events
+    [Event(nameof(Deposited))]
     public class Deposited: IAccountEvent
     {
-        public string Type { get; set;} = nameof(Deposited);
         public decimal Amount { get; set; }
         public int AccountId { get; set; }
         public decimal PendingAmount { get; set; }
     }
 
+    [Event(nameof(Withdrawn))]
     public class Withdrawn: IAccountEvent
     {
-        public string Type { get; set; } = nameof(Withdrawn);
         public decimal Amount { get; set; }
         public int AccountId { get; set; }
     }
 
+    [Event(nameof(TransferCredited))]
     public class TransferCredited: IAccountEvent
     {
-        public string Type { get; set; } = nameof(TransferCredited);
         public int AccountId { get; set; }
         public int ToAccountId { get; set; }
         public decimal Amount { get; set; }
         public Guid TransactionId { get; set; }
     }
 
+    [Event(nameof(TransferDebited))]
     public class TransferDebited: IAccountEvent
     {
-        public string Type { get; set; } = nameof(TransferDebited);
         public int AccountId { get; set; }
         public int FromAccountId { get; set; }
         public decimal Amount { get; set; }
         public Guid TransactionId { get; set; }
     }
     
+    [Event(nameof(TransferCreditReversed))]
     public class TransferCreditReversed: IAccountEvent
     {
-        public string Type { get; set; } = nameof(TransferCreditReversed);
         public int AccountId { get; set; }
         public int ToAccountId { get; set; }
         public decimal Amount { get; set; }
         public Guid TransactionId { get; set; }
     }
 
+    [Event(nameof(TransferDebitReversed))]
     public class TransferDebitReversed: IAccountEvent
     {
-        public string Type { get; set; } = nameof(TransferDebitReversed);
         public int AccountId { get; set; }
         public int FromAccountId { get; set; }
         public decimal Amount { get; set; }

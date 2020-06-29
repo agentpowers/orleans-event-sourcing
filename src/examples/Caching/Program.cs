@@ -13,25 +13,25 @@ namespace Caching
 {
     public class Program
     {
-        const int siloPort = 11111;
-        const int gatewayPort = 30000;
+        const int defaultSiloPort = 11111;
+        const int defaultGatewayPort = 30000;
 
-        public static bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Development");
-
-        public static string connectionString = Program.isLocal 
-				? "host=localhost;database=EventSourcing;username=orleans;password=orleans"
-				: $"host={Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST")};database=postgresdb;username=postgresadmin;password=postgrespwd";
+        private static bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
+        private static string siloPortEnv = Environment.GetEnvironmentVariable("SILO_PORT");
+        private static string gatewayPortEnv = Environment.GetEnvironmentVariable("GATEWAY_PORT");
+        private static string podIPAddressEnv = Environment.GetEnvironmentVariable("POD_IP");
+        private static string customPortEnv = Environment.GetEnvironmentVariable("CUSTOM_PORT");
+        private static string postgresServiceHostEnv = Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST");
+        private static string connectionString = $"host={(string.IsNullOrEmpty(postgresServiceHostEnv) ? "localhost" : postgresServiceHostEnv)};database=postgresdb;username=postgresadmin;password=postgrespwd;Enlist=false;";
         private static void ConfigureOrleans(ISiloBuilder builder)
         {
-            // get injected pod ip address 
-            var podIPAddress = Environment.GetEnvironmentVariable("POD_IP");
             builder.Configure<ClusterOptions>(options => 
             {
-                options.ClusterId = "account-cluster";
-                options.ServiceId = "ACCOUNT";
+                options.ClusterId = "caching-cluster";
+                options.ServiceId = "CACHING";
             })
-            .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Parse(podIPAddress))
-            .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
+            .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Parse(podIPAddressEnv))
+            .ConfigureEndpoints(siloPort: defaultSiloPort, gatewayPort: defaultGatewayPort )
             .UseAdoNetClustering(options =>
             {
                 options.Invariant = "Npgsql";
@@ -53,11 +53,12 @@ namespace Caching
         {
             builder.Configure<ClusterOptions>(options => 
             {
-                options.ClusterId = "account-cluster";
-                options.ServiceId = "ACCOUNT";
+                options.ClusterId = "caching-cluster";
+                options.ServiceId = "CACHING";
             })
-            .ConfigureEndpoints(new Random(1).Next(10001, 10100), new Random(1).Next(20001, 20100))
-            .ConfigureEndpoints(siloPort: siloPort, gatewayPort: gatewayPort)
+            .ConfigureEndpoints(
+                string.IsNullOrEmpty(siloPortEnv) ? defaultSiloPort : int.Parse(siloPortEnv),
+                string.IsNullOrEmpty(gatewayPortEnv) ? defaultGatewayPort : int.Parse(gatewayPortEnv))
             .UseAdoNetClustering(options =>
             {
                 options.Invariant = "Npgsql";
@@ -75,6 +76,7 @@ namespace Caching
         
         public static void Main(string[] args)
         {
+            Console.WriteLine($"Starting {(isLocal ? "LOCAL" : "K8S")} config");
             var hostBuilder = 
                 Host.CreateDefaultBuilder(args)
                 .ConfigureLogging((hostingContext, logging) =>
@@ -85,6 +87,15 @@ namespace Caching
                 .ConfigureWebHostDefaults(builder =>
                 {
                     builder.UseStartup<Startup>();
+                    //use custom port if provided for kestrel
+                    if (!string.IsNullOrEmpty(customPortEnv))
+                    {
+                        Console.WriteLine($"Starting Kestrel in port {customPortEnv}");
+                        builder.UseKestrel(kestrelOptions =>
+                        {
+                            kestrelOptions.ListenAnyIP(int.Parse(customPortEnv));
+                        });
+                    }
                 });
             // configure
             if(isLocal)

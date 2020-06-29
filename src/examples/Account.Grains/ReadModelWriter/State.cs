@@ -1,8 +1,9 @@
 using System;
+using EventSourcingGrains.Grains;
 
 namespace Account.Grains.ReadModelWriter
 {
-    public class AccountModel
+    public class AccountModel: IModelWriterState
     {
         public long Version { get; set; }
         public long Id { get; set; }
