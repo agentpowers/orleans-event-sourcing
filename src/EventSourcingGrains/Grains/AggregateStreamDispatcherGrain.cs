@@ -72,14 +72,13 @@ namespace EventSourcingGrains.Grains
 
                 // sync up lastQueuedEventId and LastNotifiedEventId
                 _lastQueuedEventId = State.LastNotifiedEventId;
-
             }
 
             // register pollForEvents method
             this.RegisterTimer(NotifySubscribers, null, TimeSpan.FromSeconds(1), _notifyInterval);
         }
 
-        public Task AddToQueue(Immutable<AggregateEvent[]> events)
+        public ValueTask<bool> AddToQueue(Immutable<AggregateEvent[]> events)
         {
             // add new events to queue
             foreach (var ev in events.Value)
@@ -97,7 +96,7 @@ namespace EventSourcingGrains.Grains
                 }
             }
 
-            return Task.CompletedTask;
+            return new ValueTask<bool>(InternalIsUnderPressure());
         }
 
         private async Task NotifySubscribers(object args)
@@ -152,9 +151,16 @@ namespace EventSourcingGrains.Grains
             }
         }
 
+        private bool InternalIsUnderPressure() => _eventQueue.Count > _eventDispatcherSettings.QueueSizeThreshold;
+
+        public ValueTask<bool> IsUnderPressure()
+        {
+            return new ValueTask<bool>(InternalIsUnderPressure());
+        }
+
         public ValueTask<long> GetLastQueuedEventId()
         {
-            return new ValueTask<long>(State.LastNotifiedEventId);
+            return new ValueTask<long>(_lastQueuedEventId);
         }
     }
 }
