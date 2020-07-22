@@ -31,7 +31,7 @@ namespace EventSourcing.Persistance
             }
         }
 
-        public async Task<AggregateEvent[]> GetAggregateEvents(string aggregateName, long eventId)
+        public async Task<AggregateEvent[]> GetAggregateEvents(string aggregateName, long afterEventId)
         {
             const string sql = @"select ev.id, ev.aggregateid, ev.aggregateversion, ev.eventversion, ev.parenteventid, ev.rooteventid, ev.type, ev.data, ev.created, ag.type as aggregateType
                                 from {0}_events ev
@@ -40,7 +40,21 @@ namespace EventSourcing.Persistance
                                 order by ev.Id asc;";
             using (IDbConnection conn = Connection)
             {
-                return (await conn.QueryAsync<AggregateEvent>(string.Format(sql, aggregateName), new { id = eventId })).ToArray();
+                return (await conn.QueryAsync<AggregateEvent>(string.Format(sql, aggregateName), new { id = afterEventId })).ToArray();
+            }
+        }
+
+        public async Task<AggregateEvent[]> GetAggregateEvents(string aggregateName, long afterEventId, int size)
+        {
+            const string sql = @"select ev.id, ev.aggregateid, ev.aggregateversion, ev.eventversion, ev.parenteventid, ev.rooteventid, ev.type, ev.data, ev.created, ag.type as aggregateType
+                                from {0}_events ev
+                                join aggregate ag on ag.aggregateid = ev.aggregateid
+                                where ev.Id > @id
+                                order by ev.Id asc
+                                limit {1};";
+            using (IDbConnection conn = Connection)
+            {
+                return (await conn.QueryAsync<AggregateEvent>(string.Format(sql, aggregateName, size), new { id = afterEventId })).ToArray();
             }
         }
 
