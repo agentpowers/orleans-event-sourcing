@@ -22,18 +22,18 @@ namespace Account.Grains.Reconciler
     {
         public const string AggregateName = "accountReconciler";
         private readonly ILogger<AccountReconcilerGrain> _logger;
-        private TimeSpan _reverseTransactionWaitPeriod = TimeSpan.FromMinutes(2);
+        private readonly TimeSpan _reverseTransactionWaitPeriod = TimeSpan.FromMinutes(2);
         // flag indicating if tranfer debited event queue is being processed
         private bool _isProcessingTransferDebitedEventQueue = false;
         // flag indicating if event queue is being processed
         private bool _isProcessingEventQueue = false;
         private long _lastQueuedEventId = 0;
         // local state to keep unmatched transactions
-        private HashSet<Guid> _unmatchedTransactions = new HashSet<Guid>();
+        private readonly HashSet<Guid> _unmatchedTransactions = new HashSet<Guid>();
         // AggregateEvent queue to process them in background
-        private Queue<AggregateEvent> _eventQueue = new Queue<AggregateEvent>();
+        private readonly Queue<AggregateEvent> _eventQueue = new Queue<AggregateEvent>();
         // queue with TransferDebitedEvent TransactionId and AggregateEvent
-        private Queue<(Guid TransactionId, AggregateEvent AggregateEvent)> _transferDebitedEventQueue = new Queue<(Guid, AggregateEvent)>();
+        private readonly Queue<(Guid TransactionId, AggregateEvent AggregateEvent)> _transferDebitedEventQueue = new Queue<(Guid, AggregateEvent)>();
         public AccountReconcilerGrain(ILogger<AccountReconcilerGrain> logger) : base(AggregateName, new AccountReconcilerAggregate())
         {
             _logger = logger;
