@@ -15,7 +15,7 @@ namespace Account.Grains.Repositories
 
     public class AccountRepository : IAccountRepository
     {
-        private string _connectionString;
+        private readonly string _connectionString;
         private IDbConnection Connection
         {
             get
@@ -31,42 +31,36 @@ namespace Account.Grains.Repositories
         
         public async Task<AccountModel> GetAccount(long accountId)
         {
-            using (IDbConnection conn = Connection)
-            {
-                return await conn.QueryFirstOrDefaultAsync<AccountModel>(
-                    @"
+            using IDbConnection conn = Connection;
+            return await conn.QueryFirstOrDefaultAsync<AccountModel>(
+                @"
                         select * from account
                         where Id=@accountId
                     ",
-                    new {  accountId });
-            }
+                new { accountId });
         }
 
         public async Task CreateAccount(AccountModel account)
         {
-            using (IDbConnection conn = Connection)
-            {
-                await conn.ExecuteAsync(
-                    @"
+            using IDbConnection conn = Connection;
+            await conn.ExecuteAsync(
+                @"
                         insert into Account(Id, Version, Balance, Modified) 
                         values (@Id, @Version, @Balance, @Modified)
                     ",
-                    account);
-            }
+                account);
         }
 
         public async Task UpdateAccount(AccountModel account)
         {
-            using (IDbConnection conn = Connection)
-            {
-                await conn.ExecuteAsync(
-                    @"
+            using IDbConnection conn = Connection;
+            await conn.ExecuteAsync(
+                @"
                         update Account 
                         set Version=@Version, Balance=@Balance, Modified=@Modified
                         where Id=@Id
                     ",
-                    account);
-            }
+                account);
         }
     }
 }

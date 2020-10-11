@@ -11,7 +11,7 @@ namespace Account.Controllers
     [Route("[controller]")]
     public class AccountController : ControllerBase
     {
-        private IClusterClient client;
+        private readonly IClusterClient client;
         
         public AccountController(IClusterClient client)
         {

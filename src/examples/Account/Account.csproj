@@ -8,12 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Orleans.Client" Version="3.2.0" />
-    <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="3.2.0" />
-    <PackageReference Include="Orleans.Clustering.Kubernetes" Version="1.2.2" />
-    <PackageReference Include="Microsoft.Orleans.Clustering.AdoNet" Version="3.2.0" />
+    <PackageReference Include="Microsoft.Orleans.Client" Version="3.3.0" />
+    <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="3.3.0" />
+    <PackageReference Include="Orleans.Clustering.Kubernetes" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Orleans.Clustering.AdoNet" Version="3.3.0" />
+    <PackageReference Include="Orleans.TelemetryConsumers.Prometheus" Version="0.0.1" />
     <PackageReference Include="OrleansDashboard" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Orleans.OrleansTelemetryConsumers.Linux" Version="3.2.0" />
+    <PackageReference Include="Microsoft.Orleans.OrleansTelemetryConsumers.Linux" Version="3.3.0" />
   </ItemGroup>
   <ItemGroup>
       <ProjectReference Include="..\..\EventSourcingGrains\EventSourcingGrains.csproj" />

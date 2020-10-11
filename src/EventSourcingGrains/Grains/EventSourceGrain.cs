@@ -14,8 +14,8 @@ namespace EventSourcingGrains.Grains
     {
         protected IEventSource<TState, TEvent> EventSource;
         private EventSourceGrainSetting _eventSourceGrainSettings = null;
-        private string _aggregateName;
-        private IAggregate<TState, TEvent> _aggregate;
+        private readonly string _aggregateName;
+        private readonly IAggregate<TState, TEvent> _aggregate;
         private bool _hasAggregateStream;
         
         /// <summary>

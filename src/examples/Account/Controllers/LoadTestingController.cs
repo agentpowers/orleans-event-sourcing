@@ -14,7 +14,7 @@ namespace Account.Controllers
     [Route("load_testing")]
     public class LoadTestingController : ControllerBase
     {
-        private IClusterClient client;
+        private readonly IClusterClient client;
         
         public LoadTestingController(IClusterClient client)
         {
@@ -60,25 +60,23 @@ namespace Account.Controllers
             Func<T, Task> body)
         {
             var tasks = new List<Task>();
-            using (var throttler = new SemaphoreSlim(degreeOfParallelism))
+            using var throttler = new SemaphoreSlim(degreeOfParallelism);
+            foreach (var element in source)
             {
-                foreach (var element in source)
+                await throttler.WaitAsync();
+                tasks.Add(Task.Run(async () =>
                 {
-                    await throttler.WaitAsync();
-                    tasks.Add(Task.Run(async () =>
+                    try
                     {
-                        try
-                        {
-                            await body(element);
-                        }
-                        finally
-                        {
-                            throttler.Release();
-                        }
-                    }));
-                }
-                await Task.WhenAll(tasks);
+                        await body(element);
+                    }
+                    finally
+                    {
+                        throttler.Release();
+                    }
+                }));
             }
+            await Task.WhenAll(tasks);
         }
     }
 }

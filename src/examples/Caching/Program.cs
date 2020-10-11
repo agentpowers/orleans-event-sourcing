@@ -16,13 +16,13 @@ namespace Caching
         const int defaultSiloPort = 11111;
         const int defaultGatewayPort = 30000;
 
-        private static bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
-        private static string siloPortEnv = Environment.GetEnvironmentVariable("SILO_PORT");
-        private static string gatewayPortEnv = Environment.GetEnvironmentVariable("GATEWAY_PORT");
-        private static string podIPAddressEnv = Environment.GetEnvironmentVariable("POD_IP");
-        private static string customPortEnv = Environment.GetEnvironmentVariable("CUSTOM_PORT");
-        private static string postgresServiceHostEnv = Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST");
-        private static string connectionString = $"host={(string.IsNullOrEmpty(postgresServiceHostEnv) ? "localhost" : postgresServiceHostEnv)};database=postgresdb;username=postgresadmin;password=postgrespwd;Enlist=false;";
+        private static readonly bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
+        private static readonly string siloPortEnv = Environment.GetEnvironmentVariable("SILO_PORT");
+        private static readonly string gatewayPortEnv = Environment.GetEnvironmentVariable("GATEWAY_PORT");
+        private static readonly string podIPAddressEnv = Environment.GetEnvironmentVariable("POD_IP");
+        private static readonly string customPortEnv = Environment.GetEnvironmentVariable("CUSTOM_PORT");
+        private static readonly string postgresServiceHostEnv = Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST");
+        private static readonly string connectionString = $"host={(string.IsNullOrEmpty(postgresServiceHostEnv) ? "localhost" : postgresServiceHostEnv)};database=postgresdb;username=postgresadmin;password=postgrespwd;Enlist=false;";
         private static void ConfigureOrleans(ISiloBuilder builder)
         {
             builder.Configure<ClusterOptions>(options => 

@@ -12,7 +12,7 @@ namespace EventSourcingGrains.Grains
     [Reentrant]
     public class AggregateStreamGrain : Grain, IAggregateStreamGrain
     {
-        private IAggregateStreamSettings _aggregateStreamSettings;
+        private readonly IAggregateStreamSettings _aggregateStreamSettings;
         private readonly ILogger<AggregateStreamGrain> _logger;
         private readonly IRepository _repository;
         private long _lastNotifiedEventId;
@@ -21,7 +21,7 @@ namespace EventSourcingGrains.Grains
         private string _aggregateName;
         private bool _isPollingForEvents;
         private bool _isDispatcherUnderPressure;
-        private static TimeSpan _pollingInterval = TimeSpan.FromSeconds(1);
+        private static readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(1);
         private const int SkippedPollingCountThreshold = 60;
 
         public AggregateStreamGrain(ILogger<AggregateStreamGrain> logger, IRepository repository, IAggregateStreamSettings aggregateStreamSettings)

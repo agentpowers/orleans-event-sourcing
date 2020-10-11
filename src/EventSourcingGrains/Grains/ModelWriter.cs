@@ -16,7 +16,7 @@ namespace EventSourcingGrains.Grains
     {
         public const string GrainPrefix = "writer:";
         // aggregate
-        private IAggregate<TState, TEvent> _aggregate;
+        private readonly IAggregate<TState, TEvent> _aggregate;
 
         /// <summary>
         /// Get current state

@@ -18,7 +18,7 @@ namespace Account.Grains.ReadModelWriter
         private readonly EventSourcing.Persistance.IRepository _eventSourcingRepository;
         private readonly IAccountRepository _accountRepository;
         private long _accountId;
-        private ILogger<AccountModelWriterGrain> _logger;
+        private readonly ILogger<AccountModelWriterGrain> _logger;
         public AccountModelWriterGrain(
             EventSourcing.Persistance.IRepository eventSourcingRepository,
             IAccountRepository accountRepository,

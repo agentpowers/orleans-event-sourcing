@@ -12,7 +12,7 @@ namespace Caching.Controllers
     [Route("[controller]")]
     public class CacheController : ControllerBase
     {
-        private IClusterClient client;
+        private readonly IClusterClient client;
         
         public CacheController(IClusterClient client)
         {

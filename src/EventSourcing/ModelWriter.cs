@@ -8,7 +8,7 @@ namespace EventSourcing
         where TEvent : AggregateEvent
     {
         // aggregate
-        private IAggregate<TState, TEvent> _aggregate;
+        private readonly IAggregate<TState, TEvent> _aggregate;
 
         /// <summary>
         /// Get current state
