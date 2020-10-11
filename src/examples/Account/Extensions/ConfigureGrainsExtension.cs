@@ -14,7 +14,7 @@ namespace Account.Extensions
         public static void ConfigureGrains(this ISiloBuilder builder)
         {
             // configure stream
-            builder.ConfigureAggregateStream(AccountGrain.AggregateName, (aggregateStreamSettings) => 
+            builder.ConfigureAggregateStream(AccountGrain.AggregateName, (aggregateStreamSettings) =>
             {
                 // account writer
                 aggregateStreamSettings.EventDispatcherSettingsMap.Add(nameof(AccountModelWriterGrain), new EventDispatcherSettings
@@ -36,12 +36,12 @@ namespace Account.Extensions
             });
 
             // configure keep alive service
-            builder.ConfigureKeepAliveService((keepAliveSettings) => 
+            builder.ConfigureKeepAliveService((keepAliveSettings) =>
             {
                 keepAliveSettings.GrainKeepAliveSettings.Add(new KeepAliveGrainSetting
-                { 
+                {
                     Interval = TimeSpan.FromMinutes(10),
-                    GrainResolver = (grainFactory) => 
+                    GrainResolver = (grainFactory) =>
                     {
                         var grain = grainFactory.GetGrain<IAccountReconcilerGrain>(nameof(AccountReconcilerGrain));
                         return grain;
@@ -50,7 +50,7 @@ namespace Account.Extensions
             });
 
             // eventsourcing grain configuration
-            builder.ConfigureEventSourcingGrains((settings) => 
+            builder.ConfigureEventSourcingGrains((settings) =>
             {
                 // account grain
                 settings.Add(AccountGrain.AggregateName, new EventSourceGrainSetting());

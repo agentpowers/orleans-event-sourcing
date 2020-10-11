@@ -15,7 +15,7 @@ namespace Account.Controllers
     public class LoadTestingController : ControllerBase
     {
         private readonly IClusterClient client;
-        
+
         public LoadTestingController(IClusterClient client)
         {
             this.client = client;
@@ -41,11 +41,11 @@ namespace Account.Controllers
         {
             var started = DateTime.UtcNow;
             var sw = Stopwatch.StartNew();
-            await Enumerable.Range(1, count).ForEachAsyncSemaphore(Environment.ProcessorCount -2, body: async entry =>
-            {
-                var grain = this.client.GetGrain<IAccountGrain>(entry);
-                var response = await grain.Withdraw(1000);
-            });
+            await Enumerable.Range(1, count).ForEachAsyncSemaphore(Environment.ProcessorCount - 2, body: async entry =>
+             {
+                 var grain = this.client.GetGrain<IAccountGrain>(entry);
+                 var response = await grain.Withdraw(1000);
+             });
             sw.Stop();
             var ended = started.Add(sw.Elapsed);
             return Ok($"{count} Took ticks={sw.ElapsedTicks}, ms={sw.ElapsedMilliseconds}, started={started}, ended={ended}");

@@ -3,7 +3,7 @@ using EventSourcingGrains.Grains;
 
 namespace Account.Grains.ReadModelWriter
 {
-    public class AccountModel: IModelWriterState
+    public class AccountModel : IModelWriterState
     {
         public long Version { get; set; }
         public long Id { get; set; }

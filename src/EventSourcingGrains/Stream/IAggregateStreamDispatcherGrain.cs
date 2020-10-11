@@ -5,7 +5,7 @@ using Orleans.Concurrency;
 
 namespace EventSourcingGrains.Stream
 {
-    public interface IAggregateStreamDispatcherGrain: IGrainWithStringKey
+    public interface IAggregateStreamDispatcherGrain : IGrainWithStringKey
     {
         // Notify aggregate stream dispatcher grain about new events
         ValueTask<bool> AddToQueue(Immutable<AggregateEvent[]> events);

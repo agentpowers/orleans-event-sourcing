@@ -28,7 +28,7 @@ namespace Account.Grains.Repositories
         {
             _connectionString = connectionString;
         }
-        
+
         public async Task<AccountModel> GetAccount(long accountId)
         {
             using IDbConnection conn = Connection;

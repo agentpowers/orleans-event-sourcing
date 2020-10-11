@@ -9,7 +9,7 @@ namespace Account.Grains
     {
         public const string AggregateName = "account";
         private readonly ILogger<AccountGrain> _logger;
-        public AccountGrain(ILogger<AccountGrain> logger): base(AggregateName, new AccountAggregate())
+        public AccountGrain(ILogger<AccountGrain> logger) : base(AggregateName, new AccountAggregate())
         {
             _logger = logger;
         }
@@ -21,7 +21,7 @@ namespace Account.Grains
 
         public async Task<AccountResponse<decimal>> Deposit(decimal amount)
         {
-            await ApplyEvent(new Deposited{ Amount = amount, AccountId = State.AccountId });
+            await ApplyEvent(new Deposited { Amount = amount, AccountId = State.AccountId });
             return new AccountResponse<decimal>(State.Amount);
         }
 
@@ -38,7 +38,7 @@ namespace Account.Grains
                 return new AccountResponse<decimal>("insufficient funds", ErrorCode.InsufficientFunds);
             }
             // save event
-            await ApplyEvent(new Withdrawn{ Amount = amount, AccountId = State.AccountId});
+            await ApplyEvent(new Withdrawn { Amount = amount, AccountId = State.AccountId });
             return new AccountResponse<decimal>(State.Amount);
         }
 
@@ -60,17 +60,17 @@ namespace Account.Grains
             {
                 // save event with response value(eventId) as Root and ParentId
                 await ApplyEvent(
-                    new TransferCredited{ AccountId = State.AccountId, ToAccountId = toAccountId, Amount = amount, TransactionId = transactionId },
+                    new TransferCredited { AccountId = State.AccountId, ToAccountId = toAccountId, Amount = amount, TransactionId = transactionId },
                     response.Value,
                     response.Value
                 );
                 // return new balance
                 return new AccountResponse<decimal>(State.Amount);
             }
-            else 
+            else
             {
                 // log info
-                _logger.LogInformation($"Unable to complete transfer, Reason={response.ErrorMessage}, From={State.AccountId}, To={toAccountId}");   
+                _logger.LogInformation($"Unable to complete transfer, Reason={response.ErrorMessage}, From={State.AccountId}, To={toAccountId}");
                 // return error 
                 return new AccountResponse<decimal>(response.ErrorMessage, response.ErrorCode);
             }
@@ -78,7 +78,7 @@ namespace Account.Grains
 
         public async Task<AccountResponse<long>> TransferDebit(int fromAccountId, Guid transactionId, decimal amount)
         {
-            var eventId = await ApplyEvent(new TransferDebited{ AccountId = State.AccountId, FromAccountId = fromAccountId, Amount = amount, TransactionId = transactionId });
+            var eventId = await ApplyEvent(new TransferDebited { AccountId = State.AccountId, FromAccountId = fromAccountId, Amount = amount, TransactionId = transactionId });
             return new AccountResponse<long>(eventId);
         }
 
@@ -86,7 +86,7 @@ namespace Account.Grains
         {
             // TODO: make this idempotent
             await ApplyEvent(
-                new TransferDebitReversed{ AccountId = State.AccountId, FromAccountId = fromAccountId, Amount = amount, TransactionId = transactionId },
+                new TransferDebitReversed { AccountId = State.AccountId, FromAccountId = fromAccountId, Amount = amount, TransactionId = transactionId },
                 rootEventId,
                 parentEventId
             );

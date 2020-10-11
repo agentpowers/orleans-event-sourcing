@@ -12,11 +12,11 @@ namespace EventSourcingGrains.Stream
 
             configureAggregateStream.Invoke(aggregateStreamSettings);
 
-            builder.ConfigureServices((hostBuilder, serviceCollection) => 
+            builder.ConfigureServices((hostBuilder, serviceCollection) =>
             {
                 serviceCollection.AddSingleton<IAggregateStreamSettings>(aggregateStreamSettings);
             });
-            
+
             return builder;
         }
     }

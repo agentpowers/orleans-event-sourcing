@@ -13,7 +13,7 @@ namespace Caching.Controllers
     public class CacheController : ControllerBase
     {
         private readonly IClusterClient client;
-        
+
         public CacheController(IClusterClient client)
         {
             this.client = client;
@@ -21,7 +21,7 @@ namespace Caching.Controllers
 
         // GET
         [HttpGet("{key}")]
-        public async Task<string> Get([FromRoute]string key)
+        public async Task<string> Get([FromRoute] string key)
         {
             var grain = this.client.GetGrain<ICacheGrain<string>>(key);
             return (await grain.Get()).Value;
@@ -29,7 +29,7 @@ namespace Caching.Controllers
 
         // POST
         [HttpPost("{key}")]
-        public async Task Set([FromRoute]string key, [FromBody]CacheModel body)
+        public async Task Set([FromRoute] string key, [FromBody] CacheModel body)
         {
             var grain = this.client.GetGrain<ICacheGrain<string>>(key);
             var immutableValue = new Immutable<string>(body.Value);
@@ -37,14 +37,14 @@ namespace Caching.Controllers
         }
 
         [HttpDelete("{key}")]
-        public async Task Delete([FromRoute]string key)
+        public async Task Delete([FromRoute] string key)
         {
             var grain = this.client.GetGrain<ICacheGrain<string>>(key);
             await grain.Clear();
         }
 
         [HttpHead("{key}")]
-        public async Task Refresh([FromRoute]string key)
+        public async Task Refresh([FromRoute] string key)
         {
             var grain = this.client.GetGrain<ICacheGrain<string>>(key);
             await grain.Refresh();

@@ -12,14 +12,14 @@ using EventSourcingGrains.Keeplive;
 
 namespace EventSourcingGrains.Services
 {
-    public interface IKeepAliveService: IGrainService{}
+    public interface IKeepAliveService : IGrainService { }
     public class KeepAliveService : GrainService, IKeepAliveService
     {
         private IServiceProvider _serviceProvider;
         private readonly IGrainFactory _grainFactory;
         private readonly static TimeSpan InitialInterval = TimeSpan.Zero;
         private readonly static TimeSpan AggregateStreamInterval = TimeSpan.FromMinutes(10);
-        
+
         public KeepAliveService(IGrainIdentity grainId, Silo silo, ILoggerFactory loggerFactory, IGrainFactory grainFactory) : base(grainId, silo, loggerFactory)
         {
             _grainFactory = grainFactory;

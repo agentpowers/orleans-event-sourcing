@@ -29,12 +29,12 @@ namespace EventSourcingGrains.Grains
         private string _queueSizeMetricName;
         public const string AggregateName = "aggregate_stream_dispatcher";
 
-        public AggregateStreamDispatcherGrain(ITelemetryProducer telemetryProducer, ILogger<AggregateStreamDispatcherGrain> logger): base(AggregateName, new AggregateStream())
+        public AggregateStreamDispatcherGrain(ITelemetryProducer telemetryProducer, ILogger<AggregateStreamDispatcherGrain> logger) : base(AggregateName, new AggregateStream())
         {
             _logger = logger;
             _telemetryProducer = telemetryProducer;
         }
-        
+
         public override async Task OnActivateAsync()
         {
             // set current grain key as aggregateName
@@ -50,7 +50,7 @@ namespace EventSourcingGrains.Grains
             var aggregateStreamSettings = ServiceProvider.GetServices<IAggregateStreamSettings>().FirstOrDefault(g => g.AggregateName == rootAggregateName);
 
             // throw if not able to get StreamSettings
-            if(aggregateStreamSettings == null)
+            if (aggregateStreamSettings == null)
             {
                 throw new InvalidOperationException($"unable to retrieve IAggregateStreamSettings for {nameSplit[0]}");
             }
@@ -71,9 +71,9 @@ namespace EventSourcingGrains.Grains
                 {
                     // get last event from db
                     var lastEvent = await EventSource.GetLastAggregateEvent(rootAggregateName);
-                    
+
                     // get LastNotifiedEventVersion as latest aggregate version from db or 0
-                    await ApplyEvent(new UpdatedLastNotifiedEventId{ LastNotifiedEventId = lastEvent?.Id ?? 0 });
+                    await ApplyEvent(new UpdatedLastNotifiedEventId { LastNotifiedEventId = lastEvent?.Id ?? 0 });
 
                     // sync up lastQueuedEventId and LastNotifiedEventId
                     _lastQueuedEventId = State.LastNotifiedEventId;
@@ -123,7 +123,7 @@ namespace EventSourcingGrains.Grains
             try
             {
                 // dequeue each event and sent to subscribers
-                while(_eventQueue.Count > 0)
+                while (_eventQueue.Count > 0)
                 {
                     var @event = _eventQueue.Peek();
                     // TODO: set up auto retry
@@ -149,7 +149,7 @@ namespace EventSourcingGrains.Grains
                     if (_eventDispatcherSettings.PersistDispatcherState)
                     {
                         // update state with LastNotifiedEventVersion
-                        await ApplyEvent(new UpdatedLastNotifiedEventId{ LastNotifiedEventId = @event.Id });
+                        await ApplyEvent(new UpdatedLastNotifiedEventId { LastNotifiedEventId = @event.Id });
                     }
 
                     // remove from queue

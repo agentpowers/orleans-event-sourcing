@@ -7,10 +7,10 @@ namespace EventSourcingGrains.Grains
 {
     public interface IModelWriterState
     {
-        long Version { get;}
+        long Version { get; }
     }
 
-    public abstract class ModelWriter<TState, TEvent>: Grain
+    public abstract class ModelWriter<TState, TEvent> : Grain
         where TState : IModelWriterState
         where TEvent : AggregateEvent
     {
@@ -22,7 +22,7 @@ namespace EventSourcingGrains.Grains
         /// Get current state
         /// </summary>
         /// <value></value>
-        protected TState State { get { return _aggregate.State ;} }
+        protected TState State { get { return _aggregate.State; } }
 
         // constructor
         protected ModelWriter(IAggregate<TState, TEvent> aggregate)
@@ -45,7 +45,7 @@ namespace EventSourcingGrains.Grains
             var currentState = await GetCurrentState();
             // get pending events
             var pendingEvents = await GetPendingEvents(currentState.Version);
-            
+
             // set aggregate state
             _aggregate.State = currentState;
 

@@ -87,7 +87,7 @@ namespace EventSourcing
         /// Get current state
         /// </summary>
         /// <value></value>
-        public TState State { get { return _aggregate.State ;} }
+        public TState State { get { return _aggregate.State; } }
 
         public EventSource(IRepository repository)
         {
@@ -130,7 +130,7 @@ namespace EventSourcing
                 // add new aggregate if it doesn't exist
                 AggregateId = await _repository.SaveAggregate(
                     new Aggregate
-                    { 
+                    {
                         Type = aggregateType,
                         Created = DateTime.UtcNow
                     }
@@ -168,7 +168,7 @@ namespace EventSourcing
                 AggregateId
             );
             // apply snapshot if any
-            if(snapshot != null)
+            if (snapshot != null)
             {
                 // store aggregate version number
                 _aggregateVersion = snapshot.AggregateVersion;
@@ -192,9 +192,9 @@ namespace EventSourcing
         public async Task SaveSnapshot()
         {
             await _repository.SaveSnapshot(
-                _aggregateName, 
+                _aggregateName,
                 new Snapshot
-                { 
+                {
                     AggregateId = AggregateId,
                     AggregateVersion = _aggregateVersion,
                     Data = JsonSerializer.Serialize(_aggregate.State),
@@ -222,14 +222,14 @@ namespace EventSourcing
             var eventId = await _repository.SaveEvent(
                 _aggregateName,
                 new Persistance.AggregateEventBase
-                { 
+                {
                     AggregateId = AggregateId,
                     AggregateVersion = _aggregateVersion,
                     Type = eventIdentity.Name,
                     EventVersion = eventIdentity.Version,
                     Data = serialized,
                     RootEventId = rootEventId,
-                    ParentEventId = parentEventId, 
+                    ParentEventId = parentEventId,
                     Created = DateTime.UtcNow
                 }
             );
@@ -251,10 +251,10 @@ namespace EventSourcing
         public Task<AggregateEvent[]> GetAggregateEvents(string aggregateName, long eventId = 0) =>
              _repository.GetAggregateEvents(aggregateName, eventId);
 
-        public Task<AggregateEvent> GetLastAggregateEvent() => 
+        public Task<AggregateEvent> GetLastAggregateEvent() =>
             _repository.GetLastAggregateEvent(_aggregateName);
-        
-        public Task<AggregateEvent> GetLastAggregateEvent(string aggregateName) => 
+
+        public Task<AggregateEvent> GetLastAggregateEvent(string aggregateName) =>
             _repository.GetLastAggregateEvent(aggregateName);
     }
 }

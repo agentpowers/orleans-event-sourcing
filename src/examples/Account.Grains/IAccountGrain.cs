@@ -32,7 +32,7 @@ namespace Account.Grains
             ErrorCode = errorCode;
         }
     }
-    public interface IAccountGrain: IGrainWithIntegerKey
+    public interface IAccountGrain : IGrainWithIntegerKey
     {
         // return balance
         Task<AccountResponse<decimal>> GetBalance();
