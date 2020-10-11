@@ -11,8 +11,8 @@ namespace Account.Controllers
     [Route("[controller]")]
     public class AccountController : ControllerBase
     {
-        private IClusterClient client;
-        
+        private readonly IClusterClient client;
+
         public AccountController(IClusterClient client)
         {
             this.client = client;
@@ -32,7 +32,7 @@ namespace Account.Controllers
         }
 
         [HttpPost("{id}/deposit")]
-        public async Task<IActionResult> Deposit(int id, [FromBody]AccountDepositModel body)
+        public async Task<IActionResult> Deposit(int id, [FromBody] AccountDepositModel body)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
             var response = await grain.Deposit(body.Amount);
@@ -44,7 +44,7 @@ namespace Account.Controllers
         }
 
         [HttpPost("{id}/withdraw")]
-        public async Task<IActionResult> Withdraw(int id, [FromBody]AccountWithdrawModel body)
+        public async Task<IActionResult> Withdraw(int id, [FromBody] AccountWithdrawModel body)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
             var response = await grain.Withdraw(body.Amount);
@@ -56,7 +56,7 @@ namespace Account.Controllers
         }
 
         [HttpPost("{id}/transfer")]
-        public async Task<IActionResult> Transfer(int id, [FromBody]AccountTransferModel body)
+        public async Task<IActionResult> Transfer(int id, [FromBody] AccountTransferModel body)
         {
             var grain = this.client.GetGrain<IAccountGrain>(id);
             var response = await grain.Transfer(body.ToAccountId, body.Amount);

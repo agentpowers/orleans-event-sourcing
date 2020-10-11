@@ -4,7 +4,7 @@ using Orleans;
 
 namespace EventSourcingGrains.Stream
 {
-    public interface IAggregateStreamGrain: IKeepAliveGrain, IGrainWithStringKey
+    public interface IAggregateStreamGrain : IKeepAliveGrain, IGrainWithStringKey
     {
         // Notify aggregate stream grain about new event
         Task Notify(long eventId);

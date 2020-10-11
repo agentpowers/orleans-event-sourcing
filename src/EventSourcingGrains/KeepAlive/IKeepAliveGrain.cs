@@ -3,7 +3,7 @@ using Orleans;
 
 namespace EventSourcingGrains.Keeplive
 {
-    public interface IKeepAliveGrain: IGrainWithStringKey
+    public interface IKeepAliveGrain : IGrainWithStringKey
     {
         Task Ping();
     }

@@ -5,9 +5,9 @@ using System.Linq;
 namespace EventSourcing
 {
     public static class EventTypeHelper
-    {       
-        private static Dictionary<(string Name, int Version), Type> _eventIdentityToTypeCache = new Dictionary<(string Name, int Version), Type>();
-        private static Dictionary<Type, (string Name, int Version)> _typeToEventIdentityCache = new Dictionary<Type, (string Name, int Version)>();
+    {
+        private static readonly Dictionary<(string Name, int Version), Type> _eventIdentityToTypeCache = new Dictionary<(string Name, int Version), Type>();
+        private static readonly Dictionary<Type, (string Name, int Version)> _typeToEventIdentityCache = new Dictionary<Type, (string Name, int Version)>();
         static EventTypeHelper()
         {
             var assemblyList = AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic);
@@ -22,13 +22,13 @@ namespace EventSourcing
                         var attribute = type.GetCustomAttributes(attributeType, false).FirstOrDefault();
                         if (attribute != default && attribute is Event eventMeta)
                         {
-                            if(!_typeToEventIdentityCache.TryAdd(type, (eventMeta.Name, eventMeta.Version)))
+                            if (!_typeToEventIdentityCache.TryAdd(type, (eventMeta.Name, eventMeta.Version)))
                             {
-                                throw new InvalidOperationException($"Unable to add type for {eventMeta.ToString()}. Are there duplicate {nameof(Event)}?");
+                                throw new InvalidOperationException($"Unable to add type for {eventMeta}. Are there duplicate {nameof(Event)}?");
                             }
-                            if(!_eventIdentityToTypeCache.TryAdd((eventMeta.Name, eventMeta.Version), type))
+                            if (!_eventIdentityToTypeCache.TryAdd((eventMeta.Name, eventMeta.Version), type))
                             {
-                                throw new InvalidOperationException($"Unable to add type for {eventMeta.ToString()}. Are there duplicate {nameof(Event)}?");
+                                throw new InvalidOperationException($"Unable to add type for {eventMeta}. Are there duplicate {nameof(Event)}?");
                             }
                         }
                     }
@@ -45,6 +45,6 @@ namespace EventSourcing
         public static (string Name, int Version) GetEventIdentity(Type type)
         {
             return _typeToEventIdentityCache[type];
-        }       
+        }
     }
 }

@@ -14,15 +14,15 @@ namespace EventSourcingGrains.Grains
     {
         protected IEventSource<TState, TEvent> EventSource;
         private EventSourceGrainSetting _eventSourceGrainSettings = null;
-        private string _aggregateName;
-        private IAggregate<TState, TEvent> _aggregate;
+        private readonly string _aggregateName;
+        private readonly IAggregate<TState, TEvent> _aggregate;
         private bool _hasAggregateStream;
-        
+
         /// <summary>
         /// Get current state
         /// </summary>
         /// <value></value>
-        protected TState State { get { return EventSource.State ;} }
+        protected TState State { get { return EventSource.State; } }
 
         protected EventSourceGrain(string aggregateName, IAggregate<TState, TEvent> aggregate)
         {
@@ -99,7 +99,7 @@ namespace EventSourcingGrains.Grains
                 // notify AggregateStreamGrain about new event
                 var aggregateGrain = GrainFactory.GetGrain<IAggregateStreamGrain>(_aggregateName);
                 // fire and forget request
-                aggregateGrain.InvokeOneWay(handler=> handler.Notify(eventId));
+                aggregateGrain.InvokeOneWay(handler => handler.Notify(eventId));
             }
             // return eventId
             return eventId;

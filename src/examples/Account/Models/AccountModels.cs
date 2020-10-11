@@ -4,11 +4,11 @@ namespace Account.Models
     {
         public decimal Amount { get; set; }
     }
-    public class AccountDepositModel: AccountModelBase{}
+    public class AccountDepositModel : AccountModelBase { }
 
-    public class AccountWithdrawModel: AccountModelBase{}
+    public class AccountWithdrawModel : AccountModelBase { }
 
-    public class AccountTransferModel: AccountModelBase
+    public class AccountTransferModel : AccountModelBase
     {
         public int ToAccountId { get; set; }
     }

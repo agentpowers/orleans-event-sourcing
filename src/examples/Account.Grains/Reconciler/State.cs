@@ -5,7 +5,7 @@ using EventSourcingGrains;
 
 namespace Account.Grains.Reconciler
 {
-    public class AccountReconciler: IState
+    public class AccountReconciler : IState
     {
         public long LastProcessedEventId { get; set; }
 

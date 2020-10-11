@@ -12,11 +12,11 @@ namespace EventSourcingGrains.Keeplive
 
             configure.Invoke(keepAliveSettings);
 
-            builder.ConfigureServices((hostBuilder, serviceCollection) => 
+            builder.ConfigureServices((hostBuilder, serviceCollection) =>
             {
                 serviceCollection.AddSingleton<IKeepAliveSettings>(keepAliveSettings);
             });
-            
+
             return builder;
         }
     }

@@ -16,13 +16,13 @@ namespace EventSourcingGrains.Grains
             // add AggregateStreamDispatcherGrain settings
             settings.Add(AggregateStreamDispatcherGrain.AggregateName, new EventSourceGrainSetting());
 
-            builder.ConfigureServices((hostBuilder, serviceCollection) => 
+            builder.ConfigureServices((hostBuilder, serviceCollection) =>
             {
                 serviceCollection.AddSingleton<IEventSourceGrainSettingsMap>(settings);
             });
 
             builder.AddStartupTask<CallGrainStartupTask>();
-            
+
             return builder;
         }
     }

@@ -2,7 +2,7 @@ using System;
 
 namespace EventSourcing
 {
-    public class AggregateDoesNotExistException: Exception
+    public class AggregateDoesNotExistException : Exception
     {
         private readonly string _aggregateName;
 

@@ -1,8 +1,8 @@
 ﻿namespace EventSourcing
 {
     public interface IAggregate<TState, TEvent>
-    {       
-        TState State {get; set;}
+    {
+        TState State { get; set; }
         /// <summary>
         /// Applies an event to a state
         /// </summary>

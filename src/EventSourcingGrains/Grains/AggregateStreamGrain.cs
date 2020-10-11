@@ -12,7 +12,7 @@ namespace EventSourcingGrains.Grains
     [Reentrant]
     public class AggregateStreamGrain : Grain, IAggregateStreamGrain
     {
-        private IAggregateStreamSettings _aggregateStreamSettings;
+        private readonly IAggregateStreamSettings _aggregateStreamSettings;
         private readonly ILogger<AggregateStreamGrain> _logger;
         private readonly IRepository _repository;
         private long _lastNotifiedEventId;
@@ -21,7 +21,7 @@ namespace EventSourcingGrains.Grains
         private string _aggregateName;
         private bool _isPollingForEvents;
         private bool _isDispatcherUnderPressure;
-        private static TimeSpan _pollingInterval = TimeSpan.FromSeconds(1);
+        private static readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(1);
         private const int SkippedPollingCountThreshold = 60;
 
         public AggregateStreamGrain(ILogger<AggregateStreamGrain> logger, IRepository repository, IAggregateStreamSettings aggregateStreamSettings)
@@ -30,7 +30,7 @@ namespace EventSourcingGrains.Grains
             _repository = repository;
             _aggregateStreamSettings = aggregateStreamSettings;
         }
-        
+
         public override async Task OnActivateAsync()
         {
             // set current grain key as aggregateName
@@ -104,7 +104,7 @@ namespace EventSourcingGrains.Grains
             try
             {
                 // if there is no notification of new event and haven't reached PollingSkipThreshold then break
-                if(_lastNotifiedEventId <= _lastDispatchedEventId)
+                if (_lastNotifiedEventId <= _lastDispatchedEventId)
                 {
                     _skippedPollingCount++;
                     if (_skippedPollingCount != SkippedPollingCountThreshold)
@@ -139,7 +139,7 @@ namespace EventSourcingGrains.Grains
                     _logger.LogWarning($"Missed event, missingId={newEvents[i].Id + 1}, index={i}, length={newEvents.Length}");
                     newEvents = newEvents.AsSpan().Slice(0, i).ToArray();
                 }
-                
+
                 // send events to dispatcher
                 if (!_isDispatcherUnderPressure)
                 {
@@ -171,7 +171,7 @@ namespace EventSourcingGrains.Grains
                 else
                 {
                     // back pressure logic.  if all dispatchers returns false then change flag to false
-                    for (int k = _aggregateStreamSettings.EventDispatcherSettingsMap.Count - 1; k >= 0 ; k--)
+                    for (int k = _aggregateStreamSettings.EventDispatcherSettingsMap.Count - 1; k >= 0; k--)
                     {
                         var dispatcherGrainName = $"{_aggregateName}:{_aggregateStreamSettings.EventDispatcherSettingsMap.Keys.ElementAt(k)}";
                         var dispatcherGrain = GrainFactory.GetGrain<IAggregateStreamDispatcherGrain>(dispatcherGrainName);
@@ -183,7 +183,7 @@ namespace EventSourcingGrains.Grains
                             }
                             break;
                         }
-                        
+
                         if (k == 0)
                         {
                             // revert under-pressure flag
@@ -192,7 +192,7 @@ namespace EventSourcingGrains.Grains
                             {
                                 _logger.LogDebug($"Dispatcher recovered, dispatcher={dispatcherGrainName}");
                             }
-                        }                    
+                        }
                     }
                 }
             }
