@@ -14,7 +14,7 @@ namespace EventSourcingGrains.Stream
         /// This value is used by Aggregate Stream Grain to determine if a dispatcher is under pressuer
         /// </summary>
         /// <value></value>
-        public int QueueSizeThreshold { get; set; } = 1024 * 10;
+        public int QueueSizeThreshold { get; set; } = 1024 * 100;
     }
     public interface IAggregateStreamSettings
     {
@@ -38,7 +38,7 @@ namespace EventSourcingGrains.Stream
 
         public Dictionary<string, EventDispatcherSettings> EventDispatcherSettingsMap { get; private set; }
 
-        public AggregateStreamSettings(string aggregateName, int queryFetchSizeLimit = 1024 * 5, bool shouldHandleBackPressure = true)
+        public AggregateStreamSettings(string aggregateName, int queryFetchSizeLimit = 1024 * 50, bool shouldHandleBackPressure = true)
         {
             AggregateName = aggregateName;
             QueryFetchSizeLimit = queryFetchSizeLimit;
