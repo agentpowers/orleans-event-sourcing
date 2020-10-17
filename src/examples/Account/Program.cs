@@ -25,7 +25,7 @@ namespace Account
         private static readonly string podIPAddressEnv = Environment.GetEnvironmentVariable("POD_IP");
         private static readonly string customPortEnv = Environment.GetEnvironmentVariable("CUSTOM_PORT");
         private static readonly string postgresServiceHostEnv = Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST");
-        public static string ConnectionString = $"host={(string.IsNullOrEmpty(postgresServiceHostEnv) ? "localhost" : postgresServiceHostEnv)};database=postgresdb;username=postgresadmin;password=postgrespwd;Enlist=false;";
+        public static string ConnectionString = $"host={(string.IsNullOrEmpty(postgresServiceHostEnv) ? "localhost" : postgresServiceHostEnv)};database=postgresdb;username=postgresadmin;password=postgrespwd;Enlist=false;Maximum Pool Size=90;";
 
         //https://stackoverflow.com/questions/54841844/orleans-direct-client-in-asp-net-core-project/54842916#54842916
         private static void ConfigureOrleans(ISiloBuilder builder)
