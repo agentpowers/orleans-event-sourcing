@@ -42,13 +42,13 @@ namespace Account
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
             .AddGrainService<KeepAliveService>()
             .UseLinuxEnvironmentStatistics()
-.UseDashboard(x =>
-{
-    x.HostSelf = false;
-    x.BasePath = "/dashboard";
-    x.ScriptPath = "/api/dashboard";
-    x.CounterUpdateIntervalMs = 10000;
-})
+            .UseDashboard(x =>
+            {
+                x.HostSelf = false;
+                x.BasePath = "/dashboard";
+                x.ScriptPath = "/api/dashboard";
+                x.CounterUpdateIntervalMs = 10000;
+            })
             .AddPrometheusTelemetryConsumer();
 
             builder.ConfigureGrains();
@@ -72,12 +72,12 @@ namespace Account
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
             .AddGrainService<KeepAliveService>()
-.UseDashboard(x =>
-{
-    x.HostSelf = false;
-    x.BasePath = "/dashboard";
-    x.CounterUpdateIntervalMs = 10000;
-})
+            .UseDashboard(x =>
+            {
+                x.HostSelf = false;
+                x.BasePath = "/dashboard";
+                x.CounterUpdateIntervalMs = 10000;
+            })
             .AddPrometheusTelemetryConsumer();
 
             builder.ConfigureGrains();
@@ -92,19 +92,19 @@ namespace Account
                     logging.ClearProviders();
                     logging.AddConsole();
                 })
-.ConfigureWebHostDefaults(builder =>
-{
-    builder.UseStartup<Startup>();
-    //use custom port if provided for kestrel
-    if (!string.IsNullOrEmpty(customPortEnv))
-    {
-        Console.WriteLine($"Starting Kestrel in port {customPortEnv}");
-        builder.UseKestrel(kestrelOptions =>
-        {
-            kestrelOptions.ListenAnyIP(int.Parse(customPortEnv));
-        });
-    }
-});
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseStartup<Startup>();
+                    //use custom port if provided for kestrel
+                    if (!string.IsNullOrEmpty(customPortEnv))
+                    {
+                        Console.WriteLine($"Starting Kestrel in port {customPortEnv}");
+                        builder.UseKestrel(kestrelOptions =>
+                        {
+                            kestrelOptions.ListenAnyIP(int.Parse(customPortEnv));
+                        });
+                    }
+                });
             if (isLocal)
             {
                 hostBuilder.UseOrleans(ConfigureLocalOrleans);
