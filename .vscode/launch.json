@@ -17,9 +17,6 @@
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "ORLEANS_ENV":"LOCAL"
-            },
-            "sourceFileMap": {
-                "/Views": "${workspaceFolder}/Views"
             }
         },
         {
