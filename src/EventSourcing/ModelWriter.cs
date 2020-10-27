@@ -8,13 +8,13 @@ namespace EventSourcing
         where TEvent : AggregateEvent
     {
         // aggregate
-        private IAggregate<TState, TEvent> _aggregate;
+        private readonly IAggregate<TState, TEvent> _aggregate;
 
         /// <summary>
         /// Get current state
         /// </summary>
         /// <value></value>
-        protected TState State { get { return _aggregate.State ;} }
+        protected TState State { get { return _aggregate.State; } }
 
         // constructor
         protected ModelWriter(IAggregate<TState, TEvent> aggregate)
@@ -33,7 +33,7 @@ namespace EventSourcing
         {
             // get current state
             var (currentState, pendingEvents) = await GetCurrentStateAndPendingEvents();
-            
+
             // set aggregate state
             _aggregate.State = currentState;
 

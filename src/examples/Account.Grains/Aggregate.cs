@@ -10,7 +10,7 @@ namespace Account.Grains
         {
             switch (@event)
             {
-                case Deposited deposited: 
+                case Deposited deposited:
                     State.Amount += deposited.Amount;
                     break;
                 case Withdrawn withdrawn:

@@ -14,8 +14,8 @@ namespace Account.Controllers
     [Route("load_testing")]
     public class LoadTestingController : ControllerBase
     {
-        private IClusterClient client;
-        
+        private readonly IClusterClient client;
+
         public LoadTestingController(IClusterClient client)
         {
             this.client = client;
@@ -41,11 +41,11 @@ namespace Account.Controllers
         {
             var started = DateTime.UtcNow;
             var sw = Stopwatch.StartNew();
-            await Enumerable.Range(1, count).ForEachAsyncSemaphore(Environment.ProcessorCount -2, body: async entry =>
-            {
-                var grain = this.client.GetGrain<IAccountGrain>(entry);
-                var response = await grain.Withdraw(1000);
-            });
+            await Enumerable.Range(1, count).ForEachAsyncSemaphore(Environment.ProcessorCount - 2, body: async entry =>
+             {
+                 var grain = this.client.GetGrain<IAccountGrain>(entry);
+                 var response = await grain.Withdraw(1000);
+             });
             sw.Stop();
             var ended = started.Add(sw.Elapsed);
             return Ok($"{count} Took ticks={sw.ElapsedTicks}, ms={sw.ElapsedMilliseconds}, started={started}, ended={ended}");
@@ -60,25 +60,23 @@ namespace Account.Controllers
             Func<T, Task> body)
         {
             var tasks = new List<Task>();
-            using (var throttler = new SemaphoreSlim(degreeOfParallelism))
+            using var throttler = new SemaphoreSlim(degreeOfParallelism);
+            foreach (var element in source)
             {
-                foreach (var element in source)
+                await throttler.WaitAsync();
+                tasks.Add(Task.Run(async () =>
                 {
-                    await throttler.WaitAsync();
-                    tasks.Add(Task.Run(async () =>
+                    try
                     {
-                        try
-                        {
-                            await body(element);
-                        }
-                        finally
-                        {
-                            throttler.Release();
-                        }
-                    }));
-                }
-                await Task.WhenAll(tasks);
+                        await body(element);
+                    }
+                    finally
+                    {
+                        throttler.Release();
+                    }
+                }));
             }
+            await Task.WhenAll(tasks);
         }
     }
 }

@@ -2,8 +2,8 @@ using EventSourcing;
 
 namespace EventSourcingGrains.Stream
 {
-    public class AggregateStreamState: IState
-    { 
+    public class AggregateStreamState : IState
+    {
         public long LastNotifiedEventId { get; set; }
         public string Id { get; set; }
 

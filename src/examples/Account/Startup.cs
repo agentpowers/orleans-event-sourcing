@@ -9,42 +9,42 @@ using Account.Extensions;
 
 namespace Account
 {
-	public class Startup
-	{
-		public Startup(IConfiguration configuration)
-		{
-			Configuration = configuration;
-		}
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
 
-		public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; }
 
-		public void ConfigureServices(IServiceCollection services)
-		{
-			// add grain service
-			services.AddGrainServices("Server=localhost;Database=eventsourcing;User Id=sa;Password=MyStrongPassword1!;");
-			// add controllers
-			services.AddControllers();
-			// add services for dashboard
-			services.AddServicesForSelfHostedDashboard();
-		}
+        public void ConfigureServices(IServiceCollection services)
+        {
+            // add grain service
+            services.AddGrainServices(Program.ConnectionString);
+            // add controllers
+            services.AddControllers();
+            // add services for dashboard
+            services.AddServicesForSelfHostedDashboard();
+        }
 
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-		{
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage();
-			}
-			app.UseRouting();
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            app.UseRouting();
 
-			app.UseOrleansDashboard(new OrleansDashboard.DashboardOptions 
-			{ 
-				BasePath = "/dashboard"
-			});
+            app.UseOrleansDashboard(new OrleansDashboard.DashboardOptions
+            {
+                BasePath = "/dashboard"
+            });
 
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapDefaultControllerRoute();
-			});
-		}
-	}
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapDefaultControllerRoute();
+            });
+        }
+    }
 }

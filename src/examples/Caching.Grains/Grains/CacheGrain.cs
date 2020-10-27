@@ -9,7 +9,7 @@ namespace Caching.Grains
 {
     public class CacheGrain<T> : Grain, ICacheGrain<T>
     {
-        private Immutable<T> _state { get; set; } = new Immutable<T>(default(T));
+        private Immutable<T> _state { get; set; } = new Immutable<T>(default);
         private TimeSpan _delayDeactivation { get; set; }
 
         public Task Clear()

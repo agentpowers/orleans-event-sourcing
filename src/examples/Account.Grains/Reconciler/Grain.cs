@@ -12,8 +12,8 @@ using EventSourcing;
 
 namespace Account.Grains.Reconciler
 {
-    public interface IAccountReconcilerReceiver: IAggregateStreamReceiver{}
-    public interface IAccountReconcilerGrain: IKeepAliveGrain, IGrainWithStringKey, IAccountReconcilerReceiver
+    public interface IAccountReconcilerReceiver : IAggregateStreamReceiver { }
+    public interface IAccountReconcilerGrain : IKeepAliveGrain, IGrainWithStringKey, IAccountReconcilerReceiver
     {
     }
 
@@ -22,19 +22,19 @@ namespace Account.Grains.Reconciler
     {
         public const string AggregateName = "accountReconciler";
         private readonly ILogger<AccountReconcilerGrain> _logger;
-        private TimeSpan _reverseTransactionWaitPeriod = TimeSpan.FromMinutes(2);
+        private readonly TimeSpan _reverseTransactionWaitPeriod = TimeSpan.FromMinutes(2);
         // flag indicating if tranfer debited event queue is being processed
         private bool _isProcessingTransferDebitedEventQueue = false;
         // flag indicating if event queue is being processed
         private bool _isProcessingEventQueue = false;
         private long _lastQueuedEventId = 0;
         // local state to keep unmatched transactions
-        private HashSet<Guid> _unmatchedTransactions = new HashSet<Guid>();
+        private readonly HashSet<Guid> _unmatchedTransactions = new HashSet<Guid>();
         // AggregateEvent queue to process them in background
-        private Queue<AggregateEvent> _eventQueue = new Queue<AggregateEvent>();
+        private readonly Queue<AggregateEvent> _eventQueue = new Queue<AggregateEvent>();
         // queue with TransferDebitedEvent TransactionId and AggregateEvent
-        private Queue<(Guid TransactionId, AggregateEvent AggregateEvent)> _transferDebitedEventQueue = new Queue<(Guid, AggregateEvent)>();
-        public AccountReconcilerGrain(ILogger<AccountReconcilerGrain> logger): base(AggregateName, new AccountReconcilerAggregate())
+        private readonly Queue<(Guid TransactionId, AggregateEvent AggregateEvent)> _transferDebitedEventQueue = new Queue<(Guid, AggregateEvent)>();
+        public AccountReconcilerGrain(ILogger<AccountReconcilerGrain> logger) : base(AggregateName, new AccountReconcilerAggregate())
         {
             _logger = logger;
         }
@@ -60,7 +60,7 @@ namespace Account.Grains.Reconciler
 
         public async Task Receive(AggregateEvent @event)
         {
-            if(@event.Id > _lastQueuedEventId)
+            if (@event.Id > _lastQueuedEventId)
             {
                 // check to see if any events were missed
                 if (@event.Id != _lastQueuedEventId + 1)
@@ -89,7 +89,7 @@ namespace Account.Grains.Reconciler
 
             try
             {
-                while(_eventQueue.Count > 0)
+                while (_eventQueue.Count > 0)
                 {
                     var @event = _eventQueue.Peek();
                     var accountEvent = EventSerializer.DeserializeEvent(@event);
@@ -107,10 +107,10 @@ namespace Account.Grains.Reconciler
                             // add to unmatched hashset
                             _unmatchedTransactions.Add(transferDebited.TransactionId);
                             break;
-                        case TransferCreditReversed transferCreditReversed: 
+                        case TransferCreditReversed transferCreditReversed:
                             //this event shouldn't happen(not implemented)
                             await ApplyEvent(
-                                new ManualInterventionRequired{ TransactionId = transferCreditReversed.TransactionId, EventId = @event.Id},
+                                new ManualInterventionRequired { TransactionId = transferCreditReversed.TransactionId, EventId = @event.Id },
                                 @event.RootEventId,
                                 @event.Id
                             );
@@ -134,7 +134,7 @@ namespace Account.Grains.Reconciler
             if (_unmatchedTransactions.Remove(transactionId))
             {
                 await ApplyEvent(
-                    new TransactionMatched{ TransactionId = transactionId, EventId = @event.Id},
+                    new TransactionMatched { TransactionId = transactionId, EventId = @event.Id },
                     @event.RootEventId,
                     @event.ParentEventId
                 );
@@ -143,7 +143,7 @@ namespace Account.Grains.Reconciler
             {
                 //transaction was reversed already or something catastrophic
                 await ApplyEvent(
-                    new ManualInterventionRequired{ TransactionId = transactionId, EventId = @event.Id},
+                    new ManualInterventionRequired { TransactionId = transactionId, EventId = @event.Id },
                     @event.RootEventId,
                     @event.ParentEventId
                 );
@@ -163,7 +163,7 @@ namespace Account.Grains.Reconciler
             try
             {
 
-                while(_transferDebitedEventQueue.Count > 0)
+                while (_transferDebitedEventQueue.Count > 0)
                 {
                     // get next item in queue
                     var (transactionId, nextEventToProcess) = _transferDebitedEventQueue.Peek();

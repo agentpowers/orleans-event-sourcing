@@ -7,11 +7,11 @@ namespace EventSourcingGrains.Grains
         public bool ShouldThrowIfAggregateDoesNotExist { get; set; }
     }
 
-    public interface IEventSourceGrainSettingsMap: IDictionary<string, EventSourceGrainSetting>
+    public interface IEventSourceGrainSettingsMap : IDictionary<string, EventSourceGrainSetting>
     {
     }
 
-    public class EventSourceGrainSettingsMap: Dictionary<string, EventSourceGrainSetting> , IEventSourceGrainSettingsMap
+    public class EventSourceGrainSettingsMap : Dictionary<string, EventSourceGrainSetting>, IEventSourceGrainSettingsMap
     {
     }
 }

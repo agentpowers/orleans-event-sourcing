@@ -8,7 +8,7 @@ namespace EventSourcing.Persistance
 {
     public class SqlServerRepository : IRepository
     {
-        private string _connectionString;
+        private readonly string _connectionString;
         private IDbConnection Connection
         {
             get
@@ -24,13 +24,9 @@ namespace EventSourcing.Persistance
 
         public async Task<Aggregate> GetAggregateByTypeName(string type)
         {
-            const string sql = @"BEGIN TRANSACTION;
-                                    select top 1 * from Aggregate where Type=@type;
-                                COMMIT;";
-            using (IDbConnection conn = Connection)
-            {
-                return await conn.QueryFirstOrDefaultAsync<Aggregate>(sql, new { type });
-            }
+            const string sql = "select top 1 * from Aggregate where Type=@type;";
+            using IDbConnection conn = Connection;
+            return await conn.QueryFirstOrDefaultAsync<Aggregate>(sql, new { type });
         }
 
         public async Task<AggregateEvent[]> GetAggregateEvents(string aggregateName, long eventId)
@@ -42,10 +38,8 @@ namespace EventSourcing.Persistance
                                     where ev.Id > @id
                                     order by ev.Id asc;
                                 COMMIT;";
-            using (IDbConnection conn = Connection)
-            {
-                return (await conn.QueryAsync<AggregateEvent>(string.Format(sql, aggregateName), new { id = eventId })).ToArray();
-            }
+            using IDbConnection conn = Connection;
+            return (await conn.QueryAsync<AggregateEvent>(string.Format(sql, aggregateName), new { id = eventId })).ToArray();
         }
 
         public async Task<(Snapshot, AggregateEventBase[])> GetSnapshotAndEvents(string aggregateName, long aggregateId)
@@ -60,11 +54,9 @@ namespace EventSourcing.Persistance
                                             where AggregateId=@id and AggregateVersion > @AggregateVersion
                                             order by Id asc;
                                         COMMIT;";
-            using (IDbConnection conn = Connection)
-            {
-                var snapshot  = await conn.QueryFirstOrDefaultAsync<Snapshot>(string.Format(snapshotSql, aggregateName), new { id = aggregateId });
-                return (snapshot, (await conn.QueryAsync<AggregateEventBase>(string.Format(getEventsSql, aggregateName), new { id = aggregateId, aggregateVersion = (snapshot?.AggregateVersion).GetValueOrDefault() })).ToArray());
-            }
+            using IDbConnection conn = Connection;
+            var snapshot = await conn.QueryFirstOrDefaultAsync<Snapshot>(string.Format(snapshotSql, aggregateName), new { id = aggregateId });
+            return (snapshot, (await conn.QueryAsync<AggregateEventBase>(string.Format(getEventsSql, aggregateName), new { id = aggregateId, aggregateVersion = (snapshot?.AggregateVersion).GetValueOrDefault() })).ToArray());
         }
 
         public async Task<long> SaveAggregate(Aggregate aggregate)
@@ -74,10 +66,8 @@ namespace EventSourcing.Persistance
                                                 values (@Type);
                                                 SELECT SCOPE_IDENTITY();
                                             COMMIT;";
-            using (IDbConnection conn = Connection)
-            {
-                return await conn.ExecuteScalarAsync<long>(newAggregateSql, aggregate);
-            }
+            using IDbConnection conn = Connection;
+            return await conn.ExecuteScalarAsync<long>(newAggregateSql, aggregate);
         }
 
         public async Task<long> SaveEvent(string aggregateName, AggregateEventBase @event)
@@ -87,10 +77,8 @@ namespace EventSourcing.Persistance
                                     values (@AggregateId, @AggregateVersion, @EventVersion, @ParentEventId, @RootEventId, @Type, @Data, @Created);
                                     SELECT SCOPE_IDENTITY();
                                 COMMIT;";
-            using (IDbConnection conn = Connection)
-            {
-                return await conn.ExecuteScalarAsync<long>(string.Format(sql, aggregateName), @event);
-            }
+            using IDbConnection conn = Connection;
+            return await conn.ExecuteScalarAsync<long>(string.Format(sql, aggregateName), @event);
         }
 
         public async Task<long> SaveSnapshot(string aggregateName, Snapshot snapshot)
@@ -100,10 +88,8 @@ namespace EventSourcing.Persistance
                                     values (@AggregateId, @AggregateVersion, @Data, @Created);
                                     SELECT SCOPE_IDENTITY();
                                 COMMIT;";
-            using (IDbConnection conn = Connection)
-            {
-                return await conn.ExecuteAsync(string.Format(sql, aggregateName), snapshot);
-            }
+            using IDbConnection conn = Connection;
+            return await conn.ExecuteAsync(string.Format(sql, aggregateName), snapshot);
         }
 
         public async Task<AggregateEvent> GetLastAggregateEvent(string aggregateName)
@@ -114,10 +100,8 @@ namespace EventSourcing.Persistance
                                     join aggregate ag on ag.aggregateid = ev.aggregateid
                                     order by ev.Id desc;
                                 COMMIT;";
-            using (IDbConnection conn = Connection)
-            {
-                return await conn.QueryFirstOrDefaultAsync<AggregateEvent>(string.Format(sql, aggregateName));
-            }
+            using IDbConnection conn = Connection;
+            return await conn.QueryFirstOrDefaultAsync<AggregateEvent>(string.Format(sql, aggregateName));
         }
 
         public async Task<AggregateEvent[]> GetAggregateEventsByAggregateTypeName(string aggregateName, string aggregateTypeName, long aggregateVersion)
@@ -129,10 +113,8 @@ namespace EventSourcing.Persistance
                                     where ag.type=@AggregateTypeName and ev.AggregateVersion > @AggregateVersion
                                     order by ev.Id asc;
                                 COMMIT;";
-            using (IDbConnection conn = Connection)
-            {
-                return (await conn.QueryAsync<AggregateEvent>(string.Format(str, aggregateName), new { aggregateTypeName, aggregateVersion })).ToArray();
-            }
+            using IDbConnection conn = Connection;
+            return (await conn.QueryAsync<AggregateEvent>(string.Format(str, aggregateName), new { aggregateTypeName, aggregateVersion })).ToArray();
         }
 
         public async Task CreateEventsAndSnapshotsTables(string aggregateName)
@@ -179,14 +161,23 @@ namespace EventSourcing.Persistance
                                 {0}
                                 {1}
                                 COMMIT;";
-            using (IDbConnection conn = Connection)
-            {
-                await conn.ExecuteAsync(string.Format(
-                    sql,
-                    string.Format(createEventsTableSql, aggregateName),
-                    string.Format(createSnapshotTableSql, aggregateName))
-                );
-            }
+            using IDbConnection conn = Connection;
+            await conn.ExecuteAsync(string.Format(
+                sql,
+                string.Format(createEventsTableSql, aggregateName),
+                string.Format(createSnapshotTableSql, aggregateName))
+            );
+        }
+
+        public async Task<AggregateEvent[]> GetAggregateEvents(string aggregateName, long afterEventId, int size)
+        {
+            const string sql = @"select ev.id, ev.aggregateid, ev.aggregateversion, ev.eventversion, ev.parenteventid, ev.rooteventid, ev.type, ev.data, ev.created, ag.type as aggregateType
+                    from {0}_events ev
+                    join aggregate ag on ag.aggregateid = ev.aggregateid
+                    where ev.Id > @id
+                    order by ev.Id asc;";
+            using IDbConnection conn = Connection;
+            return (await conn.QueryAsync<AggregateEvent>(string.Format(sql, aggregateName), new { id = afterEventId })).ToArray();
         }
     }
 }

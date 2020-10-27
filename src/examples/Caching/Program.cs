@@ -13,45 +13,46 @@ namespace Caching
 {
     public class Program
     {
-        const int defaultSiloPort = 11111;
-        const int defaultGatewayPort = 30000;
+        const int defaultSiloPort = 11111;
+        const int defaultGatewayPort = 30000;
 
-        private static bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
-        private static string siloPortEnv = Environment.GetEnvironmentVariable("SILO_PORT");
-        private static string gatewayPortEnv = Environment.GetEnvironmentVariable("GATEWAY_PORT");
-        private static string podIPAddressEnv = Environment.GetEnvironmentVariable("POD_IP");
-        private static string customPortEnv = Environment.GetEnvironmentVariable("CUSTOM_PORT");
-        private static string postgresServiceHostEnv = Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST");
-        private static string connectionString = $"host={(string.IsNullOrEmpty(postgresServiceHostEnv) ? "localhost" : postgresServiceHostEnv)};database=postgresdb;username=postgresadmin;password=postgrespwd;Enlist=false;";
+        private static readonly bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
+        private static readonly string siloPortEnv = Environment.GetEnvironmentVariable("SILO_PORT");
+        private static readonly string gatewayPortEnv = Environment.GetEnvironmentVariable("GATEWAY_PORT");
+        private static readonly string podIPAddressEnv = Environment.GetEnvironmentVariable("POD_IP");
+        private static readonly string customPortEnv = Environment.GetEnvironmentVariable("CUSTOM_PORT");
+        private static readonly string postgresServiceHostEnv = Environment.GetEnvironmentVariable("POSTGRES_SERVICE_HOST");
+        //public static string ConnectionString = $"host={(string.IsNullOrEmpty(postgresServiceHostEnv) ? "localhost" : postgresServiceHostEnv)};database=postgresdb;username=postgresadmin;password=postgrespwd;Enlist=false;Maximum Pool Size=90;";
+        public static string ConnectionString = $"Server={(string.IsNullOrEmpty(postgresServiceHostEnv) ? "localhost" : postgresServiceHostEnv)};Database=eventsourcing;User Id=sa;Password=MyStrongPassword1!;";
         private static void ConfigureOrleans(ISiloBuilder builder)
         {
-            builder.Configure<ClusterOptions>(options => 
+            builder.Configure<ClusterOptions>(options =>
             {
                 options.ClusterId = "caching-cluster";
                 options.ServiceId = "CACHING";
             })
             .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Parse(podIPAddressEnv))
-            .ConfigureEndpoints(siloPort: defaultSiloPort, gatewayPort: defaultGatewayPort )
+            .ConfigureEndpoints(siloPort: defaultSiloPort, gatewayPort: defaultGatewayPort)
             .UseAdoNetClustering(options =>
             {
                 options.Invariant = "Npgsql";
-                options.ConnectionString = connectionString;
+                options.ConnectionString = ConnectionString;
             })
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CacheGrain<>).Assembly).WithReferences())
             .UseLinuxEnvironmentStatistics()
-            .UseDashboard(x =>
-             {
-                x.HostSelf = false;
+            .UseDashboard(x =>
+            {
+                x.HostSelf = false;
                 x.BasePath = "/dashboard";
                 x.ScriptPath = "/api/dashboard";
                 x.CounterUpdateIntervalMs = 10000;
-            });
+            });
         }
-        
+
         private static void ConfigureLocalOrleans(ISiloBuilder builder)
         {
-            builder.Configure<ClusterOptions>(options => 
+            builder.Configure<ClusterOptions>(options =>
             {
                 options.ClusterId = "caching-cluster";
                 options.ServiceId = "CACHING";
@@ -61,32 +62,33 @@ namespace Caching
                 string.IsNullOrEmpty(gatewayPortEnv) ? defaultGatewayPort : int.Parse(gatewayPortEnv))
             .UseAdoNetClustering(options =>
             {
-                options.Invariant = "Npgsql";
-                options.ConnectionString = connectionString;
+                //options.Invariant = "Npgsql";
+                options.Invariant =  "System.Data.SQLite";
+                options.ConnectionString = ConnectionString;
             })
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CacheGrain<>).Assembly).WithReferences())
-            .UseDashboard(x =>
-             {
-                x.HostSelf = false;
+            .UseDashboard(x =>
+            {
+                x.HostSelf = false;
                 x.BasePath = "/dashboard";
                 x.CounterUpdateIntervalMs = 10000;
-             });
+            });
         }
-        
+
         public static void Main(string[] args)
         {
             Console.WriteLine($"Starting {(isLocal ? "LOCAL" : "K8S")} config");
-            var hostBuilder = 
+            var hostBuilder =
                 Host.CreateDefaultBuilder(args)
                 .ConfigureLogging((hostingContext, logging) =>
                 {
                     logging.ClearProviders();
                     logging.AddConsole();
                 })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<Startup>();
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseStartup<Startup>();
                     //use custom port if provided for kestrel
                     if (!string.IsNullOrEmpty(customPortEnv))
                     {
@@ -96,9 +98,9 @@ namespace Caching
                             kestrelOptions.ListenAnyIP(int.Parse(customPortEnv));
                         });
                     }
-                });
+                });
             // configure
-            if(isLocal)
+            if (isLocal)
             {
                 hostBuilder.UseOrleans(ConfigureLocalOrleans);
             }
@@ -107,7 +109,7 @@ namespace Caching
                 hostBuilder.UseOrleans(ConfigureOrleans);
             }
 
-            hostBuilder.Build().Run();
+            hostBuilder.Build().Run();
         }
     }
 }

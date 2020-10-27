@@ -9,13 +9,13 @@ namespace Account.Grains.ReadModelWriter
         public void Apply(AggregateEvent aggregateEvent)
         {
             State.Version = aggregateEvent.AggregateVersion;
-            State.Modified = aggregateEvent.Created;
-            //State.Modified = System.DateTime.UtcNow;
-            
+            //State.Modified = aggregateEvent.Created;
+            State.Modified = System.DateTime.UtcNow;
+
             var accountEvent = EventSerializer.DeserializeEvent(aggregateEvent);
             switch (accountEvent)
             {
-                case Deposited deposited: 
+                case Deposited deposited:
                     State.Balance += deposited.Amount;
                     break;
                 case Withdrawn withdrawn:

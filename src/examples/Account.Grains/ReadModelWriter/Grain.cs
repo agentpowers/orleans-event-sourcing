@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Account.Grains.ReadModelWriter
 {
-    public interface IAccountModelWriterAggregateStreamReceiver: IAggregateStreamReceiver{}
+    public interface IAccountModelWriterAggregateStreamReceiver : IAggregateStreamReceiver { }
 
     public class AccountModelWriterGrain : ModelWriter<AccountModel, AggregateEvent>, IAccountModelWriterAggregateStreamReceiver, IGrainWithStringKey
     {
@@ -18,7 +18,7 @@ namespace Account.Grains.ReadModelWriter
         private readonly EventSourcing.Persistance.IRepository _eventSourcingRepository;
         private readonly IAccountRepository _accountRepository;
         private long _accountId;
-        private ILogger<AccountModelWriterGrain> _logger;
+        private readonly ILogger<AccountModelWriterGrain> _logger;
         public AccountModelWriterGrain(
             EventSourcing.Persistance.IRepository eventSourcingRepository,
             IAccountRepository accountRepository,
@@ -65,10 +65,10 @@ namespace Account.Grains.ReadModelWriter
             // get current state from db
             var currentState = await _accountRepository.GetAccount(_accountId);
             // return if null
-            if(currentState == null)
+            if (currentState == null)
             {
                 // save default state
-                currentState = new AccountModel{ Id = _accountId, Balance = 0, Version = 0, Modified = DateTime.UtcNow };
+                currentState = new AccountModel { Id = _accountId, Balance = 0, Version = 0, Modified = DateTime.UtcNow };
                 await _accountRepository.CreateAccount(currentState);
             }
 
@@ -76,7 +76,7 @@ namespace Account.Grains.ReadModelWriter
         }
 
         public override async Task<AggregateEvent[]> GetPendingEvents(long currentVersion)
-        {            
+        {
             // get events
             var events = await _eventSourcingRepository.GetAggregateEventsByAggregateTypeName(AccountGrain.AggregateName, $"{AccountGrain.AggregateName}:{_accountId}", currentVersion);
 
