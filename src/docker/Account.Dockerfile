@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 WORKDIR /src
 
 #TODO: split nuget restore and build into multiple steps
@@ -15,7 +15,7 @@ WORKDIR /src/examples/Account
 RUN dotnet publish -c Release -o out
 
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS runtime
 WORKDIR /src/examples/Account
 COPY --from=build /src/examples/Account/out ./
 ENTRYPOINT ["dotnet", "Account.dll"]

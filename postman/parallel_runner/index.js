@@ -5,7 +5,7 @@ const fs = require("fs")
 
 let collectionJson = JSON.parse(fs.readFileSync("../ORLEANS_Account.postman_collection.json"));
 // when using iterationData, filter out methods that are not in csv(or JSON)
-collectionJson.item[0].item = collectionJson.item[0].item.filter(i => (i.name === "TRANSFER"));
+collectionJson.item[0].item = collectionJson.item[0].item.filter(i => (i.name !== "TRANSFER"));
 
 const PARALLEL_RUN_COUNT = 3
 
@@ -13,9 +13,11 @@ const parametersForTestRun = {
     collection: collectionJson, // collection
     environment: path.join(__dirname, "../local.environment.json"), // env
     globals: path.join(__dirname, "../globals.json"), //global
-    iterationData: path.join(__dirname, "../postman-runner2.csv"), //iteration
+    iterationData: path.join(__dirname, "../postman-runner3.csv"), //iteration
     reporters: "cli"
 };
+
+console.log(parametersForTestRun);
 
 parallelCollectionRun = function (done) {
     newman.run(parametersForTestRun, done);

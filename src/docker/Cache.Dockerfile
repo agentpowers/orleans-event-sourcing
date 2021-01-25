@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
 WORKDIR /src
 
 # Copy csproj and dependencies
@@ -13,7 +13,7 @@ WORKDIR /src/examples/Caching
 RUN dotnet publish -c Release -o out
 
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS runtime
 WORKDIR /src/examples/Caching
 COPY --from=build /src/examples/Caching/out ./
 ENTRYPOINT ["dotnet", "Caching.dll"]
