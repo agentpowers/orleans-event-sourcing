@@ -166,7 +166,7 @@ namespace EventSourcingGrains.Grains
                     }
 
                     // record last dispatched items id
-                    _lastDispatchedEventId = newEvents[newEvents.Length - 1].Id;
+                    _lastDispatchedEventId = newEvents[^1].Id;
                 }
                 else
                 {

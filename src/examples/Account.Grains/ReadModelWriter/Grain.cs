@@ -32,7 +32,7 @@ namespace Account.Grains.ReadModelWriter
 
         public override async Task OnActivateAsync()
         {
-            _accountId = long.Parse(this.GetPrimaryKeyString().Substring(keyStringAccountIdStartIndex));
+            _accountId = long.Parse(this.GetPrimaryKeyString()[keyStringAccountIdStartIndex..]);
             await Init();
             // call base OnActivateAsync
             await base.OnActivateAsync();
