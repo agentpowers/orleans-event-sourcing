@@ -10,7 +10,7 @@ using System;
 using System.Net;
 using EventSourcingGrains.Services;
 using SagaExample.Extensions;
-using Saga.Grains;
+using Saga.Grains.EventSourcing;
 
 namespace SagaExample
 {
@@ -39,7 +39,7 @@ namespace SagaExample
             .ConfigureEndpoints(siloPort: defaultSiloPort, gatewayPort: defaultGatewayPort)
             .UseKubeMembership()
             .AddMemoryGrainStorageAsDefault()
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(SagaGrain).Assembly).WithReferences())
+            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(SagaGrain<>).Assembly).WithReferences())
             .AddGrainService<KeepAliveService>()
             .UseLinuxEnvironmentStatistics()
             .UseDashboard(x =>
@@ -70,7 +70,7 @@ namespace SagaExample
                 options.ConnectionString = ConnectionString;
             })
             .AddMemoryGrainStorageAsDefault()
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(SagaGrain).Assembly).WithReferences())
+            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(SagaGrain<>).Assembly).WithReferences())
             .AddGrainService<KeepAliveService>()
             .UseDashboard(x =>
             {

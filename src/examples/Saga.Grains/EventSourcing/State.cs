@@ -1,15 +1,14 @@
 using System;
-using System.Collections.Generic;
 using EventSourcing;
 
-namespace Saga.Grains
+namespace Saga.Grains.EventSourcing
 {
     [Flags]
     public enum SagaStatus
     {
         NotStarted = 0,
         Executing = 1,
-        Completed = 2,
+        Executed = 2,
         Compensating = 3,
         Compensated = 4,
         Suspended = 5,
@@ -20,7 +19,11 @@ namespace Saga.Grains
     public class SagaState : IState
     {
         public SagaStatus Status { get; set; }
-        public Dictionary<string, string> Context { get; set; }
+        public SagaStatus PrevStatus { get; set; }
+        public string CancelledReason { get; set; }
+        public string FaultedError { get; set; }
+        public int SagaStepIndex { get; set; }
+        public object Context { get; set; }
         public string Id { get; set; }
         public void Init(string id)
         {

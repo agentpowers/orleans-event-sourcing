@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caching.Grains", "Examples\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Saga.Grains", "examples\Saga.Grains\Saga.Grains.csproj", "{6CDED891-E3FC-4B13-9199-01F32A58D0F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaExample", "examples\SagaExample\Saga.csproj", "{9DD9770F-DC86-4F2F-858B-3D6CFEAFFB21}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagaExample", "examples\SagaExample\SagaExample.csproj", "{9DD9770F-DC86-4F2F-858B-3D6CFEAFFB21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

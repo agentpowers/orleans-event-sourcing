@@ -3,7 +3,7 @@ using EventSourcingGrains.Grains;
 using EventSourcingGrains.Stream;
 using EventSourcingGrains.Keeplive;
 using System;
-using Saga.Grains;
+using Saga.Grains.EventSourcing;
 
 namespace SagaExample.Extensions
 {
@@ -51,7 +51,7 @@ namespace SagaExample.Extensions
             builder.ConfigureEventSourcingGrains((settings) =>
             {
                 // account grain
-                settings.Add(SagaGrain.AggregateName, new EventSourceGrainSetting());
+                settings.Add(SagaGrain<int>.AggregateName, new EventSourceGrainSetting());
                 // account reconciler grain
                 // settings.Add(AccountReconcilerGrain.AggregateName, new EventSourceGrainSetting());
             });
