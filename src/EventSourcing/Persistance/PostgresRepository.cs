@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace EventSourcing.Persistance
 {
-    public class Repository : IRepository
+    public class PostgresRepository : IRepository
     {
         private readonly string _connectionString;
         private IDbConnection Connection
@@ -17,7 +17,7 @@ namespace EventSourcing.Persistance
             }
         }
 
-        public Repository(string connectionString)
+        public PostgresRepository(string connectionString)
         {
             _connectionString = connectionString;
         }

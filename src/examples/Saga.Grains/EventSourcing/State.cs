@@ -21,6 +21,7 @@ namespace Saga.Grains.EventSourcing
         public SagaStatus Status { get; set; }
         public SagaStatus PrevStatus { get; set; }
         public string CancelledReason { get; set; }
+        public string CompensatingReason { get; set; }
         public string FaultedError { get; set; }
         public int SagaStepIndex { get; set; }
         public object Context { get; set; }

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using EventSourcingGrains.Extensions;
+using Saga.Grains.Extensions;
 
 namespace SagaExample.Extensions
 {
@@ -9,6 +10,17 @@ namespace SagaExample.Extensions
         {
             // services.AddTransient<IAccountRepository>(g => new AccountRepository(connectionString));
             services.AddEventSourcingGrain(connectionString);
+
+            // add saga steps
+            services.AddSagaSteps();
+        }
+
+        public static void AddInMemoryGrainServices(this IServiceCollection services)
+        {
+            services.AddInMemoryEventSourcingGrain();
+
+            // add saga steps
+            services.AddSagaSteps();
         }
     }
 }

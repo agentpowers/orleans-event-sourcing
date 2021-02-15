@@ -4,13 +4,27 @@
    // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
    "version": "0.2.0",
    "configurations": [
+       {
+           "name": "Launch SagaExample app",
+           "type": "coreclr",
+           "request": "launch",
+           "preLaunchTask": "SagaExample-build",
+           "program": "${workspaceFolder}/src/examples/SagaExample/bin/Debug/net5.0/SagaExample.dll",
+           "args": [],
+           "cwd": "${workspaceFolder}",
+           "stopAtEntry": false,
+           "env": {
+               "ASPNETCORE_ENVIRONMENT": "Development",
+               "ORLEANS_ENV":"LOCAL"
+           }
+       },
         {
             "name": "Launch account app",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/examples/Account/bin/Debug/netcoreapp3.1/Account.dll",
+            "program": "${workspaceFolder}/src/examples/Account/bin/Debug/net5.0/Account.dll",
             "args": [],
             "cwd": "${workspaceFolder}/src/examples/Account",
             "stopAtEntry": false,

@@ -20,7 +20,7 @@ namespace Saga.Grains.EventSourcing
                     State.Status = SagaStatus.Executed;
                     break;
                 case CompensatingStarted compensatingStarted:
-                    State.Context = compensatingStarted.Context;
+                    State.CompensatingReason = compensatingStarted.Reason;
                     State.Status = SagaStatus.Compensating;
                     break;
                 case Compensated _:

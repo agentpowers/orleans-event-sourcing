@@ -4,7 +4,7 @@ using EventSourcingGrains.Grains;
 
 namespace Saga.Grains.EventSourcing
 {
-    public class SagaGrain<T> : EventSourceGrain<SagaState, ISagaEvent>, ISagaGrain<T>
+    public abstract class SagaGrain<T> : EventSourceGrain<SagaState, ISagaEvent>, ISagaGrain<T>
     {
         public const string AggregateName = "saga";
         
@@ -15,11 +15,11 @@ namespace Saga.Grains.EventSourcing
             await base.OnActivateAsync();
         }
 
-        public async Task<SagaState> Execute(Guid id, T context)
+        public async Task<SagaState> Execute(string id, T context)
         {
             if (State.Status == SagaStatus.NotStarted)
             {
-                await ApplyEvent(new ExecutingStarted{ Id = id.ToString(), Context = context });
+                await ApplyEvent(new ExecutingStarted{ Id = id, Context = context });
                 return State;
             }
             throw new Exception("Invalid Transition");
@@ -27,8 +27,7 @@ namespace Saga.Grains.EventSourcing
 
         public async Task<SagaState> Execute(T context)
         {
-            if ((State.Status == SagaStatus.Suspended || State.Status == SagaStatus.Faulted)
-                    && State.PrevStatus == SagaStatus.Executing)
+            if (State.Status == SagaStatus.Suspended || State.Status == SagaStatus.Faulted)
             {
                 await ApplyEvent(new ExecutingStarted{ Id = State.Id, Context = context });
                 return State;
@@ -46,16 +45,14 @@ namespace Saga.Grains.EventSourcing
             throw new Exception("Invalid Transition");
         }
 
-        public async Task<SagaState> Compensate(T context)
+        public async Task<SagaState> Compensate(T context, string reason = null)
         {
-            if ((State.Status == SagaStatus.Suspended || State.Status == SagaStatus.Faulted)
-                && State.PrevStatus == SagaStatus.Compensating)
+            if (State.Status == SagaStatus.Suspended || State.Status == SagaStatus.Faulted)
             {
-                await ApplyEvent(new CompensatingStarted{ Id = State.Id, Context = context });
+                await ApplyEvent(new CompensatingStarted{ Id = State.Id, Context = context, Reason = reason });
                 return State;
             }
             throw new Exception("Invalid Transition");
-
         }
 
         public async Task<SagaState> Compensated()

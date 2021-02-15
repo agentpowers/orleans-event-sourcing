@@ -27,6 +27,7 @@ namespace Saga.Grains.EventSourcing
     [Event(nameof(CompensatingStarted))]
     public class CompensatingStarted : BaseSagaEvent
     {
+        public string Reason { get; set; }
         public object Context { get; set; }
     }
 

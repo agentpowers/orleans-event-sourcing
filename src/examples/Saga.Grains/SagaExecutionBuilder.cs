@@ -9,7 +9,7 @@ namespace Saga.Grains
     {
         Task<T> Execute(T state);
         Task<T> Compensate(T state);
-        bool ShouldSuspendAfterExecuting {get; set;}
+        bool ShouldSuspendAfterExecuting {get; set;} 
         bool ShouldSuspendAfterCompensating {get; set;}
     }
 
@@ -27,9 +27,9 @@ namespace Saga.Grains
             return this;
         }
 
-        public List<Type> Build()
+        public Type[] Build()
         {
-            return _sagaStepTypes;
+            return _sagaStepTypes.ToArray();
         }
     }
 }
