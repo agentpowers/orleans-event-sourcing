@@ -6,12 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Orleans.Client" Version="3.4.0" />
-    <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="3.4.0" />
-    <PackageReference Include="Microsoft.Orleans.Clustering.AdoNet" Version="3.4.0" />
+    <PackageReference Include="Microsoft.Orleans.Client" Version="3.4.1" />
+    <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="3.4.1" />
+    <PackageReference Include="Microsoft.Orleans.Clustering.AdoNet" Version="3.4.1" />
     <PackageReference Include="OrleansDashboard" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Orleans.OrleansTelemetryConsumers.Linux" Version="3.4.0" />
-    <PackageReference Include="Npgsql" Version="5.0.2" />
+    <PackageReference Include="Microsoft.Orleans.OrleansTelemetryConsumers.Linux" Version="3.4.1" />
+    <PackageReference Include="Npgsql" Version="5.0.3" />
   </ItemGroup>
 
   <ItemGroup>

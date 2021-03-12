@@ -12,15 +12,15 @@ namespace Saga.Grains.EventSourcing
             // update status based on events
             switch (@event)
             {
-                case ExecutingStarted executingStarted:
-                    State.Context = executingStarted.Context;
+                case Executing executing:
+                    State.Context = executing.Context;
                     State.Status = SagaStatus.Executing;
                     break;
                 case Executed _:
                     State.Status = SagaStatus.Executed;
                     break;
-                case CompensatingStarted compensatingStarted:
-                    State.CompensatingReason = compensatingStarted.Reason;
+                case Compensating compensating:
+                    State.CompensatingReason = compensating.Reason;
                     State.Status = SagaStatus.Compensating;
                     break;
                 case Compensated _:

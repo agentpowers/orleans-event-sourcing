@@ -21,9 +21,12 @@ namespace SagaExample
         public void ConfigureServices(IServiceCollection services)
         {
             // add grain service
-            services.AddInMemoryGrainServices();
+            services.AddGrainServices(Program.ConnectionString);
+            //services.AddInMemoryGrainServices();
+            
             // add controllers
             services.AddControllers();
+            
             // add services for dashboard
             services.AddServicesForSelfHostedDashboard();
         }

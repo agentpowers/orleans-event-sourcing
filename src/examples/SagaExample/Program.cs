@@ -69,6 +69,7 @@ namespace SagaExample
                 options.Invariant = "Npgsql";
                 options.ConnectionString = ConnectionString;
             })
+            //.UseLocalhostClustering()
             .AddMemoryGrainStorageAsDefault()
             .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(TestSaga).Assembly).WithReferences())
             .AddGrainService<KeepAliveService>()

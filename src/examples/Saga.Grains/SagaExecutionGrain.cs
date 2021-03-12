@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Saga.Grains.EventSourcing
 {
-    public abstract class SagaExecutionGrain<T>: SagaGrain<T>
+    public abstract class SagaExecutionGrain<T>: SagaGrain<T> where T: class
     {
         private ILogger<SagaExecutionGrain<T>> _logger;
         private readonly TimeSpan _expiration = TimeSpan.FromMinutes(5);

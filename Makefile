@@ -93,6 +93,11 @@ k8s_delete_account:
 build_saga_example:
 	docker network create saga_net
 	docker build --tag saga_db -f src/docker/SagaExample.Postgres.Dockerfile src
+
 up_saga_example_db:
 	docker run --network saga_net -v /tmp/ev_saga:/var/lib/postgresql/data -e POSTGRES_DB=postgresdb -e POSTGRES_USER=postgresadmin -e POSTGRES_PASSWORD=postgrespwd -p 5432:5432 --detach --name ev_saga saga_db
 
+cleanup_saga_example:
+	docker kill ev_saga; \
+	docker rm ev_saga; \
+	docker network rm saga_net;

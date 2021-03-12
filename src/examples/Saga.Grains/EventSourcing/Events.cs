@@ -13,8 +13,8 @@ namespace Saga.Grains.EventSourcing
     }
 
     #region Events
-    [Event(nameof(ExecutingStarted))]
-    public class ExecutingStarted : BaseSagaEvent
+    [Event(nameof(Executing))]
+    public class Executing : BaseSagaEvent
     {
         public object Context { get; set; }
     }
@@ -24,8 +24,8 @@ namespace Saga.Grains.EventSourcing
     {
     }
 
-    [Event(nameof(CompensatingStarted))]
-    public class CompensatingStarted : BaseSagaEvent
+    [Event(nameof(Compensating))]
+    public class Compensating : BaseSagaEvent
     {
         public string Reason { get; set; }
         public object Context { get; set; }

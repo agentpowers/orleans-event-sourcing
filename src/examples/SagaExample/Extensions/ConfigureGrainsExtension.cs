@@ -4,6 +4,7 @@ using EventSourcingGrains.Stream;
 using EventSourcingGrains.Keeplive;
 using System;
 using Saga.Grains.EventSourcing;
+using Saga.Grains.Manager;
 
 namespace SagaExample.Extensions
 {
@@ -11,49 +12,40 @@ namespace SagaExample.Extensions
     {
         public static void ConfigureGrains(this ISiloBuilder builder)
         {
-            // // configure stream
-            // builder.ConfigureAggregateStream(AccountGrain.AggregateName, (aggregateStreamSettings) =>
-            // {
-            //     // account writer
-            //     aggregateStreamSettings.EventDispatcherSettingsMap.Add(nameof(AccountModelWriterGrain), new EventDispatcherSettings
-            //     {
-            //         ReceiverGrainResolver = (aggregateEvent, grainFactory) =>
-            //         {
-            //             return (IAccountModelWriterAggregateStreamReceiver)grainFactory.GetGrain(typeof(IAccountModelWriterAggregateStreamReceiver), $"{AccountModelWriterGrain.GrainPrefix}{aggregateEvent.AggregateType}");
-            //         }
-            //     });
+            // configure stream
+            builder.ConfigureAggregateStream(SagaGrain<object>.AggregateName, (aggregateStreamSettings) =>
+            {
+                // saga manager
+                aggregateStreamSettings.EventDispatcherSettingsMap.Add(nameof(SagaManagerGrain), new EventDispatcherSettings
+                {
+                    ReceiverGrainResolver = (aggregateEvent, grainFactory) =>
+                    {
+                        return (ISagaManagerGrain)grainFactory.GetGrain(typeof(ISagaManagerGrain), nameof(SagaManagerGrain));
+                    }
+                });
+            });
 
-            //     // account reconciler
-            //     aggregateStreamSettings.EventDispatcherSettingsMap.Add(nameof(AccountReconciler), new EventDispatcherSettings
-            //     {
-            //         ReceiverGrainResolver = (aggregateEvent, grainFactory) =>
-            //         {
-            //             return (IAccountReconcilerGrain)grainFactory.GetGrain(typeof(IAccountReconcilerGrain), nameof(AccountReconcilerGrain));
-            //         }
-            //     });
-            // });
-
-            // // configure keep alive service
-            // builder.ConfigureKeepAliveService((keepAliveSettings) =>
-            // {
-            //     keepAliveSettings.GrainKeepAliveSettings.Add(new KeepAliveGrainSetting
-            //     {
-            //         Interval = TimeSpan.FromMinutes(10),
-            //         GrainResolver = (grainFactory) =>
-            //         {
-            //             var grain = grainFactory.GetGrain<IAccountReconcilerGrain>(nameof(AccountReconcilerGrain));
-            //             return grain;
-            //         }
-            //     });
-            // });
+            // configure keep alive service
+            builder.ConfigureKeepAliveService((keepAliveSettings) =>
+            {
+                keepAliveSettings.GrainKeepAliveSettings.Add(new KeepAliveGrainSetting
+                {
+                    Interval = TimeSpan.FromMinutes(10),
+                    GrainResolver = (grainFactory) =>
+                    {
+                        var grain = grainFactory.GetGrain<ISagaManagerGrain>(nameof(SagaManagerGrain));
+                        return grain;
+                    }
+                });
+            });
 
             // eventsourcing grain configuration
             builder.ConfigureEventSourcingGrains((settings) =>
             {
-                // account grain
-                settings.Add(SagaGrain<int>.AggregateName, new EventSourceGrainSetting());
+                // saga grain
+                settings.Add(SagaGrain<object>.AggregateName, new EventSourceGrainSetting());
                 // account reconciler grain
-                // settings.Add(AccountReconcilerGrain.AggregateName, new EventSourceGrainSetting());
+                settings.Add(SagaManagerGrain.AggregateName, new EventSourceGrainSetting());
             });
         }
     }

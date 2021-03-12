@@ -8,7 +8,6 @@ namespace SagaExample.Extensions
     {
         public static void AddGrainServices(this IServiceCollection services, string connectionString)
         {
-            // services.AddTransient<IAccountRepository>(g => new AccountRepository(connectionString));
             services.AddEventSourcingGrain(connectionString);
 
             // add saga steps

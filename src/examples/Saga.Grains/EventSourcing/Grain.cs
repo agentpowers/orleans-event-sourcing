@@ -4,7 +4,7 @@ using EventSourcingGrains.Grains;
 
 namespace Saga.Grains.EventSourcing
 {
-    public abstract class SagaGrain<T> : EventSourceGrain<SagaState, ISagaEvent>, ISagaGrain<T>
+    public abstract class SagaGrain<T> : EventSourceGrain<SagaState, ISagaEvent>, ISagaGrain<T> where T : class
     {
         public const string AggregateName = "saga";
         
@@ -15,11 +15,13 @@ namespace Saga.Grains.EventSourcing
             await base.OnActivateAsync();
         }
 
+        public Task Ping() => Task.CompletedTask;
+
         public async Task<SagaState> Execute(string id, T context)
         {
             if (State.Status == SagaStatus.NotStarted)
             {
-                await ApplyEvent(new ExecutingStarted{ Id = id, Context = context });
+                await ApplyEvent(new Executing{ Id = id, Context = context });
                 return State;
             }
             throw new Exception("Invalid Transition");
@@ -29,7 +31,7 @@ namespace Saga.Grains.EventSourcing
         {
             if (State.Status == SagaStatus.Suspended || State.Status == SagaStatus.Faulted)
             {
-                await ApplyEvent(new ExecutingStarted{ Id = State.Id, Context = context });
+                await ApplyEvent(new Executing{ Id = State.Id, Context = context });
                 return State;
             }
             throw new Exception("Invalid Transition");
@@ -49,7 +51,7 @@ namespace Saga.Grains.EventSourcing
         {
             if (State.Status == SagaStatus.Suspended || State.Status == SagaStatus.Faulted)
             {
-                await ApplyEvent(new CompensatingStarted{ Id = State.Id, Context = context, Reason = reason });
+                await ApplyEvent(new Compensating{ Id = State.Id, Context = context, Reason = reason });
                 return State;
             }
             throw new Exception("Invalid Transition");

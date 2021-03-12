@@ -9,6 +9,7 @@ namespace Saga.Grains.Extensions
             services.AddTransient<StepOne>();
             services.AddTransient<StepTwo>();
             services.AddTransient<StepThree>();
+            services.AddTransient<StepFour>();
         }
     }
 }
