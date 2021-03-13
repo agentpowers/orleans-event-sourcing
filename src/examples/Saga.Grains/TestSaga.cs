@@ -80,7 +80,7 @@ namespace Saga.Grains
 
         public async Task<TestSagaState> Execute(TestSagaState state)
         {
-            await Task.Delay(100);
+            await Task.Delay(TimeSpan.FromMinutes(20));
             ++state.Value;
             return state;
         }
@@ -88,7 +88,7 @@ namespace Saga.Grains
     public interface ITestSaga: IGrainWithStringKey
     {
         Task<string> Start(TestSagaState context);
-        Task<(SagaStatus, TestSagaState)> GetStatus();
+        Task<SagaState> GetState();
         Task Resume(TestSagaState context);
         Task Revert(string reason);
     }
@@ -104,11 +104,6 @@ namespace Saga.Grains
                                 .AddStep<StepThree>()
                                 .AddStep<StepFour>();
             StepTypes = stepBuilder.Build();
-        }
-
-        public Task<(SagaStatus, TestSagaState)> GetStatus()
-        {
-            return Task.FromResult((State.Status, Context));
         }
     }
 }

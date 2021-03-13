@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using EventSourcingGrains.Grains;
 
@@ -13,6 +14,11 @@ namespace Saga.Grains.EventSourcing
         public override async Task OnActivateAsync()
         {
             await base.OnActivateAsync();
+            // Hack: if state was just loaded from db, then serialize it to T and assign to context
+            if (State.Context is JsonElement jsonElement)
+            {
+                State.Context = JsonSerializer.Deserialize<T>(jsonElement.GetRawText());
+            }
         }
 
         public Task Ping() => Task.CompletedTask;

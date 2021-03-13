@@ -30,8 +30,7 @@ namespace SagaExample.Controllers
         public async Task<IActionResult> Get(string id)
         {
             var grain = this.client.GetGrain<ITestSaga>(id);
-            var (sagaStatus, context) = await grain.GetStatus();
-            return Ok(new { SagaStatus = sagaStatus.ToString(), context });
+            return Ok(await grain.GetState());
         }
 
         [HttpGet("resume/{id}/{value}")]
