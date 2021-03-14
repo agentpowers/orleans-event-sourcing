@@ -57,14 +57,12 @@ namespace Saga.Grains.EventSourcing
     public class StepExecuted : BaseSagaEvent
     {
         public object Context { get; set; }
-        public bool ShouldSuspend { get; set; }
     }
 
     [Event(nameof(StepCompensated))]
     public class StepCompensated : BaseSagaEvent
     {
         public object Context { get; set; }
-        public bool ShouldSuspend { get; set; }
     }
 
     #endregion

@@ -105,7 +105,18 @@ namespace Saga.Grains.EventSourcing
         {
             if (State.Status == SagaStatus.Executing)
             {
-                await ApplyEvent(new StepExecuted{ Id = State.Id, Context = context, ShouldSuspend = shouldSuspend });
+                if (shouldSuspend)
+                {
+                    await ApplyEvents(new ISagaEvent[]
+                    {
+                        new StepExecuted{ Id = State.Id, Context = context },
+                        new Suspended{ Id = State.Id },
+                    });
+                }
+                else
+                {
+                    await ApplyEvent(new StepExecuted{ Id = State.Id, Context = context });
+                }
                 return State;
             }
             throw new Exception("Invalid Transition");
@@ -115,12 +126,23 @@ namespace Saga.Grains.EventSourcing
         {
             if (State.Status == SagaStatus.Compensating)
             {
-                await ApplyEvent(new StepCompensated{ Id = State.Id, Context = context, ShouldSuspend = shouldSuspend });
+                if (shouldSuspend)
+                {
+                    await ApplyEvents(new ISagaEvent[]
+                    {
+                        new StepCompensated{ Id = State.Id, Context = context },
+                        new Suspended{ Id = State.Id }
+                    });
+                }
+                else
+                {
+                    await ApplyEvent(new StepCompensated{ Id = State.Id, Context = context });
+                }
                 return State;
             }
             throw new Exception("Invalid Transition");
         }
-
+        
         public async Task<SagaState> Suspend()
         {
             if (State.Status == SagaStatus.Executing || State.Status == SagaStatus.Compensating)

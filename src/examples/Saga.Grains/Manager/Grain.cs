@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using EventSourcingGrains.Grains;
 using Microsoft.Extensions.Logging;
@@ -81,12 +80,6 @@ namespace Saga.Grains.Manager
                     break;
                 case Executed executed:
                     _runningSagas.Remove(executed.Id);
-                    break;
-                case StepExecuted stepExecuted when stepExecuted.ShouldSuspend:
-                    _runningSagas.Remove(stepExecuted.Id);
-                    break;
-                case StepCompensated stepCompensated when stepCompensated.ShouldSuspend:
-                    _runningSagas.Remove(stepCompensated.Id);
                     break;
                 case Compensated compensated:
                     _runningSagas.Remove(compensated.Id);

@@ -40,18 +40,10 @@ namespace Saga.Grains.EventSourcing
                 case StepExecuted stepExecuted:
                     State.Context = stepExecuted.Context;
                     State.SagaStepIndex++;
-                    if (stepExecuted.ShouldSuspend)
-                    {
-                        State.Status = SagaStatus.Suspended;
-                    }
                     break;
                 case StepCompensated stepCompensated:
                     State.Context = stepCompensated.Context;
                     State.SagaStepIndex--;
-                    if (stepCompensated.ShouldSuspend)
-                    {
-                        State.Status = SagaStatus.Suspended;
-                    }
                     break;
                 default:
                     break;

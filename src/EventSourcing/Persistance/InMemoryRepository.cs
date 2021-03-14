@@ -1,7 +1,5 @@
 using System.Data;
-using Dapper;
 using System.Threading.Tasks;
-using Npgsql;
 using System.Linq;
 using System.Collections.Generic;
 using System;
@@ -93,6 +91,16 @@ namespace EventSourcing.Persistance
                 }
             }
             throw new InvalidOperationException($"Message=AggregateEvent not found for {aggregateName}");
+        }
+
+        public async Task<long> SaveEvents(string aggregateName, params AggregateEventBase[] events)
+        {
+            long lastId = 0;
+            foreach (var @event in events)
+            {
+                lastId = await SaveEvent(aggregateName, @event);
+            }
+            return lastId;
         }
 
         public Task<long> SaveSnapshot(string aggregateName, Snapshot snapshot)

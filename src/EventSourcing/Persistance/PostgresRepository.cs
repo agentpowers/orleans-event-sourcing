@@ -86,6 +86,32 @@ namespace EventSourcing.Persistance
             return await conn.ExecuteScalarAsync<long>(string.Format(sql, aggregateName), @event);
         }
 
+        public async Task<long> SaveEvents(string aggregateName, params AggregateEventBase[] events)
+        {
+            const string sql = @"insert into {0}_events(AggregateId, AggregateVersion, EventVersion, ParentEventId, RootEventId, Type, Data, Created)
+                                values (@AggregateId, @AggregateVersion, @EventVersion, @ParentEventId, @RootEventId, @Type, @Data, @Created)
+                                returning Id;";
+
+            using IDbConnection conn = Connection;
+            conn.Open();
+            using var trans = conn.BeginTransaction();
+            long lastId = 0;
+            try
+            {
+                foreach (var @event in events)
+                {
+                    lastId = await conn.ExecuteScalarAsync<long>(string.Format(sql, aggregateName), @event, trans);
+                }
+                trans.Commit();
+            }
+            catch (System.Exception)
+            {
+                trans.Rollback();
+                throw;
+            }
+            return lastId;
+        }
+
         public async Task<long> SaveSnapshot(string aggregateName, Snapshot snapshot)
         {
             const string sql = @"insert into {0}_snapshots(AggregateId,AggregateVersion,Data, Created)
