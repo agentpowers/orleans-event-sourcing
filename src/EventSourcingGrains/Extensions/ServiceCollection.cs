@@ -9,5 +9,10 @@ namespace EventSourcingGrains.Extensions
         {
             services.AddEventSourcing(connectionString);
         }
+
+        public static void AddInMemoryEventSourcingGrain(this IServiceCollection services)
+        {
+            services.AddInMemoryEventSourcing();
+        }
     }
 }

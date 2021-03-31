@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using EventSourcing.Persistance;
 using System.Text.Json;
 using System;
+using System.Collections.Generic;
 
 namespace EventSourcing
 {
@@ -38,6 +39,10 @@ namespace EventSourcing
         /// Apply(Save) event
         /// </summary>
         Task<long> ApplyEvent(TEvent @event, long? rootEventId = null, long? parentEventId = null);
+        /// <summary>
+        /// Apply(Save) events
+        /// </summary>
+        Task<long> ApplyEvents(TEvent[] events, long? rootEventId = null, long? parentEventId = null);
         /// <summary>
         /// Get Aggregate events that occurred after eventId
         /// </summary>
@@ -244,6 +249,59 @@ namespace EventSourcing
             // return id
             return eventId;
         }
+
+        /// <summary>
+        /// save events to db then apply event to state
+        /// snapshot will be created for every 10 events
+        /// Returns id of the newly applied event(from db)
+        /// </summary>
+        public async Task<long> ApplyEvents(TEvent[] events, long? rootEventId = null, long? parentEventId = null)
+        {
+            var aggregateEvents = new AggregateEventBase[events.Length];
+            for (int i = 0; i < events.Length; i++)
+            {
+                // get event type
+                var type = events[i].GetType();
+                // get event type name and version
+                var eventIdentity = EventTypeHelper.GetEventIdentity(type);
+                // serialize event for db
+                var serialized = JsonSerializer.Serialize(events[i], type);
+                // increment aggregate version 
+                _aggregateVersion++;
+                // add aggregateeventbase
+                aggregateEvents[i] = new AggregateEventBase
+                {
+                    AggregateId = AggregateId,
+                    AggregateVersion = _aggregateVersion,
+                    Type = eventIdentity.Name,
+                    EventVersion = eventIdentity.Version,
+                    Data = serialized,
+                    RootEventId = rootEventId,
+                    ParentEventId = parentEventId,
+                    Created = DateTime.UtcNow
+                };
+            }
+            var eventId = await _repository.SaveEvents(
+                _aggregateName,
+                aggregateEvents
+            );
+
+            for (int i = 0; i < events.Length; i++)
+            {
+                // update state
+                _aggregate.Apply(events[i]);
+
+                // save snapshot if ShouldSaveSnapshot returns true
+                if (_shouldSaveSnapshot(events[i], _aggregateVersion))
+                {
+                    await SaveSnapshot();
+                }
+            }
+
+            // return id
+            return eventId;
+        }
+
 
         public Task<AggregateEvent[]> GetAggregateEvents(long eventId = 0) =>
              _repository.GetAggregateEvents(_aggregateName, eventId);

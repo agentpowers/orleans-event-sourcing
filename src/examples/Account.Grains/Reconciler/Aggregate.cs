@@ -8,12 +8,10 @@ namespace Account.Grains.Reconciler
         public AccountReconciler State { get; set; }
         public void Apply(IAccountReconcilerEvent @event)
         {
-            switch (@event)
+            State.LastProcessedEventId = @event switch
             {
-                default:
-                    State.LastProcessedEventId = @event.EventId;
-                    break;
-            }
+                _ => @event.EventId,
+            };
         }
     }
 }

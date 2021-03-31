@@ -105,6 +105,27 @@ namespace EventSourcingGrains.Grains
             return eventId;
         }
 
+        /// <summary>
+        /// save events to db then apply event to state
+        /// snapshot will be created when needed
+        /// Returns id of the newly applied event(from db)
+        /// </summary>
+        protected async Task<long> ApplyEvents(TEvent[] events, long? rootEventId = null, long? parentEventId = null)
+        {
+            // apply events to EventSource
+            var eventId = await EventSource.ApplyEvents(events, rootEventId, parentEventId);
+            // does this aggregate has aggregate stream settings
+            if (_hasAggregateStream)
+            {
+                // notify AggregateStreamGrain about new event
+                var aggregateGrain = GrainFactory.GetGrain<IAggregateStreamGrain>(_aggregateName);
+                // fire and forget request
+                aggregateGrain.InvokeOneWay(handler => handler.Notify(eventId));
+            }
+            // return eventId
+            return eventId;
+        }
+
         public virtual bool ShouldSaveSnapshot(TEvent @event, long aggregateVersion)
         {
             return aggregateVersion % 20 == 0;

@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
       <ProjectReference Include="..\..\EventSourcingGrains\EventSourcingGrains.csproj" />
-      <ProjectReference Include="..\Account.Grains\Account.Grains.csproj" />
+      <ProjectReference Include="..\Saga.Grains\Saga.Grains.csproj" />
   </ItemGroup>
 
 </Project>

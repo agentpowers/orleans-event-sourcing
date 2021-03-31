@@ -13,6 +13,7 @@ namespace EventSourcing.Persistance
         Task<long> SaveAggregate(Aggregate aggregate);
         Task<long> SaveSnapshot(string aggregateName, Snapshot snapshot);
         Task<long> SaveEvent(string aggregateName, AggregateEventBase @event);
+        Task<long> SaveEvents(string aggregateName, params AggregateEventBase[] events);
         Task CreateEventsAndSnapshotsTables(string aggregateName);
     }
 }
