@@ -55,7 +55,7 @@ namespace EventSourcing.Persistance
 
         public Task<long> SaveAggregate(Aggregate aggregate)
         {
-            lock(_syncRoot)
+            lock (_syncRoot)
             {
                 var id = _aggregateById.Count == 0 ? 1 : _aggregateById.Keys.OrderByDescending(g => g).First() + 1;
                 aggregate.AggregateId = id;
@@ -67,9 +67,9 @@ namespace EventSourcing.Persistance
 
         public Task<long> SaveEvent(string aggregateName, AggregateEventBase @event)
         {
-            if(_aggregateEvents.TryGetValue(aggregateName, out var entity))
+            if (_aggregateEvents.TryGetValue(aggregateName, out var entity))
             {
-                lock(entity.SyncRoot)
+                lock (entity.SyncRoot)
                 {
                     var id = entity.Values.Count == 0 ? 1 : entity.Values.Last().Id + 1;
                     var aggregateType = _aggregateById[@event.AggregateId];
@@ -105,9 +105,9 @@ namespace EventSourcing.Persistance
 
         public Task<long> SaveSnapshot(string aggregateName, Snapshot snapshot)
         {
-            if(_snapshotes.TryGetValue(aggregateName, out var entity))
+            if (_snapshotes.TryGetValue(aggregateName, out var entity))
             {
-                lock(entity.SyncRoot)
+                lock (entity.SyncRoot)
                 {
                     var id = entity.Values.Count == 0 ? 1 : entity.Values.Last().Id + 1;
                     snapshot.Id = id;
@@ -138,7 +138,7 @@ namespace EventSourcing.Persistance
 
         public Task CreateEventsAndSnapshotsTables(string aggregateName)
         {
-            lock(_syncRoot)
+            lock (_syncRoot)
             {
                 _aggregateEvents.TryAdd(aggregateName, new SyncWrapper<AggregateEvent>());
                 _snapshotes.TryAdd(aggregateName, new SyncWrapper<Snapshot>());

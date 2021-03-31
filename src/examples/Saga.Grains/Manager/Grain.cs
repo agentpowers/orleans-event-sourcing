@@ -24,7 +24,7 @@ namespace Saga.Grains.Manager
         private readonly ILogger<SagaManagerGrain> _logger;
         private long _lastReceivedEventId = 0;
         private readonly HashSet<string> _runningSagas = new HashSet<string>();
-        
+
         public SagaManagerGrain(ILogger<SagaManagerGrain> logger) : base(AggregateName, new SagaManagerAggregate())
         {
             _logger = logger;

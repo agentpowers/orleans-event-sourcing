@@ -9,8 +9,8 @@ namespace Saga.Grains
     {
         Task<T> Execute(T state);
         Task<T> Compensate(T state);
-        bool ShouldSuspendAfterExecuting {get; set;} 
-        bool ShouldSuspendAfterCompensating {get; set;}
+        bool ShouldSuspendAfterExecuting { get; set; }
+        bool ShouldSuspendAfterCompensating { get; set; }
     }
 
     public class SagaExecutionStepsBuilder<T>

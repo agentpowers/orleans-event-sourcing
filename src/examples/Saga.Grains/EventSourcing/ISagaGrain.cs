@@ -5,7 +5,7 @@ using Orleans;
 namespace Saga.Grains.EventSourcing
 {
 
-    public interface IBaseSagaGrain: IGrainWithStringKey
+    public interface IBaseSagaGrain : IGrainWithStringKey
     {
         Task Ping();
     }

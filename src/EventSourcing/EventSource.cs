@@ -290,7 +290,7 @@ namespace EventSourcing
             {
                 // update state
                 _aggregate.Apply(events[i]);
-                
+
                 // save snapshot if ShouldSaveSnapshot returns true
                 if (_shouldSaveSnapshot(events[i], _aggregateVersion))
                 {

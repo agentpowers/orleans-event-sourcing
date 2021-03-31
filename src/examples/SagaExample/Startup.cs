@@ -23,10 +23,10 @@ namespace SagaExample
             // add grain service
             services.AddGrainServices(Program.ConnectionString);
             //services.AddInMemoryGrainServices();
-            
+
             // add controllers
             services.AddControllers();
-            
+
             // add services for dashboard
             services.AddServicesForSelfHostedDashboard();
         }

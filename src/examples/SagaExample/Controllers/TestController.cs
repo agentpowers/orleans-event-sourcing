@@ -22,7 +22,7 @@ namespace SagaExample.Controllers
         {
             var id = Guid.NewGuid().ToString();
             var grain = this.client.GetGrain<ITestSaga>(id);
-            await grain.Start(new TestSagaState{ Value = value });
+            await grain.Start(new TestSagaState { Value = value });
             return Ok(id);
         }
 
@@ -37,7 +37,7 @@ namespace SagaExample.Controllers
         public async Task<IActionResult> Resume(string id, int value)
         {
             var grain = this.client.GetGrain<ITestSaga>(id);
-            await grain.Resume(new TestSagaState{ Value = value });
+            await grain.Resume(new TestSagaState { Value = value });
             return Ok();
         }
 

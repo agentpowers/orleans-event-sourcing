@@ -15,7 +15,7 @@ namespace Saga.Grains.EventSourcing
         Cancelled = 6,
         Faulted = 7
     }
-    
+
     public class SagaState : IState
     {
         public SagaStatus Status { get; set; }

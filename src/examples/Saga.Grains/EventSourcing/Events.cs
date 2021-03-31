@@ -2,12 +2,12 @@ using EventSourcing;
 
 namespace Saga.Grains.EventSourcing
 {
-    public interface ISagaEvent: IEvent
+    public interface ISagaEvent : IEvent
     {
         string Id { get; set; }
     }
 
-    public abstract class BaseSagaEvent: ISagaEvent
+    public abstract class BaseSagaEvent : ISagaEvent
     {
         public string Id { get; set; }
     }
