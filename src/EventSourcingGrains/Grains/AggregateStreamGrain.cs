@@ -1,12 +1,12 @@
-using Orleans;
-using System;
-using System.Threading.Tasks;
-using Orleans.Concurrency;
-using Microsoft.Extensions.Logging;
-using EventSourcingGrains.Stream;
-using EventSourcing.Persistance;
+﻿using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+using EventSourcing.Persistance;
+using EventSourcingGrains.Stream;
+using Microsoft.Extensions.Logging;
+using Orleans;
+using Orleans.Concurrency;
 
 namespace EventSourcingGrains.Grains
 {
@@ -87,6 +87,7 @@ namespace EventSourcingGrains.Grains
             {
                 _logger.LogDebug($"Received notification, eventId={eventId}");
             }
+
             return Task.CompletedTask;
         }
 
@@ -101,6 +102,7 @@ namespace EventSourcingGrains.Grains
             {
                 return;
             }
+
             _isPollingForEvents = true;
             try
             {
@@ -182,6 +184,7 @@ namespace EventSourcingGrains.Grains
                             {
                                 _logger.LogDebug($"Dispatcher still under pressure, dispatcher={dispatcherGrainName}");
                             }
+
                             break;
                         }
 

@@ -1,8 +1,8 @@
-using System.Data;
-using Dapper;
-using System.Threading.Tasks;
-using Npgsql;
+﻿using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
+using Dapper;
+using Npgsql;
 
 namespace EventSourcing.Persistance
 {
@@ -96,6 +96,7 @@ namespace EventSourcing.Persistance
                 {
                     lastId = await conn.ExecuteScalarAsync<long>(string.Format(sql, aggregateName), @event, trans);
                 }
+
                 trans.Commit();
             }
             catch (System.Exception)
@@ -103,6 +104,7 @@ namespace EventSourcing.Persistance
                 trans.Rollback();
                 throw;
             }
+
             return lastId;
         }
 

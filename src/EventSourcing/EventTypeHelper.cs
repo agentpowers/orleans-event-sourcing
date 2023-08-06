@@ -26,6 +26,7 @@ namespace EventSourcing
                             {
                                 throw new InvalidOperationException($"Unable to add type for {eventMeta}. Are there duplicate {nameof(Event)}?");
                             }
+
                             if (!_eventIdentityToTypeCache.TryAdd((eventMeta.Name, eventMeta.Version), type))
                             {
                                 throw new InvalidOperationException($"Unable to add type for {eventMeta}. Are there duplicate {nameof(Event)}?");

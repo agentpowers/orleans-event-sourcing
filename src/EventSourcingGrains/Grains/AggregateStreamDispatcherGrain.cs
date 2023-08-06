@@ -1,16 +1,16 @@
-using Orleans;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Orleans.Concurrency;
-using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
-using Microsoft.Extensions.Logging;
-using EventSourcingGrains.Stream;
+using System.Threading;
+using System.Threading.Tasks;
 using EventSourcing.Persistance;
+using EventSourcingGrains.Stream;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Orleans;
+using Orleans.Concurrency;
 using Orleans.Placement;
 using Orleans.Runtime;
-using System.Threading;
 
 namespace EventSourcingGrains.Grains
 {
@@ -99,6 +99,7 @@ namespace EventSourcingGrains.Grains
                     {
                         _logger.LogWarning($"Missed event, lastQueuedEventId={_lastQueuedEventId}, received={ev.Id}");
                     }
+
                     _eventQueue.Enqueue(ev);
                     _lastQueuedEventId = ev.Id;
                 }

@@ -49,6 +49,5 @@ namespace Caching.Controllers
             var grain = _client.GetGrain<ICacheGrain<string>>(key);
             await grain.Refresh();
         }
-
     }
 }

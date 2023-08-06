@@ -1,5 +1,4 @@
-using EventSourcing;
-using EventSourcingGrains;
+﻿using EventSourcing;
 
 namespace Account.Grains.Reconciler
 {

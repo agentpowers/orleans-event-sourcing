@@ -1,5 +1,5 @@
+﻿using EventSourcing;
 using EventSourcing.Persistance;
-using EventSourcing;
 
 namespace Account.Grains.ReadModelWriter
 {

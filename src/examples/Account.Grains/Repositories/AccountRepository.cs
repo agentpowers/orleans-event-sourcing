@@ -1,8 +1,8 @@
-using System.Data;
+﻿using System.Data;
 using System.Threading.Tasks;
-using Npgsql;
-using Dapper;
 using Account.Grains.ReadModelWriter;
+using Dapper;
+using Npgsql;
 
 namespace Account.Grains.Repositories
 {

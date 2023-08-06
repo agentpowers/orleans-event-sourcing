@@ -1,6 +1,6 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Account.Grains.Repositories;
 using EventSourcingGrains.Extensions;
-using Account.Grains.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Account.Extensions
 {

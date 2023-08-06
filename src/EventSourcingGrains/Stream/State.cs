@@ -1,4 +1,4 @@
-using EventSourcing;
+﻿using EventSourcing;
 
 namespace EventSourcingGrains.Stream
 {

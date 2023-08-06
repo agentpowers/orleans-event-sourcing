@@ -28,6 +28,7 @@ namespace Account.Controllers
             {
                 return BadRequest(response.ErrorMessage);
             }
+
             return Ok(response.Value);
         }
 
@@ -40,6 +41,7 @@ namespace Account.Controllers
             {
                 return BadRequest(response.ErrorMessage);
             }
+
             return Ok(response.Value);
         }
 
@@ -52,6 +54,7 @@ namespace Account.Controllers
             {
                 return BadRequest(response.ErrorMessage);
             }
+
             return Ok(response.Value);
         }
 
@@ -64,6 +67,7 @@ namespace Account.Controllers
             {
                 return BadRequest(response.ErrorMessage);
             }
+
             return Ok(response.Value);
         }
     }

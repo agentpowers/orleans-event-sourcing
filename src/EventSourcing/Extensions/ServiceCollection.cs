@@ -1,5 +1,5 @@
+﻿using EventSourcing.Persistance;
 using Microsoft.Extensions.DependencyInjection;
-using EventSourcing.Persistance;
 
 namespace EventSourcing.Extensions
 {

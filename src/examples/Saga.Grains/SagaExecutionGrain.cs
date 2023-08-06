@@ -1,8 +1,8 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
+﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Saga.Grains.EventSourcing
 {
@@ -84,6 +84,7 @@ namespace Saga.Grains.EventSourcing
                     {
                         throw new InvalidOperationException($"Message=unable to retrieve service for step, StepType={StepTypes[State.SagaStepIndex]}");
                     }
+
                     _logger.LogInformation("Message=Executing step, SageId={0}, Index={1}", State.Id, State.SagaStepIndex);
                     var context = await sagaStep.Execute(Context);
                     await ExecuteStep(context, sagaStep.ShouldSuspendAfterExecuting);

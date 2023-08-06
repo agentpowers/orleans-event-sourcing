@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,6 +31,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Executing { Id = id, Context = context });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -41,6 +42,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Executing { Id = State.Id, Context = context });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -51,6 +53,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Executed { Id = State.Id });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -61,6 +64,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Compensating { Id = State.Id, Context = context, Reason = reason });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -71,6 +75,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Compensated { Id = State.Id });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
 
         }
@@ -83,6 +88,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Cancelled { Id = State.Id, Reason = reason });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -94,6 +100,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Faulted { Id = State.Id, Error = error });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -118,8 +125,10 @@ namespace Saga.Grains.EventSourcing
                 {
                     await ApplyEvent(new StepExecuted { Id = State.Id, Context = context });
                 }
+
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -139,8 +148,10 @@ namespace Saga.Grains.EventSourcing
                 {
                     await ApplyEvent(new StepCompensated { Id = State.Id, Context = context });
                 }
+
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -151,6 +162,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Suspended { Id = State.Id });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
 
         }

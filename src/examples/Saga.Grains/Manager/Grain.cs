@@ -1,15 +1,15 @@
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using EventSourcing;
+using EventSourcing.Persistance;
 using EventSourcingGrains.Grains;
+using EventSourcingGrains.Keeplive;
+using EventSourcingGrains.Stream;
 using Microsoft.Extensions.Logging;
 using Orleans;
-using EventSourcingGrains.Stream;
-using EventSourcing.Persistance;
-using System.Collections.Generic;
 using Orleans.Concurrency;
-using EventSourcingGrains.Keeplive;
-using EventSourcing;
 using Saga.Grains.EventSourcing;
-using System.Threading;
 
 namespace Saga.Grains.Manager
 {

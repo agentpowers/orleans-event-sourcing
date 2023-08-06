@@ -1,7 +1,7 @@
+﻿using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using EventSourcing.Persistance;
-using System.Text.Json;
-using System;
 
 namespace EventSourcing
 {
@@ -280,6 +280,7 @@ namespace EventSourcing
                     Created = DateTime.UtcNow
                 };
             }
+
             var eventId = await _repository.SaveEvents(
                 _aggregateName,
                 aggregateEvents
@@ -300,7 +301,6 @@ namespace EventSourcing
             // return id
             return eventId;
         }
-
 
         public Task<AggregateEvent[]> GetAggregateEvents(long eventId = 0) =>
              _repository.GetAggregateEvents(_aggregateName, eventId);

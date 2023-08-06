@@ -1,20 +1,18 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using System;
+using System.Net;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Orleans.Hosting;
 using Orleans;
 using Orleans.Configuration;
-using Microsoft.Extensions.Hosting;
-using Orleans.Statistics;
-using System;
-using System.Net;
-using Caching.Grains;
+using Orleans.Hosting;
 
 namespace Caching
 {
     public class Program
     {
-        const int defaultSiloPort = 11111;
-        const int defaultGatewayPort = 30000;
+        private const int defaultSiloPort = 11111;
+        private const int defaultGatewayPort = 30000;
 
         private static readonly bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
         private static readonly string siloPortEnv = Environment.GetEnvironmentVariable("SILO_PORT");

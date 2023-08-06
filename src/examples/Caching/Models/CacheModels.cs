@@ -1,4 +1,4 @@
-namespace Caching.Models
+﻿namespace Caching.Models
 {
     public class CacheModel
     {

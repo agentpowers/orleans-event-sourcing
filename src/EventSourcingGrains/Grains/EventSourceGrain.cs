@@ -1,11 +1,11 @@
-using Orleans;
-using System.Threading.Tasks;
-using System;
+﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using EventSourcing;
 using EventSourcingGrains.Stream;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading;
+using Orleans;
 
 namespace EventSourcingGrains.Grains
 {
@@ -42,14 +42,17 @@ namespace EventSourcingGrains.Grains
             {
                 return this.GetPrimaryKeyLong().ToString();
             }
+
             if (interfaces.Any(x => x.Equals(typeof(IGrainWithStringKey))))
             {
                 return this.GetPrimaryKeyString();
             }
+
             if (interfaces.Any(x => x.Equals(typeof(IGrainWithGuidKey))))
             {
                 return this.GetPrimaryKey().ToString();
             }
+
             throw new InvalidOperationException("unable to retrieve GrainKey");
         }
 

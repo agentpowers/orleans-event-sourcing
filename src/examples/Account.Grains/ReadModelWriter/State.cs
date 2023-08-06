@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using EventSourcingGrains.Grains;
 
 namespace Account.Grains.ReadModelWriter

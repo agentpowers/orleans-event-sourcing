@@ -1,13 +1,13 @@
-using Orleans;
-using Orleans.Runtime;
-using System;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Orleans.Services;
+using EventSourcingGrains.Keeplive;
 using EventSourcingGrains.Stream;
 using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
-using EventSourcingGrains.Keeplive;
+using Microsoft.Extensions.Logging;
+using Orleans;
+using Orleans.Runtime;
+using Orleans.Services;
 
 namespace EventSourcingGrains.Services
 {

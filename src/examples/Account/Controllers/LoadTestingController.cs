@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Account.Grains;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
-using Account.Grains;
-using System.Diagnostics;
-using System.Threading;
 
 namespace Account.Controllers
 {
@@ -76,6 +76,7 @@ namespace Account.Controllers
                     }
                 }));
             }
+
             await Task.WhenAll(tasks);
         }
     }
