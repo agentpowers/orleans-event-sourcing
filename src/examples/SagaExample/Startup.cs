@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans;
 using Microsoft.Extensions.Hosting;
-using System;
 using SagaExample.Extensions;
 
 namespace SagaExample

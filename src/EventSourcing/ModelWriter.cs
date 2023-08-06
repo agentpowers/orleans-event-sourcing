@@ -14,7 +14,7 @@ namespace EventSourcing
         /// Get current state
         /// </summary>
         /// <value></value>
-        protected TState State { get { return _aggregate.State; } }
+        protected TState State => _aggregate.State;
 
         // constructor
         protected ModelWriter(IAggregate<TState, TEvent> aggregate)

@@ -16,7 +16,7 @@ namespace EventSourcingGrains.Grains
             // add AggregateStreamDispatcherGrain settings
             settings.Add(AggregateStreamDispatcherGrain.AggregateName, new EventSourceGrainSetting());
 
-            builder.ConfigureServices((hostBuilder, serviceCollection) =>
+            builder.ConfigureServices((serviceCollection) =>
             {
                 serviceCollection.AddSingleton<IEventSourceGrainSettingsMap>(settings);
             });

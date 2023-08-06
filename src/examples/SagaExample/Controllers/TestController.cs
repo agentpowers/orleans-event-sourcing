@@ -1,50 +1,58 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using IdentityModel;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using Saga.Grains;
 
 namespace SagaExample.Controllers
 {
+    public class TestModel
+    {
+        [Required]
+        public string Id { get; set; }
+        [Required]
+        public int Value { get; set; }
+    }
     [ApiController]
     [Route("[controller]")]
     public class TestController : ControllerBase
     {
-        private readonly IClusterClient client;
+        private readonly IClusterClient _client;
 
         public TestController(IClusterClient client)
         {
-            this.client = client;
+            _client = client;
         }
 
-        [HttpGet("create/{value}")]
-        public async Task<IActionResult> Create(int value)
+        [HttpPost("")]
+        public async Task<IActionResult> Create([FromBody][Required] TestModel model)
         {
-            var id = Guid.NewGuid().ToString();
-            var grain = this.client.GetGrain<ITestSaga>(id);
-            await grain.Start(new TestSagaState { Value = value });
-            return Ok(id);
+            var grain = _client.GetGrain<ITestSaga>(model.Id);
+            await grain.Start(new TestSagaState { Value = model.Value });
+            return NoContent();
         }
 
-        [HttpGet("get/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
-            var grain = this.client.GetGrain<ITestSaga>(id);
+            var grain = _client.GetGrain<ITestSaga>(id);
             return Ok(await grain.GetState());
         }
 
-        [HttpGet("resume/{id}/{value}")]
-        public async Task<IActionResult> Resume(string id, int value)
+        [HttpPost("resume")]
+        public async Task<IActionResult> Resume([FromBody][Required] TestModel model)
         {
-            var grain = this.client.GetGrain<ITestSaga>(id);
-            await grain.Resume(new TestSagaState { Value = value });
+            var grain = _client.GetGrain<ITestSaga>(model.Id);
+            await grain.Resume(new TestSagaState { Value = model.Value });
             return Ok();
         }
 
-        [HttpGet("revert/{id}")]
-        public async Task<IActionResult> Revert(string id)
+        [HttpPost("revert")]
+        public async Task<IActionResult> Revert([FromBody][Required] TestModel model)
         {
-            var grain = this.client.GetGrain<ITestSaga>(id);
+            var grain = _client.GetGrain<ITestSaga>(model.Id);
             await grain.Revert("reverting...");
             return Ok();
         }

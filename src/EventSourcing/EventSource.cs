@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using EventSourcing.Persistance;
 using System.Text.Json;
 using System;
-using System.Collections.Generic;
 
 namespace EventSourcing
 {
@@ -92,7 +91,7 @@ namespace EventSourcing
         /// Get current state
         /// </summary>
         /// <value></value>
-        public TState State { get { return _aggregate.State; } }
+        public TState State => _aggregate.State;
 
         public EventSource(IRepository repository)
         {
@@ -258,7 +257,7 @@ namespace EventSourcing
         public async Task<long> ApplyEvents(TEvent[] events, long? rootEventId = null, long? parentEventId = null)
         {
             var aggregateEvents = new AggregateEventBase[events.Length];
-            for (int i = 0; i < events.Length; i++)
+            for (var i = 0; i < events.Length; i++)
             {
                 // get event type
                 var type = events[i].GetType();
@@ -286,7 +285,7 @@ namespace EventSourcing
                 aggregateEvents
             );
 
-            for (int i = 0; i < events.Length; i++)
+            for (var i = 0; i < events.Length; i++)
             {
                 // update state
                 _aggregate.Apply(events[i]);

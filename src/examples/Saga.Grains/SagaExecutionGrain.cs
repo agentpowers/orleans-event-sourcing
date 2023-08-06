@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading;
 
 namespace Saga.Grains.EventSourcing
 {
@@ -12,11 +13,11 @@ namespace Saga.Grains.EventSourcing
         private IDisposable _timer;
         public abstract Type[] StepTypes { get; set; }
 
-        public SagaExecutionGrain()
+        protected SagaExecutionGrain()
         {
         }
 
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken = default)
         {
             _logger = ServiceProvider.GetService<ILogger<SagaExecutionGrain<T>>>();
             await base.OnActivateAsync();

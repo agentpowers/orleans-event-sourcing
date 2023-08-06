@@ -39,17 +39,14 @@ namespace Account
             .ConfigureEndpoints(siloPort: defaultSiloPort, gatewayPort: defaultGatewayPort)
             .UseKubeMembership()
             .AddMemoryGrainStorageAsDefault()
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
             .AddGrainService<KeepAliveService>()
-            .UseLinuxEnvironmentStatistics()
             .UseDashboard(x =>
             {
                 x.HostSelf = false;
                 x.BasePath = "/dashboard";
                 x.ScriptPath = "/api/dashboard";
                 x.CounterUpdateIntervalMs = 10000;
-            })
-            .AddPrometheusTelemetryConsumer();
+            });
 
             builder.ConfigureGrains();
         }
@@ -70,15 +67,15 @@ namespace Account
                 options.ConnectionString = ConnectionString;
             })
             .AddMemoryGrainStorageAsDefault()
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
+            // .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
             .AddGrainService<KeepAliveService>()
             .UseDashboard(x =>
             {
                 x.HostSelf = false;
                 x.BasePath = "/dashboard";
                 x.CounterUpdateIntervalMs = 10000;
-            })
-            .AddPrometheusTelemetryConsumer();
+            });
+            // .AddPrometheusTelemetryConsumer();
 
             builder.ConfigureGrains();
         }

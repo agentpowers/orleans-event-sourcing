@@ -1,3 +1,4 @@
 {
-    "FSharp.suggestSdkScripts": false
+    "FSharp.suggestSdkScripts": false,
+    "dotnet.defaultSolution": "src/src.sln"
 }

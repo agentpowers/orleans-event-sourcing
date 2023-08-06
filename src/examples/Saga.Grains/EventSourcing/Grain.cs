@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using EventSourcingGrains.Grains;
 
@@ -9,11 +10,11 @@ namespace Saga.Grains.EventSourcing
     {
         public const string AggregateName = "saga";
 
-        public SagaGrain() : base(AggregateName, new SagaAggregate()) { }
+        protected SagaGrain() : base(AggregateName, new SagaAggregate()) { }
 
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken = default)
         {
-            await base.OnActivateAsync();
+            await base.OnActivateAsync(cancellationToken);
             // Hack: if state was just loaded from db, then serialize it to T and assign to context
             if (State.Context is JsonElement jsonElement)
             {

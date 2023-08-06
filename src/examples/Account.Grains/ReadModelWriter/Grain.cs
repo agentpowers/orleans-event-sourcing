@@ -6,6 +6,7 @@ using System;
 using System.Threading.Tasks;
 using Account.Grains.Repositories;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace Account.Grains.ReadModelWriter
 {
@@ -30,12 +31,12 @@ namespace Account.Grains.ReadModelWriter
             _logger = logger;
         }
 
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             _accountId = long.Parse(this.GetPrimaryKeyString()[keyStringAccountIdStartIndex..]);
             await Init();
             // call base OnActivateAsync
-            await base.OnActivateAsync();
+            await base.OnActivateAsync(cancellationToken);
         }
 
         public override Task PersistState(AccountModel account)

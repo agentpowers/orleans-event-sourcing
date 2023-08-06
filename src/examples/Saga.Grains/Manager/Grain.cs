@@ -9,6 +9,7 @@ using Orleans.Concurrency;
 using EventSourcingGrains.Keeplive;
 using EventSourcing;
 using Saga.Grains.EventSourcing;
+using System.Threading;
 
 namespace Saga.Grains.Manager
 {
@@ -30,9 +31,9 @@ namespace Saga.Grains.Manager
             _logger = logger;
         }
 
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken = default)
         {
-            await base.OnActivateAsync();
+            await base.OnActivateAsync(cancellationToken);
 
             //load all account events after last processed event
             await RecoverEventQueue(State.LastProcessedEventId);

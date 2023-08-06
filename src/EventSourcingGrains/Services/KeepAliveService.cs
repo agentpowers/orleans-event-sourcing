@@ -2,7 +2,6 @@ using Orleans;
 using Orleans.Runtime;
 using System;
 using System.Threading.Tasks;
-using Orleans.Core;
 using Microsoft.Extensions.Logging;
 using Orleans.Services;
 using EventSourcingGrains.Stream;
@@ -17,10 +16,10 @@ namespace EventSourcingGrains.Services
     {
         private IServiceProvider _serviceProvider;
         private readonly IGrainFactory _grainFactory;
-        private readonly static TimeSpan InitialInterval = TimeSpan.Zero;
-        private readonly static TimeSpan AggregateStreamInterval = TimeSpan.FromMinutes(10);
+        private static readonly TimeSpan InitialInterval = TimeSpan.Zero;
+        private static readonly TimeSpan AggregateStreamInterval = TimeSpan.FromMinutes(10);
 
-        public KeepAliveService(IGrainIdentity grainId, Silo silo, ILoggerFactory loggerFactory, IGrainFactory grainFactory) : base(grainId, silo, loggerFactory)
+        public KeepAliveService(GrainId grainId, Silo silo, ILoggerFactory loggerFactory, IGrainFactory grainFactory) : base(grainId, silo, loggerFactory)
         {
             _grainFactory = grainFactory;
         }
@@ -40,7 +39,7 @@ namespace EventSourcingGrains.Services
             {
                 foreach (var setting in keepAliveSettings.GrainKeepAliveSettings)
                 {
-                    this.RegisterTimer(HandlePing, setting, InitialInterval, setting.Interval);
+                    RegisterTimer(HandlePing, setting, InitialInterval, setting.Interval);
                 }
             }
 
@@ -48,7 +47,7 @@ namespace EventSourcingGrains.Services
             var aggregateNames = _serviceProvider.GetServices<IAggregateStreamSettings>().Select(g => g.AggregateName).ToArray();
             foreach (var aggregateName in aggregateNames)
             {
-                this.RegisterTimer(HandleAggregateStreamPing, aggregateName, InitialInterval, AggregateStreamInterval);
+                RegisterTimer(HandleAggregateStreamPing, aggregateName, InitialInterval, AggregateStreamInterval);
             }
         }
 

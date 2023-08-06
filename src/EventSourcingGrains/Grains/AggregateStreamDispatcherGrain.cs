@@ -10,6 +10,7 @@ using EventSourcingGrains.Stream;
 using EventSourcing.Persistance;
 using Orleans.Placement;
 using Orleans.Runtime;
+using System.Threading;
 
 namespace EventSourcingGrains.Grains
 {
@@ -19,7 +20,6 @@ namespace EventSourcingGrains.Grains
     {
         private readonly Queue<AggregateEvent> _eventQueue = new Queue<AggregateEvent>();
         private EventDispatcherSettings _eventDispatcherSettings;
-        private readonly ITelemetryProducer _telemetryProducer;
         private readonly ILogger<AggregateStreamDispatcherGrain> _logger;
         private bool _isNotifyingSubscribers = false;
         private long _lastQueuedEventId;
@@ -29,13 +29,12 @@ namespace EventSourcingGrains.Grains
         private string _queueSizeMetricName;
         public const string AggregateName = "aggregate_stream_dispatcher";
 
-        public AggregateStreamDispatcherGrain(ITelemetryProducer telemetryProducer, ILogger<AggregateStreamDispatcherGrain> logger) : base(AggregateName, new AggregateStream())
+        public AggregateStreamDispatcherGrain(ILogger<AggregateStreamDispatcherGrain> logger) : base(AggregateName, new AggregateStream())
         {
             _logger = logger;
-            _telemetryProducer = telemetryProducer;
         }
 
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             // set current grain key as aggregateName
             var nameSplit = GrainReference.GetPrimaryKeyString().Split(':');
@@ -64,7 +63,7 @@ namespace EventSourcingGrains.Grains
             if (_eventDispatcherSettings.PersistDispatcherState)
             {
                 // call base OnActivateAsync
-                await base.OnActivateAsync();
+                await base.OnActivateAsync(cancellationToken);
 
                 // set LastNotifiedEventVersion if needed
                 if (State.LastNotifiedEventId == 0)
@@ -84,10 +83,7 @@ namespace EventSourcingGrains.Grains
             }
 
             // register pollForEvents method
-            this.RegisterTimer(NotifySubscribers, null, TimeSpan.FromSeconds(1), _notifyInterval);
-
-            // register metrics reporter
-            this.RegisterTimer(ReportMetrics, null, TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(1));
+            RegisterTimer(NotifySubscribers, null, TimeSpan.FromSeconds(1), _notifyInterval);
         }
 
         public ValueTask<bool> AddToQueue(Immutable<AggregateEvent[]> events)
@@ -176,13 +172,6 @@ namespace EventSourcingGrains.Grains
         private bool InternalIsUnderPressure()
         {
             return _eventQueue.Count > _eventDispatcherSettings.QueueSizeThreshold;
-        }
-
-        private Task ReportMetrics(object _)
-        {
-            _telemetryProducer.TrackMetric(_underPressureMetricName, InternalIsUnderPressure() ? 1 : 0);
-            _telemetryProducer.TrackMetric(_queueSizeMetricName, _eventQueue.Count);
-            return Task.CompletedTask;
         }
     }
 }

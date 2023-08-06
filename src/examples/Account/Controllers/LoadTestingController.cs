@@ -14,11 +14,11 @@ namespace Account.Controllers
     [Route("load_testing")]
     public class LoadTestingController : ControllerBase
     {
-        private readonly IClusterClient client;
+        private readonly IClusterClient _client;
 
         public LoadTestingController(IClusterClient client)
         {
-            this.client = client;
+            _client = client;
         }
 
         [HttpGet("deposit")]
@@ -28,7 +28,7 @@ namespace Account.Controllers
             var sw = Stopwatch.StartNew();
             await Enumerable.Range(1, count).ForEachAsyncSemaphore(Environment.ProcessorCount, body: async entry =>
             {
-                var grain = this.client.GetGrain<IAccountGrain>(entry);
+                var grain = _client.GetGrain<IAccountGrain>(entry);
                 var response = await grain.Deposit(1000);
             });
             sw.Stop();
@@ -43,7 +43,7 @@ namespace Account.Controllers
             var sw = Stopwatch.StartNew();
             await Enumerable.Range(1, count).ForEachAsyncSemaphore(Environment.ProcessorCount - 2, body: async entry =>
              {
-                 var grain = this.client.GetGrain<IAccountGrain>(entry);
+                 var grain = _client.GetGrain<IAccountGrain>(entry);
                  var response = await grain.Withdraw(1000);
              });
             sw.Stop();

@@ -16,13 +16,7 @@ namespace Account.Grains.Repositories
     public class AccountRepository : IAccountRepository
     {
         private readonly string _connectionString;
-        private IDbConnection Connection
-        {
-            get
-            {
-                return new NpgsqlConnection(_connectionString);
-            }
-        }
+        private IDbConnection Connection => new NpgsqlConnection(_connectionString);
 
         public AccountRepository(string connectionString)
         {
@@ -31,7 +25,7 @@ namespace Account.Grains.Repositories
 
         public async Task<AccountModel> GetAccount(long accountId)
         {
-            using IDbConnection conn = Connection;
+            using var conn = Connection;
             return await conn.QueryFirstOrDefaultAsync<AccountModel>(
                 @"
                         select * from account
@@ -42,7 +36,7 @@ namespace Account.Grains.Repositories
 
         public async Task CreateAccount(AccountModel account)
         {
-            using IDbConnection conn = Connection;
+            using var conn = Connection;
             await conn.ExecuteAsync(
                 @"
                         insert into Account(Id, Version, Balance, Modified) 
@@ -53,7 +47,7 @@ namespace Account.Grains.Repositories
 
         public async Task UpdateAccount(AccountModel account)
         {
-            using IDbConnection conn = Connection;
+            using var conn = Connection;
             await conn.ExecuteAsync(
                 @"
                         update Account 

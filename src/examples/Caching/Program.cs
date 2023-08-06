@@ -37,9 +37,8 @@ namespace Caching
                 options.Invariant = "Npgsql";
                 options.ConnectionString = connectionString;
             })
+
             .AddMemoryGrainStorageAsDefault()
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CacheGrain<>).Assembly).WithReferences())
-            .UseLinuxEnvironmentStatistics()
             .UseDashboard(x =>
             {
                 x.HostSelf = false;
@@ -65,7 +64,6 @@ namespace Caching
                 options.ConnectionString = connectionString;
             })
             .AddMemoryGrainStorageAsDefault()
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(CacheGrain<>).Assembly).WithReferences())
             .UseDashboard(x =>
             {
                 x.HostSelf = false;

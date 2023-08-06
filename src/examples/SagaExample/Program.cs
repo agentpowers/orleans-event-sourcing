@@ -39,17 +39,14 @@ namespace SagaExample
             .ConfigureEndpoints(siloPort: defaultSiloPort, gatewayPort: defaultGatewayPort)
             .UseKubeMembership()
             .AddMemoryGrainStorageAsDefault()
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(TestSaga).Assembly).WithReferences())
             .AddGrainService<KeepAliveService>()
-            .UseLinuxEnvironmentStatistics()
             .UseDashboard(x =>
             {
                 x.HostSelf = false;
                 x.BasePath = "/dashboard";
                 x.ScriptPath = "/api/dashboard";
                 x.CounterUpdateIntervalMs = 10000;
-            })
-            .AddPrometheusTelemetryConsumer();
+            });
 
             builder.ConfigureGrains();
         }
@@ -69,17 +66,15 @@ namespace SagaExample
                 options.Invariant = "Npgsql";
                 options.ConnectionString = ConnectionString;
             })
-            //.UseLocalhostClustering()
+            .UseLocalhostClustering()
             .AddMemoryGrainStorageAsDefault()
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(TestSaga).Assembly).WithReferences())
             .AddGrainService<KeepAliveService>()
             .UseDashboard(x =>
             {
                 x.HostSelf = false;
                 x.BasePath = "/dashboard";
                 x.CounterUpdateIntervalMs = 10000;
-            })
-            .AddPrometheusTelemetryConsumer();
+            });
 
             builder.ConfigureGrains();
         }
