@@ -1,11 +1,12 @@
-using Orleans;
-using System;
-using System.Threading.Tasks;
-using Orleans.Concurrency;
-using Microsoft.Extensions.Logging;
-using EventSourcingGrains.Stream;
-using EventSourcing.Persistance;
+﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using EventSourcing.Persistance;
+using EventSourcingGrains.Stream;
+using Microsoft.Extensions.Logging;
+using Orleans;
+using Orleans.Concurrency;
 
 namespace EventSourcingGrains.Grains
 {
@@ -31,13 +32,13 @@ namespace EventSourcingGrains.Grains
             _aggregateStreamSettings = aggregateStreamSettings;
         }
 
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             // set current grain key as aggregateName
             _aggregateName = GrainReference.GetPrimaryKeyString();
 
             // call base OnActivateAsync
-            await base.OnActivateAsync();
+            await base.OnActivateAsync(cancellationToken);
 
             var persistedDispatchers = _aggregateStreamSettings.EventDispatcherSettingsMap.Where(g => g.Value.PersistDispatcherState == true).ToList();
 
@@ -67,7 +68,7 @@ namespace EventSourcingGrains.Grains
             }
 
             // register pollForEvents method
-            this.RegisterTimer(PollForEvents, null, TimeSpan.FromSeconds(1), _pollingInterval);
+            RegisterTimer(PollForEvents, null, TimeSpan.FromSeconds(1), _pollingInterval);
         }
 
         /// <summary>
@@ -86,6 +87,7 @@ namespace EventSourcingGrains.Grains
             {
                 _logger.LogDebug($"Received notification, eventId={eventId}");
             }
+
             return Task.CompletedTask;
         }
 
@@ -100,6 +102,7 @@ namespace EventSourcingGrains.Grains
             {
                 return;
             }
+
             _isPollingForEvents = true;
             try
             {
@@ -151,7 +154,7 @@ namespace EventSourcingGrains.Grains
                         var isDispatcherUnderPressure = await dispatcherGrain.AddToQueue(new Immutable<AggregateEvent[]>(newEvents));
                         if (_logger.IsEnabled(LogLevel.Debug))
                         {
-                            _logger.LogDebug($"Send to dispatcher, aggregateName={_aggregateName}, dispatcher={dispatcherGrain}, eventIds={String.Join(',', newEvents.Select(g => g.Id))}");
+                            _logger.LogDebug($"Send to dispatcher, aggregateName={_aggregateName}, dispatcher={dispatcherGrain}, eventIds={string.Join(',', newEvents.Select(g => g.Id))}");
                         }
 
                         // update under-pressure flag
@@ -171,7 +174,7 @@ namespace EventSourcingGrains.Grains
                 else
                 {
                     // back pressure logic.  if all dispatchers returns false then change flag to false
-                    for (int k = _aggregateStreamSettings.EventDispatcherSettingsMap.Count - 1; k >= 0; k--)
+                    for (var k = _aggregateStreamSettings.EventDispatcherSettingsMap.Count - 1; k >= 0; k--)
                     {
                         var dispatcherGrainName = $"{_aggregateName}:{_aggregateStreamSettings.EventDispatcherSettingsMap.Keys.ElementAt(k)}";
                         var dispatcherGrain = GrainFactory.GetGrain<IAggregateStreamDispatcherGrain>(dispatcherGrainName);
@@ -181,6 +184,7 @@ namespace EventSourcingGrains.Grains
                             {
                                 _logger.LogDebug($"Dispatcher still under pressure, dispatcher={dispatcherGrainName}");
                             }
+
                             break;
                         }
 

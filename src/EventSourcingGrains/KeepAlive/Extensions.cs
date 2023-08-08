@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Hosting;
 
@@ -12,7 +12,7 @@ namespace EventSourcingGrains.Keeplive
 
             configure.Invoke(keepAliveSettings);
 
-            builder.ConfigureServices((hostBuilder, serviceCollection) =>
+            builder.ConfigureServices((serviceCollection) =>
             {
                 serviceCollection.AddSingleton<IKeepAliveSettings>(keepAliveSettings);
             });

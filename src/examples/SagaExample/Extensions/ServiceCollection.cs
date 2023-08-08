@@ -1,5 +1,5 @@
+﻿using EventSourcingGrains.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using EventSourcingGrains.Extensions;
 using Saga.Grains.Extensions;
 
 namespace SagaExample.Extensions

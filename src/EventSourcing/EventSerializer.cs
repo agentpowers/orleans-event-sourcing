@@ -1,5 +1,5 @@
-﻿using EventSourcing.Persistance;
-using System.Text.Json;
+﻿using System.Text.Json;
+using EventSourcing.Persistance;
 
 namespace EventSourcing
 {

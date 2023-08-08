@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using EventSourcingGrains.Grains;
 using Microsoft.Extensions.Logging;
@@ -14,9 +15,9 @@ namespace Account.Grains
             _logger = logger;
         }
 
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            await base.OnActivateAsync();
+            await base.OnActivateAsync(cancellationToken);
         }
 
         public async Task<AccountResponse<decimal>> Deposit(decimal amount)

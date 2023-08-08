@@ -1,13 +1,14 @@
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using EventSourcing;
+using EventSourcing.Persistance;
 using EventSourcingGrains.Grains;
+using EventSourcingGrains.Keeplive;
+using EventSourcingGrains.Stream;
 using Microsoft.Extensions.Logging;
 using Orleans;
-using EventSourcingGrains.Stream;
-using EventSourcing.Persistance;
-using System.Collections.Generic;
 using Orleans.Concurrency;
-using EventSourcingGrains.Keeplive;
-using EventSourcing;
 using Saga.Grains.EventSourcing;
 
 namespace Saga.Grains.Manager
@@ -30,9 +31,9 @@ namespace Saga.Grains.Manager
             _logger = logger;
         }
 
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken = default)
         {
-            await base.OnActivateAsync();
+            await base.OnActivateAsync(cancellationToken);
 
             //load all account events after last processed event
             await RecoverEventQueue(State.LastProcessedEventId);

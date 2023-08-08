@@ -1,7 +1,6 @@
-using Orleans;
-using Orleans.Concurrency;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Orleans;
 
 namespace Account.Grains
 {
@@ -13,10 +12,14 @@ namespace Account.Grains
         InsufficientFunds = 2
     }
     [Immutable]
+    [GenerateSerializer]
     public struct AccountResponse<T>
     {
+        [Id(0)]
         public T Value { get; set; }
+        [Id(1)]
         public string ErrorMessage { get; set; }
+        [Id(2)]
         public ErrorCode ErrorCode { get; set; }
         public AccountResponse(T value)
         {

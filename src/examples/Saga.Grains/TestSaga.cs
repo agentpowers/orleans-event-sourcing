@@ -1,12 +1,14 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Orleans;
 using Saga.Grains.EventSourcing;
 
 namespace Saga.Grains
 {
+    [GenerateSerializer]
     public class TestSagaState
     {
+        [Id(0)]
         public int Value { get; set; }
     }
     public class StepOne : ISagaStep<TestSagaState>

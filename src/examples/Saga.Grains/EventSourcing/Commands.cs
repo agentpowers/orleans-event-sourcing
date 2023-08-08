@@ -1,4 +1,4 @@
-namespace Saga.Grains.EventSourcing
+﻿namespace Saga.Grains.EventSourcing
 {
     public interface ISagaCommand
     {

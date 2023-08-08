@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using EventSourcingGrains.Grains;
 
@@ -9,11 +10,11 @@ namespace Saga.Grains.EventSourcing
     {
         public const string AggregateName = "saga";
 
-        public SagaGrain() : base(AggregateName, new SagaAggregate()) { }
+        protected SagaGrain() : base(AggregateName, new SagaAggregate()) { }
 
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken = default)
         {
-            await base.OnActivateAsync();
+            await base.OnActivateAsync(cancellationToken);
             // Hack: if state was just loaded from db, then serialize it to T and assign to context
             if (State.Context is JsonElement jsonElement)
             {
@@ -30,6 +31,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Executing { Id = id, Context = context });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -40,6 +42,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Executing { Id = State.Id, Context = context });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -50,6 +53,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Executed { Id = State.Id });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -60,6 +64,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Compensating { Id = State.Id, Context = context, Reason = reason });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -70,6 +75,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Compensated { Id = State.Id });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
 
         }
@@ -82,6 +88,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Cancelled { Id = State.Id, Reason = reason });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -93,6 +100,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Faulted { Id = State.Id, Error = error });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -117,8 +125,10 @@ namespace Saga.Grains.EventSourcing
                 {
                     await ApplyEvent(new StepExecuted { Id = State.Id, Context = context });
                 }
+
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -138,8 +148,10 @@ namespace Saga.Grains.EventSourcing
                 {
                     await ApplyEvent(new StepCompensated { Id = State.Id, Context = context });
                 }
+
                 return State;
             }
+
             throw new Exception("Invalid Transition");
         }
 
@@ -150,6 +162,7 @@ namespace Saga.Grains.EventSourcing
                 await ApplyEvent(new Suspended { Id = State.Id });
                 return State;
             }
+
             throw new Exception("Invalid Transition");
 
         }

@@ -1,8 +1,8 @@
-using System.Data;
-using System.Threading.Tasks;
-using System.Linq;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace EventSourcing.Persistance
 {
@@ -25,6 +25,7 @@ namespace EventSourcing.Persistance
             {
                 return Task.FromResult(entity);
             }
+
             return Task.FromResult(default(Aggregate));
         }
 
@@ -34,6 +35,7 @@ namespace EventSourcing.Persistance
             {
                 return Task.FromResult(entity.Values.Where(g => g.Id > afterEventId).ToArray());
             }
+
             return Task.FromResult(Array.Empty<AggregateEvent>());
         }
 
@@ -43,6 +45,7 @@ namespace EventSourcing.Persistance
             {
                 return Task.FromResult(entity.Values.Where(g => g.Id > afterEventId).Take(size).ToArray());
             }
+
             return Task.FromResult(Array.Empty<AggregateEvent>());
         }
 
@@ -90,6 +93,7 @@ namespace EventSourcing.Persistance
                     return Task.FromResult(id);
                 }
             }
+
             throw new InvalidOperationException($"Message=AggregateEvent not found for {aggregateName}");
         }
 
@@ -100,6 +104,7 @@ namespace EventSourcing.Persistance
             {
                 lastId = await SaveEvent(aggregateName, @event);
             }
+
             return lastId;
         }
 
@@ -115,6 +120,7 @@ namespace EventSourcing.Persistance
                     return Task.FromResult(id);
                 }
             }
+
             throw new InvalidOperationException($"Message=Snapshot not found for {aggregateName}");
         }
 
@@ -124,6 +130,7 @@ namespace EventSourcing.Persistance
             {
                 return Task.FromResult(entity.Values.OrderByDescending(g => g.Id).FirstOrDefault());
             }
+
             return Task.FromResult(default(AggregateEvent));
         }
 
@@ -133,6 +140,7 @@ namespace EventSourcing.Persistance
             {
                 return Task.FromResult(entity.Values.Where(g => g.AggregateType == aggregateTypeName && g.AggregateVersion > aggregateVersion).ToArray());
             }
+
             return Task.FromResult(Array.Empty<AggregateEvent>());
         }
 
@@ -143,6 +151,7 @@ namespace EventSourcing.Persistance
                 _aggregateEvents.TryAdd(aggregateName, new SyncWrapper<AggregateEvent>());
                 _snapshotes.TryAdd(aggregateName, new SyncWrapper<Snapshot>());
             }
+
             return Task.CompletedTask;
         }
     }

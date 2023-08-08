@@ -1,8 +1,8 @@
-using Orleans.Hosting;
+﻿using System;
 using EventSourcingGrains.Grains;
-using EventSourcingGrains.Stream;
 using EventSourcingGrains.Keeplive;
-using System;
+using EventSourcingGrains.Stream;
+using Orleans.Hosting;
 using Saga.Grains.EventSourcing;
 using Saga.Grains.Manager;
 

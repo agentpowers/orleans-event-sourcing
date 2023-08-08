@@ -1,4 +1,4 @@
-namespace EventSourcing
+﻿namespace EventSourcing
 {
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct)]
     public class Event : System.Attribute

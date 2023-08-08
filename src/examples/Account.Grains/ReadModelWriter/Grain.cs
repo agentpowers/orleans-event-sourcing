@@ -1,11 +1,12 @@
-using EventSourcingGrains.Grains;
-using EventSourcing.Persistance;
-using EventSourcingGrains.Stream;
-using Orleans;
-using System;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Account.Grains.Repositories;
+using EventSourcing.Persistance;
+using EventSourcingGrains.Grains;
+using EventSourcingGrains.Stream;
 using Microsoft.Extensions.Logging;
+using Orleans;
 
 namespace Account.Grains.ReadModelWriter
 {
@@ -30,12 +31,12 @@ namespace Account.Grains.ReadModelWriter
             _logger = logger;
         }
 
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             _accountId = long.Parse(this.GetPrimaryKeyString()[keyStringAccountIdStartIndex..]);
             await Init();
             // call base OnActivateAsync
-            await base.OnActivateAsync();
+            await base.OnActivateAsync(cancellationToken);
         }
 
         public override Task PersistState(AccountModel account)
@@ -56,6 +57,7 @@ namespace Account.Grains.ReadModelWriter
                     _logger.LogWarning($"Missed event, recovered={State.Version}, received={@event.AggregateVersion}");
 
                 }
+
                 await ApplyEvent(@event);
             }
         }

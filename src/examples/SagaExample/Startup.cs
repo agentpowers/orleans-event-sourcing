@@ -2,9 +2,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans;
 using Microsoft.Extensions.Hosting;
-using System;
+using Orleans;
 using SagaExample.Extensions;
 
 namespace SagaExample
@@ -37,6 +36,7 @@ namespace SagaExample
             {
                 app.UseDeveloperExceptionPage();
             }
+
             app.UseRouting();
 
             app.UseOrleansDashboard(new OrleansDashboard.DashboardOptions

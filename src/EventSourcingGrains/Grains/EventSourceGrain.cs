@@ -1,10 +1,11 @@
-using Orleans;
-using System.Threading.Tasks;
-using System;
+﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using EventSourcing;
 using EventSourcingGrains.Stream;
 using Microsoft.Extensions.DependencyInjection;
+using Orleans;
 
 namespace EventSourcingGrains.Grains
 {
@@ -22,7 +23,7 @@ namespace EventSourcingGrains.Grains
         /// Get current state
         /// </summary>
         /// <value></value>
-        protected TState State { get { return EventSource.State; } }
+        protected TState State => EventSource.State;
 
         protected EventSourceGrain(string aggregateName, IAggregate<TState, TEvent> aggregate)
         {
@@ -36,19 +37,22 @@ namespace EventSourcingGrains.Grains
         /// <returns></returns>
         public virtual string GetGrainKey()
         {
-            var interfaces = this.GetType().GetInterfaces().ToList();
+            var interfaces = GetType().GetInterfaces().ToList();
             if (interfaces.Any(x => x.Equals(typeof(IGrainWithIntegerKey))))
             {
                 return this.GetPrimaryKeyLong().ToString();
             }
+
             if (interfaces.Any(x => x.Equals(typeof(IGrainWithStringKey))))
             {
                 return this.GetPrimaryKeyString();
             }
+
             if (interfaces.Any(x => x.Equals(typeof(IGrainWithGuidKey))))
             {
                 return this.GetPrimaryKey().ToString();
             }
+
             throw new InvalidOperationException("unable to retrieve GrainKey");
         }
 
@@ -56,7 +60,7 @@ namespace EventSourcingGrains.Grains
         /// Retrieves current state using snapshot and events
         /// </summary>
         /// <returns></returns>
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
             // does this aggregate has stream settings
             _hasAggregateStream = ServiceProvider.GetServices<IAggregateStreamSettings>().Any(g => g.AggregateName == _aggregateName);
@@ -72,7 +76,7 @@ namespace EventSourcingGrains.Grains
             // restore EventSource State
             await EventSource.Restore();
             // call base OnActivateAsync
-            await base.OnActivateAsync();
+            await base.OnActivateAsync(cancellationToken);
         }
 
         /// <summary>
@@ -99,7 +103,7 @@ namespace EventSourcingGrains.Grains
                 // notify AggregateStreamGrain about new event
                 var aggregateGrain = GrainFactory.GetGrain<IAggregateStreamGrain>(_aggregateName);
                 // fire and forget request
-                aggregateGrain.InvokeOneWay(handler => handler.Notify(eventId));
+                await aggregateGrain.Notify(eventId);
             }
             // return eventId
             return eventId;
@@ -120,7 +124,7 @@ namespace EventSourcingGrains.Grains
                 // notify AggregateStreamGrain about new event
                 var aggregateGrain = GrainFactory.GetGrain<IAggregateStreamGrain>(_aggregateName);
                 // fire and forget request
-                aggregateGrain.InvokeOneWay(handler => handler.Notify(eventId));
+                await aggregateGrain.Notify(eventId);
             }
             // return eventId
             return eventId;

@@ -1,23 +1,21 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
-using Orleans.Hosting;
-using Orleans;
-using Orleans.Configuration;
-using Microsoft.Extensions.Hosting;
-using Orleans.Clustering.Kubernetes;
-using Orleans.Statistics;
-using System;
+﻿using System;
 using System.Net;
-using EventSourcingGrains.Services;
 using Account.Extensions;
-using Account.Grains;
+using EventSourcingGrains.Services;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Orleans;
+using Orleans.Clustering.Kubernetes;
+using Orleans.Configuration;
+using Orleans.Hosting;
 
 namespace Account
 {
     public class Program
     {
-        const int defaultSiloPort = 11111;
-        const int defaultGatewayPort = 30000;
+        private const int defaultSiloPort = 11111;
+        private const int defaultGatewayPort = 30000;
 
         private static readonly bool isLocal = string.Equals(Environment.GetEnvironmentVariable("ORLEANS_ENV"), "LOCAL");
         private static readonly string siloPortEnv = Environment.GetEnvironmentVariable("SILO_PORT");
@@ -39,17 +37,14 @@ namespace Account
             .ConfigureEndpoints(siloPort: defaultSiloPort, gatewayPort: defaultGatewayPort)
             .UseKubeMembership()
             .AddMemoryGrainStorageAsDefault()
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
             .AddGrainService<KeepAliveService>()
-            .UseLinuxEnvironmentStatistics()
             .UseDashboard(x =>
             {
                 x.HostSelf = false;
                 x.BasePath = "/dashboard";
                 x.ScriptPath = "/api/dashboard";
                 x.CounterUpdateIntervalMs = 10000;
-            })
-            .AddPrometheusTelemetryConsumer();
+            });
 
             builder.ConfigureGrains();
         }
@@ -70,15 +65,15 @@ namespace Account
                 options.ConnectionString = ConnectionString;
             })
             .AddMemoryGrainStorageAsDefault()
-            .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
+            // .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(AccountGrain).Assembly).WithReferences())
             .AddGrainService<KeepAliveService>()
             .UseDashboard(x =>
             {
                 x.HostSelf = false;
                 x.BasePath = "/dashboard";
                 x.CounterUpdateIntervalMs = 10000;
-            })
-            .AddPrometheusTelemetryConsumer();
+            });
+            // .AddPrometheusTelemetryConsumer();
 
             builder.ConfigureGrains();
         }

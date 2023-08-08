@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Account.Extensions;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans;
 using Microsoft.Extensions.Hosting;
-using System;
-using Account.Extensions;
+using Orleans;
 
 namespace Account
 {
@@ -34,6 +33,7 @@ namespace Account
             {
                 app.UseDeveloperExceptionPage();
             }
+
             app.UseRouting();
 
             app.UseOrleansDashboard(new OrleansDashboard.DashboardOptions

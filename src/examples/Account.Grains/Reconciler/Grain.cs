@@ -1,14 +1,15 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using EventSourcing;
+using EventSourcing.Persistance;
 using EventSourcingGrains.Grains;
+using EventSourcingGrains.Keeplive;
+using EventSourcingGrains.Stream;
 using Microsoft.Extensions.Logging;
 using Orleans;
-using EventSourcingGrains.Stream;
-using EventSourcing.Persistance;
-using System.Collections.Generic;
 using Orleans.Concurrency;
-using EventSourcingGrains.Keeplive;
-using EventSourcing;
 
 namespace Account.Grains.Reconciler
 {
@@ -39,17 +40,17 @@ namespace Account.Grains.Reconciler
             _logger = logger;
         }
 
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            await base.OnActivateAsync();
+            await base.OnActivateAsync(cancellationToken);
 
             //load all account events after last processed event
             await RecoverEventQueue(State.LastProcessedEventId);
             //initialize timer to clear queue
-            this.RegisterTimer(ProcessQueue, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+            RegisterTimer(ProcessQueue, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
 
             //initialize timer to clear transferDebitedEventQueue
-            this.RegisterTimer(ProcessTransferDebitedEventQueue, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+            RegisterTimer(ProcessTransferDebitedEventQueue, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         }
 
         //TODO: setup keep alive
